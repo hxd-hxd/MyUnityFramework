@@ -1,0 +1,12 @@
+        [MenuItem(Constant.Menu.MenuAutoNamespacePath + "/#_MENUN_NAME_#", false, #_MENUN_PRIORITY_#)]
+        private static void NamespaceMenu_#_MENUN_FUNC_NAME_#()
+        {
+            AutoNamespaceUtility.CreateCSharpScriptAsset("#_MENUN_NAME_#");
+        }
+        // 本方法用于控制菜单按钮 #_MENUN_NAME_# 的启用
+        [MenuItem(Constant.Menu.MenuAutoNamespacePath + "/#_MENUN_NAME_#", true, #_MENUN_PRIORITY_#)]
+        private static bool NamespaceMenuEnable_#_MENUN_FUNC_NAME_#()
+        {
+            return AutoNamespaceUtility.Enable();
+        }
+        

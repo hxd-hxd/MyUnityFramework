@@ -1,0 +1,15 @@
+// -------------------------
+// 由工具自动创建，请勿手动修改
+// 创建日期：#_CREATE_TIME_#
+// -------------------------
+
+using UnityEngine;
+using UnityEditor;
+
+namespace #_NAME_SPACE_#
+{
+    public static class #_SCRIPT_NAME_#
+    {
+        #_ADD_CODES_#
+    }
+}

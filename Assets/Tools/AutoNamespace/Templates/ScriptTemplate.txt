@@ -1,0 +1,27 @@
+// -------------------------
+// 创建日期：#_CREATE_TIME_#
+// -------------------------
+
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace #_NAME_SPACE_#
+{
+    public class #_SCRIPT_NAME_# : MonoBehaviour
+    {
+        // Start is called before the first frame update
+        void Start()
+        {
+        
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+        
+        }
+    }
+}

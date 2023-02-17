@@ -1,0 +1,42 @@
+// -------------------------
+// 创建日期：#_CREATE_TIME_#
+// -------------------------
+
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+
+using UnityEngine;
+using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
+
+
+public class #_SCRIPT_NAME_# : EditorWindow
+{
+    /*
+    * 这里的菜单路径自行修改
+    * 如通过本工具创建了两个及以上此脚本，则一定要修改
+    */
+    [MenuItem("Tools/Window/Test")]
+    static void Open()
+    {
+        #_SCRIPT_NAME_# my = GetWindow<#_SCRIPT_NAME_#>("#_SCRIPT_NAME_#");
+        my.minSize = new Vector2(450, 580);
+    }
+
+    // 敞口打开时调用
+    private void OnEnable()
+    {
+        
+    }
+
+    // 编辑器 UI
+    private void OnGUI()
+    {
+        GUILayout.Label("在这里编写你的编辑器");
+
+
+    }
+}

@@ -1,0 +1,16 @@
+// -------------------------
+// 创建日期：#_CREATE_TIME_#
+// -------------------------
+
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+
+using UnityEngine;
+
+
+public static class #_SCRIPT_NAME_#
+{
+    
+}

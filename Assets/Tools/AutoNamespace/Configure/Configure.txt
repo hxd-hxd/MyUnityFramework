@@ -1,0 +1,20 @@
+{
+    "DynamicPath": "/Tools",
+    "AutoCreateDirectory": "{0}/AutoNamespace/Editor/AutoCreate/",
+    "ScriptTemplatePath": "Assets{0}/AutoNamespace/Templates/ScriptTemplate.txt",
+    "StaticScriptTemplatePath": "Assets{0}/AutoNamespace/Templates/StaticScriptTemplate.txt",
+    "EditorScriptTemplatePath": "Assets{0}/AutoNamespace/Templates/EditorScriptTemplate.txt",
+    "EditorWindowScriptTemplatePath": "Assets{0}/AutoNamespace/Templates/EditorWindowScriptTemplate.txt",
+    "ScriptTemplatePath_NotNamespace": "Assets{0}/AutoNamespace/Templates/ScriptTemplate_NotNamespace.txt",
+    "StaticScriptTemplatePath_NotNamespace": "Assets{0}/AutoNamespace/Templates/StaticScriptTemplate_NotNamespace.txt",
+    "EditorScriptTemplatePath_NotNamespace": "Assets{0}/AutoNamespace/Templates/EditorScriptTemplate_NotNamespace.txt",
+    "EditorWindowScriptTemplatePath_NotNamespace": "Assets{0}/AutoNamespace/Templates/EditorWindowScriptTemplate_NotNamespace.txt",
+    "MenuScriptTemplatePath": "Assets{0}/AutoNamespace/Templates/MenuScriptTemplate.txt",
+    "MenuOptionTemplatePath": "Assets{0}/AutoNamespace/Templates/MenuOptionTemplate.txt",
+    "enable": true,
+    "NamespaceList": [
+        "AutoNamespace",
+        "TestMenu",
+        "Framework"
+    ]
+}
