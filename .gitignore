@@ -1,0 +1,12 @@
+/UnityGameFramework.Editor.csproj
+/UnityGameFramework.Runtime.csproj
+/.vs
+/Library
+/Logs
+/obj
+/.vsconfig
+/Assembly-CSharp.csproj
+/Assembly-CSharp-Editor.csproj
+/MyFramework.sln
+/.gitignore
+/*.csproj
