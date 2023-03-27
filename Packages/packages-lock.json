@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.focus-creative-games.hybridclr_unity": {
+      "version": "https://gitee.com/focus-creative-games/hybridclr_unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "a9ca9fc6131b81cd3d4c48adcd871434475539c1"
+    },
     "com.tuyoogame.yooasset": {
       "version": "1.4.6-preview",
       "depth": 0,
