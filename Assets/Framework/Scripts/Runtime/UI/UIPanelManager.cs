@@ -115,7 +115,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// 获取界面，没有就自动加载
+        /// 获取界面
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -128,7 +128,7 @@ namespace Framework
             return null;
         }
         /// <summary>
-        /// 获取界面
+        /// 获取界面，没有就自动加载
         /// </summary>
         /// <para>ps：预制体名称要与类名一致，才能自动加载成功</para>
         /// <typeparam name="T"></typeparam>

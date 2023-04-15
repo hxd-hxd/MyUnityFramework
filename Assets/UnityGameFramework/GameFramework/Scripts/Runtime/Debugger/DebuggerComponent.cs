@@ -22,17 +22,17 @@ namespace UnityGameFramework.Runtime
         /// <summary>
         /// 默认调试器漂浮框大小。
         /// </summary>
-        internal static readonly Rect DefaultIconRect = new Rect(10f, 10f, 60f, 60f);
+        internal static readonly Rect DefaultIconRect = new Rect(50f, 50f, 60f, 60f);
 
         /// <summary>
         /// 默认调试器窗口大小。
         /// </summary>
-        internal static readonly Rect DefaultWindowRect = new Rect(10f, 10f, 640f, 480f);
+        internal static readonly Rect DefaultWindowRect = new Rect(50f, 50f, 640f, 480f);
 
         /// <summary>
         /// 默认调试器窗口缩放比例。
         /// </summary>
-        internal static readonly float DefaultWindowScale = 1f;
+        internal static readonly float DefaultWindowScale = 1.5f;
 
         private static readonly TextEditor s_TextEditor = new TextEditor();
         private IDebuggerManager m_DebuggerManager = null;

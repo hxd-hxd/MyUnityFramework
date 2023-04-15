@@ -36,6 +36,40 @@ public static class ExtendUtility
         return target;
     }
     /// <summary>
+    /// 尝试在所有子节点中找到指定名称的第一个
+    /// </summary>
+    /// <returns></returns>
+    public static bool TryFindOf(this Transform obj, string name, out Transform result)
+    {
+        result = obj.FindOf(name);
+
+        return result;
+    }
+    /// <summary>
+    /// 在所有子节点中找到指定名称的第一个，并获取其上指定组件
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static T FindOf<T>(this Transform obj, string name) where T : Component
+    {
+        return FindOf(obj, name)?.GetComponent<T>();
+    }
+    /// <summary>
+    /// 在所有子节点中找到指定名称的第一个，并获取其上指定组件
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="obj"></param>
+    /// <param name="name"></param>
+    /// <param name="result"></param>
+    /// <returns></returns>
+    public static bool TryFindOf<T>(this Transform obj, string name, out T result) where T : Component
+    {
+        result = obj.FindOf<T>(name);
+
+        return result;
+    }
+    /// <summary>
     /// 在所有子节点中找到指定名称的第一个
     /// </summary>
     /// <param name="obj"></param>
@@ -44,6 +78,16 @@ public static class ExtendUtility
     public static Transform FindOf(this GameObject obj, string name)
     {
         return FindOf(obj.transform, name);
+    }
+    /// <summary>
+    /// 尝试在所有子节点中找到指定名称的第一个
+    /// </summary>
+    /// <returns></returns>
+    public static bool TryFindOf(this GameObject obj, string name, out Transform result)
+    {
+        result = obj.FindOf(name);
+
+        return result;
     }
 
     /// <summary>
@@ -68,6 +112,34 @@ public static class ExtendUtility
         }
 
         return target;
+    }
+
+    /// <summary>
+    /// 期望有此组件，没有则添加
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="transform"></param>
+    /// <returns></returns>
+    public static T ExpectComponent<T>(this Transform self) where T : Component
+    {
+        return ExpectComponent<T>(self.gameObject);
+    }
+
+    /// <summary>
+    /// 期望有此组件，没有则添加
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="transform"></param>
+    /// <returns></returns>
+    public static T ExpectComponent<T>(this GameObject self) where T : Component
+    {
+        //T cp = self.GetComponent<T>() ?? self.AddComponent<T>();
+        T cp = self.GetComponent<T>();
+        if (!cp)
+        {
+            cp = self.AddComponent<T>();
+        }
+        return cp;
     }
 
     /// <summary>

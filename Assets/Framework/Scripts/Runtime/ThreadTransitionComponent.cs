@@ -80,7 +80,7 @@ public class ThreadTransitionComponent : MonoBehaviour
         {
             if (!Instance)
             {
-                Debug.LogWarning("<color=red>Error：线程过渡组件 未初始化</color>");
+                Debug.Log("<color=red>Error：线程过渡组件 未初始化</color>");
                 return;
             }
         }

@@ -60,7 +60,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// 获取触发实例，没有就添加
+        /// 获取触发实例
         /// </summary>
         /// <param name="triggerType"></param>
         /// <returns></returns>

@@ -20,6 +20,7 @@ namespace Framework
         private void Awake()
         {
             m_mainCanvas = gameObject.GetComponent<Canvas>();
+            gameObject.GetComponent<UnityEngine.UI.CanvasScaler>().matchWidthOrHeight = 1f;
             UIPanelManager.MainCanvas = m_mainCanvas;
         }
 

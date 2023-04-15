@@ -16,11 +16,14 @@ using UnityEditor;
 
 namespace Framework
 {
+
     /// <summary>
     /// 应用程序
     /// </summary>
     public static class ApplicationUtility
     {
+
+
         /// <summary>
         /// 是否有网络
         /// <para>注意：此方法只在 Unity 编辑器中有效</para>
@@ -50,6 +53,8 @@ namespace Framework
                 return false;
         }
 
+        //public static void 
+
         /// <summary>
         /// 退出
         /// </summary>
@@ -62,4 +67,5 @@ namespace Framework
 #endif
         }
     }
+
 }

@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.Win32;
+using UnityEngine.Events;
 
 namespace Framework
 {
@@ -22,10 +23,6 @@ namespace Framework
         [Tooltip("所属画布")]
         [SerializeField] protected Canvas _canvas;
 
-        public Action OnEnableEvent;
-        public Action OnDisableEvent;
-        public Action OnDestroyEvent;
-
         [Tooltip("是否被占用")]
         [SerializeField] protected bool isOccupy;// 是否被占用
         [Tooltip("自动置顶")]
@@ -38,6 +35,10 @@ namespace Framework
         [SerializeField] protected bool isResistRay = true;
         [Tooltip("界面排序等级。界面排序考虑到各种情况较为复杂，如遇到此选项影响不到或有问题的界面，请考虑调整界面使用策略。")]
         [SerializeField] protected int sortOrderLevel = 0;
+
+        public Action OnEnableEvent;
+        public Action OnDisableEvent;
+        public Action OnDestroyEvent;
 
         /// <summary>
         /// 是否初始化
@@ -162,13 +163,17 @@ namespace Framework
 
         }
 
+        /// <summary>
+        /// 初始化界面
+        /// </summary>
+        ///// <returns>成功初始化返回 true，已经初始化或初始化失败返回 false</returns>
         public virtual void Init()
         {
             if (init)
             {
                 return;
             }
-
+            
             init = true;
         }
 
@@ -191,13 +196,39 @@ namespace Framework
             gameObject.SetActive(enable);
 
         }
-
+        /// <summary>
+        /// 打开面板
+        /// </summary>
+        public virtual void OnShow()
+        { }
+        /// <summary>
+        /// 打开面板
+        /// </summary>
+        public virtual void OnShow<T>(T info)
+        { }
+        public virtual void OnShow<T>(T info, T infos)
+        { }
+        public virtual void OnShow<T>(T info,T infos,T infoss)
+        { }
+        public virtual void OnShow(Dictionary<string,object> info)
+        { }
+        public virtual void OnShow(Dictionary<string, object> info, UnityAction action)
+        { }
+        public virtual void OnShow(Dictionary<string, object> info, UnityAction action,UnityAction unityAction)
+        { }
         /// <summary>
         /// 销毁界面
         /// </summary>
         public virtual void Destroy()
         {
             this.DestroyPanel();
+        }
+        /// <summary>
+        /// 隱藏面板
+        /// </summary>
+        public virtual void OnHide()
+        {
+            OnEnable();
         }
 
     }

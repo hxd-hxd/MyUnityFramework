@@ -16,7 +16,7 @@ namespace BatchOperationToolsUtility
     // 添加命名空间测试用例
     public class TestNamespace
     {
-        [MenuItem("测试命名空间/添加")]
+        //[MenuItem("测试命名空间/添加")]
         static void TestMenu()
         {
             string code =
