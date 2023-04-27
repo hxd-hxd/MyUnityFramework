@@ -74,7 +74,7 @@ namespace Framework
 
         /// <summary>
         /// 选项选择事件
-        /// <para>取消选中时 <see cref="DropdownItemData"/> 参数将为 空</para>
+        /// <para>取消选中时 <see cref="DropdownItemData"/> 参数将为 <see cref="null"/></para>
         /// </summary>
         public event Action<DropdownItemData> SelectedEvent;
         /// <summary>
@@ -637,7 +637,7 @@ namespace Framework
         {
             if (!Options.IndexValid(index))
             {
-                SelectData(null, false);
+                CancelCurrentData(false);
                 return;
             }
 
@@ -666,7 +666,36 @@ namespace Framework
 
                 AmendValue();
 
-                if (sendEvent) SelectedEvent_Action();
+                if (sendEvent)
+                {
+                    itemData?.SelectedEvent?.Invoke();
+                    SelectedEvent_Action();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 选择选项
+        /// </summary>
+        /// <param name="item"></param>
+        public virtual void SelectData(Func<DropdownItemData, bool> condition)
+        {
+            SelectData(condition, true);
+        }
+        /// <summary>
+        /// 选择选项
+        /// </summary>
+        /// <param name="item"></param>
+        public virtual void SelectData(Func<DropdownItemData, bool> condition, bool sendEvent)
+        {
+            for (int i = 0; i < Options.Count; i++)
+            {
+                var item = Options[i];
+                if ((bool)condition?.Invoke(item))
+                {
+                    SelectData(item, sendEvent);
+                    break;
+                }
             }
         }
 
@@ -676,7 +705,8 @@ namespace Framework
         /// <param name="item"></param>
         public virtual void CancelCurrentData()
         {
-            SelectData(null);
+            DropdownItemData data = null;
+            SelectData(data);
         }
         /// <summary>
         /// 取消当前选项数据
@@ -684,7 +714,8 @@ namespace Framework
         /// <param name="item"></param>
         public virtual void CancelCurrentData(bool sendEvent)
         {
-            SelectData(null, sendEvent);
+            DropdownItemData data = null;
+            SelectData(data, sendEvent);
         }
 
         /// <summary>
@@ -1498,6 +1529,11 @@ namespace Framework
         public class DropdownItemData
         {
             [SerializeField] protected string m_Text;
+
+            /// <summary>
+            /// 选中事件
+            /// </summary>
+            public Action SelectedEvent;
 
             /// <summary>
             /// 选项显示

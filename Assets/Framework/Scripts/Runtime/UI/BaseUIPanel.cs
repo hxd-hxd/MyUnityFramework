@@ -7,7 +7,6 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Microsoft.Win32;
 using UnityEngine.Events;
 
 namespace Framework
@@ -39,6 +38,9 @@ namespace Framework
         public Action OnEnableEvent;
         public Action OnDisableEvent;
         public Action OnDestroyEvent;
+
+        // 是否执行过初始化？
+        protected bool isInited { get; set; } = false;
 
         /// <summary>
         /// 是否初始化
