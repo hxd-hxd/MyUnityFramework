@@ -46,6 +46,8 @@ namespace BatchOperationToolsUtility
 
         private void OnGUI()
         {
+            EditorGUILayout.LabelField("注意本工具不支持多行及嵌套格式！", EditorStyles.boldLabel);
+
             sv = EditorGUILayout.BeginScrollView(sv);
             {
                 EditorGUI.BeginDisabledGroup(!Enable);

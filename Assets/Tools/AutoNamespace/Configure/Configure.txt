@@ -15,6 +15,7 @@
     "NamespaceList": [
         "AutoNamespace",
         "TestMenu",
-        "Framework"
+        "Framework",
+        "BatchOperationToolsUtility"
     ]
 }

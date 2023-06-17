@@ -67,7 +67,7 @@ namespace BatchOperationToolsUtility
             /// <summary>
             /// 该文本文件是否符合条件
             /// </summary>
-            /// <param name="ta"></param>
+            /// <param name="obj"></param>
             /// <returns></returns>
             public static bool IsPerfect(TextAsset obj)
             {
@@ -76,7 +76,7 @@ namespace BatchOperationToolsUtility
             /// <summary>
             /// 该文本文件是否符合条件
             /// </summary>
-            /// <param name="ta"></param>
+            /// <param name="obj"></param>
             /// <returns></returns>
             public static bool IsPerfect(UnityEngine.Object obj)
             {
