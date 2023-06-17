@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace T 
+namespace TT 
 {
     public class NewBehaviourScript : MonoBehaviour
     {
