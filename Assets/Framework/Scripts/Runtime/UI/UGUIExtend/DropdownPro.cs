@@ -282,7 +282,7 @@ namespace Framework
 
         public void OnCancel(BaseEventData eventData)
         {
-            Debug.Log("OnCancel");
+            //Debug.Log("OnCancel");
 
             ShowMenu(false);
         }
@@ -299,7 +299,7 @@ namespace Framework
 
         public void OnSubmit(BaseEventData eventData)
         {
-            Debug.Log("OnSubmit");
+            //Debug.Log("OnSubmit");
 
             //ShowMenu();
         }
