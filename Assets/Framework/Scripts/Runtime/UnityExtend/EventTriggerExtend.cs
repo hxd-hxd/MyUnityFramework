@@ -52,7 +52,7 @@ namespace Framework
 
             if (ete == null)// 没有就添加一个
             {
-                ete = new Entry() { eventID = EventTriggerType.PointerClick };
+                ete = new Entry() { eventID = triggerType };
                 eventTrigger.triggers.Add(ete);
             }
 

@@ -91,24 +91,44 @@ public static class ExtendUtility
     }
 
     /// <summary>
-    /// 在所有子节点中，找到名称中包含指定名字的第一个
+    /// 在所有子节点中，找到名称中包含指定名字的第一个，默认采用模糊搜索，不区分大小写
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="containName"></param>
     /// <returns></returns>
-    public static Transform FindOfContainName(this Transform obj, string containName)
+    public static Transform FindOfContainName(this GameObject obj, string containName, bool fuzzySearch = true)
     {
-        Transform target = null;
+        return FindOfContainName(obj.transform, containName, fuzzySearch);
+    }
+    /// <summary>
+    /// 在所有子节点中，找到名称中包含指定名字的第一个，默认采用模糊搜索，不区分大小写
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="containName"></param>
+    /// <returns></returns>
+    public static Transform FindOfContainName(this Transform obj, string containName, bool fuzzySearch = true)
+    {
+        if (!obj) return null;
+
+        var cName = fuzzySearch ? containName.ToLower() : containName;
+
         foreach (Transform item in obj)
         {
-            if (item.name.Contains(containName))
+            string name = item.name;
+            if (fuzzySearch)
+            {
+                name = name.ToLower();
+            }
+            if (name.Contains(cName))
             {
                 return item;
             }
-            else
-            {
-                target = FindOfContainName(obj, containName);
-            }
+        }
+
+        Transform target = null;
+        foreach (Transform item in obj)
+        {
+            target = FindOfContainName(item, containName);
         }
 
         return target;
@@ -124,7 +144,6 @@ public static class ExtendUtility
     {
         return ExpectComponent<T>(self.gameObject);
     }
-
     /// <summary>
     /// 期望有此组件，没有则添加
     /// </summary>
@@ -140,6 +159,20 @@ public static class ExtendUtility
             cp = self.AddComponent<T>();
         }
         return cp;
+    }
+
+    public static void ResetTransformLocal(this GameObject t) => ResetTransformLocal(t.transform);
+    public static void ResetTransformLocal(this Transform t)
+    {
+        t.localEulerAngles = Vector3.zero;
+        t.localPosition = Vector3.zero;
+        t.localScale = Vector3.one;
+    }
+    public static void ResetTransformLocal(this GameObject t, Transform parent) => ResetTransformLocal(t.transform, parent);
+    public static void ResetTransformLocal(this Transform t, Transform parent)
+    {
+        t.SetParent(parent);
+        ResetTransformLocal(t);
     }
 
     /// <summary>
@@ -261,8 +294,6 @@ public static class ExtendUtility
         // 界面消失
         //yield return UIVanish();
     }
-
-
     /// <summary>
     /// 计算场景加载时刷新的进度条
     /// </summary>
@@ -344,7 +375,7 @@ public static class ExtendUtility
             {
                 return canvasGroup.alpha >= aTarget + approachValue;
             }
-            else if(canvasGroup.alpha > aTarget)// 目标要变大
+            else if (canvasGroup.alpha > aTarget)// 目标要变大
             {
                 return canvasGroup.alpha <= aTarget - approachValue;
             }
