@@ -17,7 +17,7 @@ namespace Framework
     public abstract class BaseUIPanel : MonoBehaviour
     {
         [Tooltip("是否初始化")]
-        [SerializeField] protected bool m_init;
+        [SerializeField] protected bool _isInit;
 
         [Tooltip("所属画布")]
         [SerializeField] protected Canvas _canvas;
@@ -39,21 +39,18 @@ namespace Framework
         public Action OnDisableEvent;
         public Action OnDestroyEvent;
 
-        // 是否执行过初始化？
-        protected bool isInited { get; set; } = false;
-
         /// <summary>
         /// 是否初始化
         /// </summary>
-        public bool init
+        public bool isInit
         {
             get
             {
-                return m_init;
+                return _isInit;
             }
             protected set
             {
-                m_init= value;
+                _isInit= value;
             }
         }
         /// <summary>
@@ -109,9 +106,9 @@ namespace Framework
 
         /// <summary>
         /// 界面排序等级
-        /// <para>注意：会影响到 <see cref="UIPanelManager.PanelTopmost(BaseUIPanel, bool, bool)"/> 的排序策略</para>
-        /// <para>界面排序考虑到各种情况较为复杂，如遇到此选项影响不到或有问题的界面，请考虑调整界面使用策略</para>
-        /// <para>默认最会在同级、低级中排序</para>
+        /// <para>注意：会影响到 <see cref="UIPanelManager.PanelTopmost(BaseUIPanel, bool, bool)"/> 的排序策略。</para>
+        /// <para>界面排序考虑到各种情况较为复杂，如遇到此选项影响不到或有问题的界面，请考虑调整界面使用策略。</para>
+        /// <para>默认最会在同级、低级中排序。</para>
         /// </summary>
         public virtual int SortOrderLevel
         {
@@ -171,12 +168,12 @@ namespace Framework
         ///// <returns>成功初始化返回 true，已经初始化或初始化失败返回 false</returns>
         public virtual void Init()
         {
-            if (init)
+            if (isInit)
             {
                 return;
             }
             
-            init = true;
+            isInit = true;
         }
 
         /// <summary>

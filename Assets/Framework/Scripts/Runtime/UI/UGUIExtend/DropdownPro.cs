@@ -221,7 +221,7 @@ namespace Framework
 
         #region 优化
 
-        [Header("保留的选项上限，清除时")]
+        [Header("清除时保留的选项上限")]
         [Header("优化设置")]
         [Space]
         [SerializeField] protected int itemReserveMax = 100;// 保留的选项上限，清除时

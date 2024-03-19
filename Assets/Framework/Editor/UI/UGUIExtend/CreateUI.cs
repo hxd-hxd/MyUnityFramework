@@ -16,14 +16,17 @@ namespace Framework.Editor
     {
         public const string EditorResRootPath = "Framework/Prefabs/";
         //public const string FullRootPath = "Assets/Framework/Editor/Resources/Framework/Prefabs/";
-        public const string FullRootPath = "Assets/Framework/Prefabs/";
+        //public const string FullRootPath = "Assets/Framework/Prefabs/";
+        public const string FullRootPath = "Prefabs/";
 
         public static GameObject Create(string rootPath, string name)
         {
             Object obj = Selection.objects.Length > 0 ? Selection.objects[0] : null;
 
             //var dpPrefab = EditorGUIUtility.Load($"{RootPath}DropdownPro Text.prefab");
-            var dpPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{rootPath}{name}");
+            //var dpPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{rootPath}{name}");
+            //var dpPrefab = Resources.Load<GameObject>($"{rootPath}{name}");
+            var dpPrefab = EditorResources.Load<GameObject>($"{rootPath}{name}");
             var dp = Object.Instantiate(dpPrefab);
 
             if (obj is GameObject go)
