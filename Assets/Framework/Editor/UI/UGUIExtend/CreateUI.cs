@@ -21,20 +21,29 @@ namespace Framework.Editor
 
         public static GameObject Create(string rootPath, string name)
         {
-            Object obj = Selection.objects.Length > 0 ? Selection.objects[0] : null;
+            Object selectObj = Selection.objects.Length > 0 ? Selection.objects[0] : null;
 
+            string path = Path.Combine(rootPath, name);
             //var dpPrefab = EditorGUIUtility.Load($"{RootPath}DropdownPro Text.prefab");
-            //var dpPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{rootPath}{name}");
-            //var dpPrefab = Resources.Load<GameObject>($"{rootPath}{name}");
-            var dpPrefab = EditorResources.Load<GameObject>($"{rootPath}{name}");
+            //var dpPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            //var dpPrefab = Resources.Load<GameObject>(path);
+            var dpPrefab = EditorResources.Load<GameObject>(path);
+
+            Debug.Log($"有 UI 预制体 \"{path}\"： {dpPrefab != null}，{(dpPrefab != null ? $"在 \"{AssetDatabase.GetAssetPath(dpPrefab)}\" " : null)}");
+
             var dp = Object.Instantiate(dpPrefab);
+            //var dp = (GameObject)PrefabUtility.InstantiateAttachedAsset(dpPrefab);
+            //var dp = (GameObject)PrefabUtility.InstantiatePrefab(dpPrefab);// 此实例化方式会保持对预制体原型的引用
 
-            if (obj is GameObject go)
+            if (dp)
             {
-                dp.transform.SetParent(go.transform, false);
-            }
+                if (selectObj is GameObject go)
+                {
+                    dp.transform.SetParent(go.transform, false);
+                }
 
-            Selection.activeGameObject = dp;
+                Selection.activeGameObject = dp;
+            }
 
             return dp;
         }

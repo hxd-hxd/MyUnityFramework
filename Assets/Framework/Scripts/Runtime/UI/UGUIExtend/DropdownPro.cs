@@ -259,10 +259,10 @@ namespace Framework
         {
             base.Start();
 
-            if (!m_Template)    m_Template      = transform.FindOf<RectTransform>("Template");
-            if (!m_CaptionText) m_CaptionText   = transform.FindOf<Text>("Label");
-            if (!m_Placeholder) m_Placeholder   = transform.FindOf("Placeholder")?.gameObject;
-            if (!m_Item)        m_Item          = transform.FindOf("Item")?.gameObject;
+            if (!m_Template) m_Template = transform.FindOf<RectTransform>("Template");
+            if (!m_CaptionText) m_CaptionText = transform.FindOf<Text>("Label");
+            if (!m_Placeholder) m_Placeholder = transform.FindOf("Placeholder")?.gameObject;
+            if (!m_Item) m_Item = transform.FindOf("Item")?.gameObject;
             //if (!m_ItemText)    m_ItemText      = transform.FindOf<Text>("Item Label");
 
             precreator.InitializeStart(Coroutines.Instance, 1);
@@ -1154,7 +1154,7 @@ namespace Framework
         /// <param name="item"></param>
         public virtual bool LocateTarget(DropdownItem item)
         {
-            if(!OptionItems.Contains(item)) return false;
+            if (!OptionItems.Contains(item)) return false;
             if (!item.gameObject)
             {
                 //Log.Error($"未创建选项实例：{item}");
@@ -1221,7 +1221,7 @@ namespace Framework
                     captionText_text = currentData.text;
                 }
 
-                m_Placeholder?.gameObject.SetActive(false);
+                if (m_Placeholder) m_Placeholder.gameObject.SetActive(false);
             }
             else
             {
@@ -1230,7 +1230,7 @@ namespace Framework
                     captionText_text = "";
                 }
 
-                m_Placeholder?.gameObject.SetActive(true);
+                if (m_Placeholder) m_Placeholder.gameObject.SetActive(true);
             }
         }
 

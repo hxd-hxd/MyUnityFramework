@@ -18,7 +18,7 @@ namespace Framework.TextMeshProExpress
         static void AddDropdown(MenuCommand menuCommand)
         {
             //var go = CreateUI.Create("Assets/Framework/ThirdExpressTools/TextMeshProExpress/Prefabs/", "DropdownPro TMP.prefab");
-            var go = CreateUI.Create(CreateUI.FullRootPath, "DropdownPro TMP.prefab");
+            var go = CreateUI.Create("DropdownPro TMP.prefab");
         }
     }
 }

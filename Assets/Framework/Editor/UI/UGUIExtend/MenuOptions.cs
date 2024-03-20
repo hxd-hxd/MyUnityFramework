@@ -19,7 +19,7 @@ namespace Framework.Editor
         [MenuItem("GameObject/UI/Dropdown Pro - Text", priority = 2036)]
         static void AddDropdown(MenuCommand menuCommand)
         {
-            var go = CreateUI.Create(CreateUI.FullRootPath, "DropdownPro Text.prefab");
+            var go = CreateUI.Create("DropdownPro Text.prefab");
             Selection.activeGameObject = go;
         }
 
