@@ -21,31 +21,31 @@ namespace Framework
         /// </summary>
         public static TypePool root { get; } = new TypePool();
 
-        Dictionary<Type, Queue<object>> pool;
+        Dictionary<Type, Queue<object>> _pool;
 
         public TypePool()
         {
-            pool = new Dictionary<Type, Queue<object>>();
+            _pool = new Dictionary<Type, Queue<object>>();
         }
 
         public TypePool(int capacity)
         {
-            pool = new Dictionary<Type, Queue<object>>(capacity);
+            _pool = new Dictionary<Type, Queue<object>>(capacity);
         }
 
-        public Dictionary<Type, Queue<object>> Pool => pool;
+        public Dictionary<Type, Queue<object>> Pool => _pool;
 
-        public virtual int size => pool.Count;
-        public virtual int sizeTotal
+        public virtual int poolCount => _pool.Count;
+        public virtual int itemSize
         {
             get
             {
                 int sum = 0;
-                foreach (var item in pool)
+                foreach (var item in _pool)
                 {
                     sum += item.Value.Count;
                 }
-                return pool.Count;
+                return _pool.Count;
             }
         }
 
@@ -73,9 +73,9 @@ namespace Framework
             object obj = null;
 
             var target = type;
-            var has = pool.TryGetValue(target, out var tPool);
+            var has = _pool.TryGetValue(target, out var tPool);
 
-            if (has)
+            if (has && tPool.Count > 0)
             {
                 //tPool.TryDequeue(out var _obj);
                 var _obj = tPool.Dequeue();
@@ -84,7 +84,7 @@ namespace Framework
             else
             {
                 tPool = new Queue<object>();
-                pool[target] = tPool;
+                _pool[target] = tPool;
             }
             //var _o = obj;
             obj ??= CreateInstance(type);
@@ -120,12 +120,12 @@ namespace Framework
             */
             //var target = typeof(T);
             var target = obj.GetType();
-            var has = pool.TryGetValue(target, out var tPool);
+            var has = _pool.TryGetValue(target, out var tPool);
 
             if (!has)
             {
                 tPool = new Queue<object>();
-                pool[target] = tPool;
+                _pool[target] = tPool;
             }
             tPool.Enqueue(obj);
         }
@@ -154,7 +154,7 @@ namespace Framework
 
         public virtual void Clear()
         {
-            pool.Clear();
+            _pool.Clear();
         }
     }
 

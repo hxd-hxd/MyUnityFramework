@@ -24,7 +24,8 @@ namespace Framework.Editor
             Object selectObj = Selection.objects.Length > 0 ? Selection.objects[0] : null;
 
             string path = Path.Combine(rootPath, name);
-            //var dpPrefab = EditorGUIUtility.Load($"{RootPath}DropdownPro Text.prefab");
+            //var dpPrefab = (GameObject)EditorGUIUtility.Load(path);
+            //var dpPrefab = (GameObject)EditorGUIUtility.Load(name);
             //var dpPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             //var dpPrefab = Resources.Load<GameObject>(path);
             var dpPrefab = EditorResources.Load<GameObject>(path);

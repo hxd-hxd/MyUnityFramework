@@ -530,7 +530,7 @@ namespace Framework
             foreach (var item in panelDic)
             {
                 if (item.Value == null) continue;
-                if (item.Value.Permanent && item.Value.IsEnable)
+                if (item.Value.Permanent && item.Value.isEnable)
                 {
                     num++;
                 }

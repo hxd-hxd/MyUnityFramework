@@ -82,6 +82,35 @@ namespace Framework
         /// </summary>
         public event Action<bool> MenuEnableEvent;
 
+        #region 优化
+
+        [Header("清除时保留的选项上限")]
+        [Header("优化设置")]
+        [Space]
+        [SerializeField] protected int itemReserveMax = 100;// 保留的选项上限，清除时
+
+        protected Sectionalizer m_Precreator = new Sectionalizer();
+        protected Sectionalizer m_Precleaner = new Sectionalizer();
+
+        /// <summary>
+        /// 预创建器
+        /// </summary>
+        protected Sectionalizer precreator
+        {
+            get { return m_Precreator; }
+        }
+        /// <summary>
+        /// 预清除器
+        /// </summary>
+        protected Sectionalizer precleaner
+        {
+            get { return m_Precleaner; }
+        }
+
+        public int ItemReserveMax { get => itemReserveMax; set => itemReserveMax = value; }
+
+        #endregion
+
 
         /// <summary>
         /// 根 Canvas 
@@ -90,7 +119,7 @@ namespace Framework
         {
             get
             {
-                return targetGraphic?.canvas;
+                return targetGraphic.canvas;
             }
         }
 
@@ -218,36 +247,6 @@ namespace Framework
             }
         }
 
-
-        #region 优化
-
-        [Header("清除时保留的选项上限")]
-        [Header("优化设置")]
-        [Space]
-        [SerializeField] protected int itemReserveMax = 100;// 保留的选项上限，清除时
-
-        protected Sectionalizer m_Precreator = new Sectionalizer();
-        protected Sectionalizer m_Precleaner = new Sectionalizer();
-
-        /// <summary>
-        /// 预创建器
-        /// </summary>
-        protected Sectionalizer precreator
-        {
-            get { return m_Precreator; }
-        }
-        /// <summary>
-        /// 预清除器
-        /// </summary>
-        protected Sectionalizer precleaner
-        {
-            get { return m_Precleaner; }
-        }
-
-        public int ItemReserveMax { get => itemReserveMax; set => itemReserveMax = value; }
-
-
-        #endregion
 
         protected override void Awake()
         {
@@ -1491,14 +1490,14 @@ namespace Framework
 
             public virtual void SetItem(GameObject item)
             {
-                item?.SetActive(true);
-                rectTransform = item?.GetComponent<RectTransform>();
-                this.toggle = item?.GetComponent<Toggle>();
-                this.m_ItemLabel = item?.transform.FindOf<Text>("Item Label");
-                this.bg = item?.transform.FindOf<Image>("Item Background");
-
                 if (item)
                 {
+                    item.SetActive(true);
+                    rectTransform = item.GetComponent<RectTransform>();
+                    this.toggle = item.GetComponent<Toggle>();
+                    this.m_ItemLabel = item.transform.FindOf<Text>("Item Label");
+                    this.bg = item.transform.FindOf<Image>("Item Background");
+
                     item.name = itemData.text;
                     itemLabel_text = itemData.text;
                 }
