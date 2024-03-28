@@ -16,6 +16,7 @@
         "AutoNamespace",
         "TestMenu",
         "Framework",
+        "Framework.Editor",
         "BatchOperationToolsUtility"
     ]
 }

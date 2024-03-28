@@ -1,6 +1,6 @@
 {
     "name": "AutoNamespace",
-    "rootNamespace": "",
+    "rootNamespace": "AutoNamespace",
     "references": [],
     "includePlatforms": [
         "Editor"

@@ -213,12 +213,12 @@ namespace AutoNamespace
 
         public static bool Enable()
         {
-            return Read(Constant.ConfigurePath).enable;
+            return ReadConfigure().enable;
         }
 
         public static List<string> MenuList()
         {
-            return Read(Constant.ConfigurePath).NamespaceList;
+            return ReadConfigure().NamespaceList;
         }
 
         // 检查列表中的命名空间格式，并移除格式不正确的

@@ -180,6 +180,7 @@ namespace BatchOperationToolsUtility
                 }
                 EditorGUILayout.EndVertical();
 
+                EditorGUI.EndDisabledGroup();
             }
             EditorGUILayout.EndScrollView();
         }
@@ -191,7 +192,8 @@ namespace BatchOperationToolsUtility
             {
                 GUILayout.Space(spaceOne * 2);
 
-                EditorGUILayout.LabelField(item == null || !item.file || string.IsNullOrEmpty(item.file.name) || item.file == BOTConstant.DefaultTextAsset ? "E " + index : index + "  " + item.file.name, maxWidth150);
+                //EditorGUILayout.LabelField(item == null || !item.file || string.IsNullOrEmpty(item.file.name) || item.file == BOTConstant.DefaultTextAsset ? "E " + index : index + "  " + item.file.name, maxWidth150);
+                EditorGUILayout.LabelField(index.ToString(), maxWidth25);
 
                 UnityEngine.Object obj = EditorGUILayout.ObjectField(item.file, item.file.GetType(), false);
                 if (obj == null)

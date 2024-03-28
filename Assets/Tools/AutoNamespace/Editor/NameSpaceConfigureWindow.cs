@@ -50,6 +50,12 @@ namespace AutoNamespace
 
         }
 
+        private void OnDisable()
+        {
+            _NamespaceConfig.Dispose();
+            _NamespaceList.Dispose();
+        }
+
         //private void Update()
         //{
         //    //Debug.Log("Update");

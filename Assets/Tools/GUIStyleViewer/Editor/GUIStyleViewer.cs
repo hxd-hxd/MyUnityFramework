@@ -75,6 +75,8 @@ public class GUIStyleViewer : EditorWindow
                 textEditor.text = style.name;
                 textEditor.OnFocus();
                 textEditor.Copy();
+
+                //Debug.Log($"图标资源路径：{AssetDatabase.GetAssetPath(style.normal.background)}");
             }
         }
         GUILayout.EndHorizontal();

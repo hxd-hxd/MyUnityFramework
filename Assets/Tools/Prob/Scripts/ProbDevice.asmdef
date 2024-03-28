@@ -1,6 +1,6 @@
 {
     "name": "ProbDevice",
-    "rootNamespace": "",
+    "rootNamespace": "Prob",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
