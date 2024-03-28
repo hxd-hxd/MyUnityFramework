@@ -14,7 +14,7 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using UnityEngine.SceneManagement;
 
-namespace Test
+namespace Framework.Test
 {
 #if UNITY_EDITOR
     using UnityEditor;

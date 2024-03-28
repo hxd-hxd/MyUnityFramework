@@ -59,7 +59,8 @@ namespace Framework
         /// <returns></returns>
         public static T FindOf<T>(this Transform obj, string name) where T : Component
         {
-            return FindOf(obj, name)?.GetComponent<T>();
+            var t = FindOf(obj, name);
+            return t ? t.GetComponent<T>() : null;
         }
         /// <summary>
         /// 在所有子节点中找到指定名称的第一个，并获取其上指定组件
@@ -146,7 +147,7 @@ namespace Framework
         /// <typeparam name="T"></typeparam>
         /// <param name="transform"></param>
         /// <returns></returns>
-        public static T ExpectComponent<T>(this Transform self) where T : Component
+        public static T ExpectComponent<T>(this Component self) where T : Component
         {
             return ExpectComponent<T>(self.gameObject);
         }

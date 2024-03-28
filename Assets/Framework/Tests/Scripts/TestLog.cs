@@ -8,8 +8,10 @@ namespace Framework.Test
 {
     public class TestLog : MonoBehaviour
     {
-       public  Button logBtn;
-       public  InputField inputInfoUI;
+        public Button logBtn;
+        public InputField inputInfoUI;
+
+        public Transform zi, zi3, zi4;
 
         // Start is called before the first frame update
         void Start()
@@ -18,6 +20,10 @@ namespace Framework.Test
             {
                 OnLog();
             });
+
+            zi = transform.FindOf("zi1/zi2");
+            zi3 = transform.FindOf("zi3");
+            zi4 = transform.FindOf("zi3/zi4");
         }
 
         public void OnLog()
