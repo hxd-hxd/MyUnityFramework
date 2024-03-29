@@ -256,7 +256,16 @@ namespace Framework
             tPool.Enqueue(obj);
             obj.transform.SetParent(GOManager.transform);
 
-            // 清除操作
+            // 清理操作
+            CleanupObject(obj);
+        }
+
+        /// <summary>
+        /// 清理 <see cref="ITypePoolObject.Clear()"/>
+        /// </summary>
+        /// <param name="obj"></param>
+        protected virtual void CleanupObject(GameObject obj)
+        {
             var tpos = obj.GetComponents<ITypePoolObject>();
             if (tpos != null)
             {
@@ -266,6 +275,7 @@ namespace Framework
                 }
             }
         }
+
 
         public virtual void Clear(GameObject template)
         {

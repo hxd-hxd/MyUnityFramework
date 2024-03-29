@@ -24,6 +24,7 @@ namespace Framework.Test
             zi = transform.FindOf("zi1/zi2");
             zi3 = transform.FindOf("zi3");
             zi4 = transform.FindOf("zi3/zi4");
+            
         }
 
         public void OnLog()

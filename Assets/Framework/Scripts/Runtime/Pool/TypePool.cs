@@ -6,8 +6,8 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Text;
+using UnityEngine;
 
 namespace Framework
 {
@@ -97,13 +97,11 @@ namespace Framework
         public List<T> GetList<T>() => Get<List<T>>();
         /// <summary>获取 <see cref="Dictionary{TKey, TValue}"/></summary>
         public Dictionary<TKey, TValue> GetDic<TKey, TValue>() => Get<Dictionary<TKey, TValue>>();
-
+        
         /// <summary>返回对象池</summary>
         public virtual void Return<T>(T obj) where T : class
         {
             if (obj == null) return;
-
-            if(obj is ITypePoolObject tpo) tpo.Clear();
 
             /* 
             这里避坑，
@@ -128,6 +126,8 @@ namespace Framework
                 _pool[target] = tPool;
             }
             tPool.Enqueue(obj);
+
+            CleanupObject(obj);
         }
         /// <summary>返回对象池</summary>
         public void Return<T>(List<T> v)
@@ -150,6 +150,15 @@ namespace Framework
             if (v == null) return;
             v.Clear();
             Return<StringBuilder>(v);
+        }
+
+        /// <summary>
+        /// 清理 <see cref="ITypePoolObject.Clear()"/>
+        /// </summary>
+        /// <param name="obj"></param>
+        protected virtual void CleanupObject(object obj)
+        {
+            if (obj is ITypePoolObject tpo) tpo.Clear();
         }
 
         public virtual void Clear()
