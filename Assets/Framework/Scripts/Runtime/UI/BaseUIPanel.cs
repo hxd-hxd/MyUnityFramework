@@ -157,6 +157,9 @@ namespace Framework
 
         protected override void OnDestroy()
         {
+            base.OnDestroy();
+            UIPanelManager.RemovePanel(this);
+
             OnDestroyEvent?.Invoke();
 
         }

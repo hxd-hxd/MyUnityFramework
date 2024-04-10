@@ -6,12 +6,18 @@ using UnityEngine.UI;
 
 namespace Framework.Test
 {
-    public class TestLog : MonoBehaviour
+    public class TestLog : MonoBehaviourSingleton<TestLog>
     {
         public Button logBtn;
         public InputField inputInfoUI;
 
         public Transform zi, zi3, zi4;
+        public MinMax<string> _mmString;
+        //public MinMax<int> _mmInt;
+        //public MinMax<bool> _mmBool;
+        //public MinMax<LogType> _mmEnum;
+        //public MinMax<float> _mmFloat;
+        //public MinMax<float> _mmFloat1;
 
         // Start is called before the first frame update
         void Start()

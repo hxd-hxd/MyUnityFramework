@@ -26,7 +26,7 @@ namespace Framework
         /// <param name="action"></param>
         public static void AddPointerClick(this EventTrigger eventTrigger, UnityAction<BaseEventData> action)
         {
-            eventTrigger.AddPointerEvent(EventTriggerType.PointerClick, action);// 添加点击后的事件回调
+            eventTrigger.AddEvent(EventTriggerType.PointerClick, action);
         }
 
         /// <summary>
@@ -34,11 +34,11 @@ namespace Framework
         /// </summary>
         /// <param name="eventTriggerType"></param>
         /// <param name="action"></param>
-        public static void AddPointerEvent(this EventTrigger eventTrigger, EventTriggerType eventTriggerType, UnityAction<BaseEventData> action)
+        public static void AddEvent(this EventTrigger eventTrigger, EventTriggerType eventTriggerType, UnityAction<BaseEventData> action)
         {
             Entry ete = eventTrigger.AddOrGetEventType(eventTriggerType);
 
-            ete.callback.AddListener(action);// 添加点击后的事件回调
+            ete.callback.AddListener(action);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Framework
         /// </summary>
         public static void Clear(this EventTrigger eventTrigger)
         {
-            eventTrigger.triggers.Clear();// 添加点击后的事件回调
+            eventTrigger.triggers.Clear();
         }
         /// <summary>
         /// 清除

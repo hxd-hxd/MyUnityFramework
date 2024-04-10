@@ -18,7 +18,7 @@ namespace Framework
     /// <summary>
     /// 包含一些扩展的实用方法
     /// </summary>
-    public static class ExtendUtility
+    public static partial class ExtendUtility
     {
         /// <summary>
         /// 在所有子节点中找到指定名称的第一个
@@ -184,6 +184,120 @@ namespace Framework
         {
             t.SetParent(parent);
             ResetTransformLocal(t);
+        }
+
+        /// <summary>
+        /// 获取宽度，考虑缩放 <see cref="Transform.lossyScale"/> 的影响
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns></returns>
+        public static float GetWidth(this RectTransform self)
+        {
+            return self ? self.rect.width * self.lossyScale.x : 0;
+        }
+        /// <summary>
+        /// 获取宽度，考虑缩放 <see cref="Transform.lossyScale"/> 的影响
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns></returns>
+        public static float GetHeight(this RectTransform self)
+        {
+            return self ? self.rect.height * self.lossyScale.y : 0;
+        }
+        /// <summary>
+        /// 获取宽高，考虑缩放 <see cref="Transform.lossyScale"/> 的影响
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns></returns>
+        public static Vector2 GetWidthHeight(this RectTransform self)
+        {
+            if (!self) return default;
+            return new Vector2(self.rect.width * self.lossyScale.x, self.rect.height * self.lossyScale.y);
+        }
+        /// <summary> 
+        /// 获取视觉上的（矩形的）中心世界坐标，该坐标无视 <see cref="RectTransform.pivot"/> 的偏移
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns></returns>
+        public static Vector2 GetVisionCentralPosition(this RectTransform self)
+        {
+            if (self == null) return default;
+
+            var pos = self.position;// 当前位置
+            var pivot = self.pivot;
+
+            /* 计算公式
+                中心位置 = 当前位置 + （中心支点 - 当前支点） * （矩形边长）
+            */
+            var newPos = Vector2.zero;
+            newPos.x = pos.x + (0.5f - pivot.x) * self.GetWidth();
+            newPos.y = pos.y + (0.5f - pivot.y) * self.GetHeight();
+
+            return newPos;
+        }
+        /// <summary> 
+        /// 获取视觉上的矩形的主要顶点，该坐标无视 <see cref="RectTransform.pivot"/> 的偏移
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns></returns>
+        public static void GetRectPrimaryVertex(this RectTransform self
+            , out Vector3 center
+            , out Vector3 leftDown
+            , out Vector3 leftUp
+            , out Vector3 rightDown
+            , out Vector3 rightUp
+            )
+        {
+            center = default; leftDown = default; leftUp = default; rightDown = default; rightUp = default;
+            if (self == null) return;
+
+            // 无视支点偏移的中点坐标
+            center = GetVisionCentralPosition(self);
+
+            // 宽、高的一半
+            float wHalf = self.GetWidth() / 2;
+            float hHalf = self.GetHeight() / 2;
+
+            // 计算矩形四个顶点位置
+            leftDown = new Vector2(
+               center.x - wHalf, center.y - hHalf);
+            leftUp = new Vector2(
+               center.x - wHalf, center.y + hHalf);
+            rightUp = new Vector2(
+               center.x + wHalf, center.y + hHalf);
+            rightDown = new Vector2(
+               center.x + wHalf, center.y - hHalf);
+        }
+
+        /// <summary>
+        /// 计算中点坐标
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static Vector2 Midpoint(this Vector2 target, Vector2 v)
+        {
+            return (target - v) / 2 + v;
+        }
+        /// <summary>
+        /// 计算中点坐标
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static Vector3 Midpoint(this Vector3 target, Vector3 v)
+        {
+            return (target - v) / 2 + v;
+        }
+        /// <summary>
+        /// 计算中点坐标
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static Vector3 Midpoint(this Vector4 target, Vector4 v)
+        {
+            return (target - v) / 2 + v;
         }
 
         /// <summary>

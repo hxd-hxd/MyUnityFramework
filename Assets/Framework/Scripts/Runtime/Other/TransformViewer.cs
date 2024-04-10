@@ -31,6 +31,8 @@ namespace Framework
 
             var my = (TransformViewer)target;
 
+            //GUI.changed
+
             position = my.transform.position;
             eulerAngles = my.transform.eulerAngles;
             localPosition = my.transform.localPosition;
@@ -42,11 +44,11 @@ namespace Framework
 
             EditorGUI.BeginChangeCheck();
             position = EditorGUILayout.Vector3Field("Position", position);
-            if(EditorGUI.EndChangeCheck()) my.transform.position = position;
+            if (EditorGUI.EndChangeCheck()) my.transform.position = position;
 
             EditorGUI.BeginChangeCheck();
             eulerAngles = EditorGUILayout.Vector3Field("Rotation", my.transform.eulerAngles);
-            if(EditorGUI.EndChangeCheck()) my.transform.eulerAngles = eulerAngles;
+            if (EditorGUI.EndChangeCheck()) my.transform.eulerAngles = eulerAngles;
 
             GUI.enabled = false;
             EditorGUILayout.Vector3Field("LossyScale", my.transform.lossyScale);
@@ -58,15 +60,24 @@ namespace Framework
 
             EditorGUI.BeginChangeCheck();
             localPosition = EditorGUILayout.Vector3Field("Position", localPosition);
-            if(EditorGUI.EndChangeCheck()) my.transform.localPosition = localPosition;
+            if (EditorGUI.EndChangeCheck()) my.transform.localPosition = localPosition;
 
             EditorGUI.BeginChangeCheck();
-            localEulerAngles = EditorGUILayout.Vector3Field("Rotation", localEulerAngles) ;
-            if(EditorGUI.EndChangeCheck()) my.transform.localEulerAngles = localEulerAngles;
+            localEulerAngles = EditorGUILayout.Vector3Field("Rotation", localEulerAngles);
+            if (EditorGUI.EndChangeCheck()) my.transform.localEulerAngles = localEulerAngles;
 
             EditorGUI.BeginChangeCheck();
             localScale = EditorGUILayout.Vector3Field("Scale", localScale);
-            if(EditorGUI.EndChangeCheck()) my.transform.localScale = localScale;
+            if (EditorGUI.EndChangeCheck()) my.transform.localScale = localScale;
+
+            if (GUI.changed)
+            {
+                //Undo.RecordObject(target, nameof(TransformViewerInspector));
+                Undo.RecordObject(this, nameof(TransformViewerInspector));
+
+                EditorUtility.SetDirty(target);
+                GUI.changed = false;
+            }
         }
     }
 #endif

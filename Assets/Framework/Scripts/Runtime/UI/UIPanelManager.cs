@@ -37,7 +37,19 @@ namespace Framework
         /// <summary>
         /// 其他 UI 的父节点（其他 UI 界面会加载到此节点下）
         /// </summary>
-        public static GameObject OtherUIParent { get => otherUIParent; set => otherUIParent = value; }
+        public static GameObject OtherUIParent
+        {
+            get
+            {
+                if (!otherUIParent)// 检查是否存在
+                {
+                    otherUIParent = new GameObject("OtherUIParent");
+                    Object.DontDestroyOnLoad(otherUIParent);
+                }
+                return otherUIParent;
+            }
+            set => otherUIParent = value;
+        }
         /// <summary>
         /// 主画布
         /// </summary>
@@ -47,12 +59,16 @@ namespace Framework
             {
                 if (!mainCanvas)
                 {
-                    mainCanvas = Object.FindObjectOfType<MainCanvas>()?.m_mainCanvas;
+                    var mc = Object.FindObjectOfType<MainCanvas>(true);
+                    if (mc)
+                        mainCanvas = mc.m_mainCanvas;
                 }
 
                 if (!mainCanvas)
                 {
-                    mainCanvas = Object.Instantiate(ResourcesManager.Load<GameObject>($"{panelLoadPath}MainCanvas")?.GetComponent<Canvas>());
+                    var mc = ResourcesManager.Load<GameObject>(Path.Combine(panelLoadPath, "MainCanvas"));
+                    if (mc)
+                        mainCanvas = Object.Instantiate(mc).GetComponent<Canvas>();
                 }
 
                 return mainCanvas;
@@ -170,19 +186,15 @@ namespace Framework
 
                 if (!panel)
                 {
-                    if (!OtherUIParent)// 检查是否存在
-                    {
-                        OtherUIParent = new GameObject("OtherUIParent");
-                        Object.DontDestroyOnLoad(OtherUIParent);
-                    }
 
                     if (autoInstance)
                     {
                         // 如果场景中没有，就实例化出来
-                        string path = panelLoadPath + type.Name;
-                        GameObject go = Object.Instantiate(ResourcesManager.Load<GameObject>(path));
-                        if (go != null)
+                        string path = Path.Combine(panelLoadPath, type.Name);
+                        GameObject prefab = ResourcesManager.Load<GameObject>(path);
+                        if (prefab != null)
                         {
+                            GameObject go = Object.Instantiate(prefab);
                             go.transform.SetParent(OtherUIParent.transform);// 将新界面设置到 UI 节点
 
                             panel = go.GetComponent<BaseUIPanel>();

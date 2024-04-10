@@ -742,6 +742,7 @@ GameObject:
   - component: {fileID: 8935448367248919496}
   - component: {fileID: 8935448367248919499}
   - component: {fileID: 952433064891869247}
+  - component: {fileID: 7990514321779278481}
   m_Layer: 5
   m_Name: LogBuoyUI
   m_TagString: Untagged
@@ -823,6 +824,46 @@ MonoBehaviour:
   _logBtn: {fileID: 0}
   _fpsText: {fileID: 6121949587983987207}
   _logSystemUI: {fileID: 0}
+--- !u!114 &7990514321779278481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8935448367248919541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f65ac2ad0cd5a654d907192262a22eab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _target: {fileID: 8935448367248919498}
+  _detectRectTransform: {fileID: 4665909848730116992}
+  _isDraggingRestrict: 1
+  _isDraggingRestrictUp: 1
+  _isDraggingRestrictDown: 1
+  _isDraggingRestrictLeft: 1
+  _isDraggingRestrictRight: 1
+  _detectRectOffsetMin: {x: 0, y: 0}
+  _detectRectOffsetMax: {x: 0, y: 0}
+  _detectRectOffsetUseRatio: 1
+  _detectRectOffsetMinRatio: {x: 0, y: 0}
+  _detectRectOffsetMaxRatio: {x: 0, y: 0}
+  _dragRestrictZone: 0
+  _testRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+  beginDragEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  dragEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  endDragEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &8935448367287937754
 GameObject:
   m_ObjectHideFlags: 0
@@ -1160,6 +1201,7 @@ GameObject:
   - component: {fileID: 8935448367472629374}
   - component: {fileID: 8935448367472629369}
   - component: {fileID: 2939040075953480273}
+  - component: {fileID: 5864326861061273177}
   m_Layer: 5
   m_Name: LogViewUI
   m_TagString: Untagged
@@ -1249,6 +1291,46 @@ MonoBehaviour:
   _copySelectedLogBtn: {fileID: 6799613743102013797}
   _copyAllLogBtn: {fileID: 2826070266748153792}
   _logNumText: {fileID: 7270830149030625489}
+--- !u!114 &5864326861061273177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8935448367472629371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f65ac2ad0cd5a654d907192262a22eab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _target: {fileID: 8935448367472629368}
+  _detectRectTransform: {fileID: 5680989509306325887}
+  _isDraggingRestrict: 1
+  _isDraggingRestrictUp: 1
+  _isDraggingRestrictDown: 1
+  _isDraggingRestrictLeft: 1
+  _isDraggingRestrictRight: 1
+  _detectRectOffsetMin: {x: -800, y: -650}
+  _detectRectOffsetMax: {x: -800, y: 0}
+  _detectRectOffsetUseRatio: 1
+  _detectRectOffsetMinRatio: {x: -0.9, y: -0.92}
+  _detectRectOffsetMaxRatio: {x: -0.9, y: 0}
+  _dragRestrictZone: 0
+  _testRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+  beginDragEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  dragEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  endDragEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &8935448367547540444
 GameObject:
   m_ObjectHideFlags: 0
@@ -2063,14 +2145,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 08ebe6a1e57202348b04ef2fa0cb63bc, type: 3}
---- !u!1 &8523503452117872161 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8193558995545688889, guid: 08ebe6a1e57202348b04ef2fa0cb63bc, type: 3}
-  m_PrefabInstance: {fileID: 575562744686191896}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8523503452117872166 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8193558995545688894, guid: 08ebe6a1e57202348b04ef2fa0cb63bc, type: 3}
+  m_PrefabInstance: {fileID: 575562744686191896}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8523503452117872161 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8193558995545688889, guid: 08ebe6a1e57202348b04ef2fa0cb63bc, type: 3}
   m_PrefabInstance: {fileID: 575562744686191896}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &904200334490701657
@@ -2280,6 +2362,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 20adde820836ff442a520b5b1123235b, type: 3}
+--- !u!224 &6799613743102013796 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8870942397098632944, guid: 20adde820836ff442a520b5b1123235b, type: 3}
+  m_PrefabInstance: {fileID: 2686115360317478804}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &6799613743102013797 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8870942397098632945, guid: 20adde820836ff442a520b5b1123235b, type: 3}
@@ -2291,11 +2378,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &6799613743102013796 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8870942397098632944, guid: 20adde820836ff442a520b5b1123235b, type: 3}
-  m_PrefabInstance: {fileID: 2686115360317478804}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3453807549774794685
 PrefabInstance:
   m_ObjectHideFlags: 0
