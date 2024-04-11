@@ -328,7 +328,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbdb8767d4c1ee34c86e67ea7f4ddd60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mmStr:
+  _float: 0
+  _logType: 0
+  _logInfo:
+    _condition: 
+    _stackTrace: 
+    _logType: 0
+    _logColor: {r: 0, g: 0, b: 0, a: 0}
+  _test:
+    name: 
+    value: 0
+    log: 0
+  _string: 
+  _vector3: {x: 0, y: 0, z: 0}
+  _mmString:
     min: 
     max: 
   _mmBool:
@@ -337,12 +350,34 @@ MonoBehaviour:
   _mmEnum:
     min: 0
     max: 0
+  _mmUint:
+    min: 0
+    max: 1
+  _mmLong:
+    min: 0
+    max: 1
+  _mmUlong:
+    min: 0
+    max: 1
+  _mmDouble:
+    min: 0
+    max: 1
   _mmFloat:
     min: 0
-    max: 0
+    max: 1
   _mmFloat1:
     min: 0
-    max: 0
+    max: 3
+  _vector2: {x: 0, y: 0}
+  _mmTest:
+    min:
+      name: 
+      value: 0
+      log: 0
+    max:
+      name: 
+      value: 0
+      log: 0
   _mmLogInfo:
     min:
       _condition: 
@@ -354,15 +389,6 @@ MonoBehaviour:
       _stackTrace: 
       _logType: 0
       _logColor: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0}
-  _mmTest:
-    min:
-      name: 
-      value: 0
-      log: 0
-    max:
-      name: 
-      value: 0
-      log: 0
   _mmInt:
     min: 0
     max: 0
