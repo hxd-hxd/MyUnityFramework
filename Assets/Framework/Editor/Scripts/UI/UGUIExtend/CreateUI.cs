@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
+//using UEditorResources = UnityEditor.Experimental.EditorResources;// 无法加载
 
 namespace Framework.Editor
 {
@@ -29,6 +30,7 @@ namespace Framework.Editor
             //var dpPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             //var dpPrefab = Resources.Load<GameObject>(path);
             var dpPrefab = EditorResources.Load<GameObject>(path);
+            //var dpPrefab = UEditorResources.Load<GameObject>(path);
 
             Debug.Log($"有 UI 预制体 \"{path}\"： {dpPrefab != null}，{(dpPrefab != null ? $"在 \"{AssetDatabase.GetAssetPath(dpPrefab)}\" " : null)}");
 

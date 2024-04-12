@@ -454,12 +454,12 @@ MonoBehaviour:
     min: 
     max: 
   _mmListFloat:
-  - min: 0
-    max: 0
-  - min: 0
-    max: 0
-  - min: 0
-    max: 0
+  - min: 0.42
+    max: 0.67
+  - min: 0.73
+    max: 0.38
+  - min: 0.22
+    max: 0.84
   _mmListString:
   - min: 
     max: 

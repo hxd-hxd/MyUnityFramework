@@ -71,6 +71,7 @@ namespace Framework.Editor
         public virtual int TextLine(string msg, float width)
         {
             int result = 0;
+            msg = msg.Replace("\r\n", "\n");
             var strs = Regex.Split(msg, "\n");
             foreach (var str in strs)
             {
@@ -79,7 +80,7 @@ namespace Framework.Editor
             return result;
         }
         /// <summary>
-        /// 根据提供的文本和宽度计算所占行数（不支持富文本）
+        /// 根据提供的文本和宽度计算所占行数（不支持富文本），忽略换行符
         /// </summary>
         /// <returns></returns>
         public int TextLineIgnoreNewlines(string msg, float width)

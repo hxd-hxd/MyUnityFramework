@@ -4,7 +4,6 @@ using UnityEditor;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System;
-using static UnityEditor.PlayerSettings;
 
 namespace Framework.Editor
 {

@@ -38,24 +38,30 @@ namespace Framework.Editor
                 || property.propertyType == SerializedPropertyType.Integer);
         }
 
+        bool useDefault = false;
         protected override float GetAttributeHintY()
         {
+            if (useDefault) return base.GetAttributeHintY();
+
             return singleLineHeight;
         }
         protected override float GetAttributeHintH(float msgLine)
         {
+            if(useDefault) return base.GetAttributeHintH(msgLine);
+
             float h = singleLineHeight * msgLine;
             float phOnLabel = propertyHeight - singleLineHeight;// 去掉标题后的属性行高
             // 多行则覆盖，单行则随后
             if ((int)phOnLabel > 0)// 多行
             {
                 float b = phOnLabel / singleLineHeight;// 去标行高所占行数
-                // 取
-                if (b < msgLine)
-                {
-                    lineCount += msgLine - b;
-                }
+                // 取消息行多余的部分叠加
+                //if (b < msgLine)
+                //{
+                //    lineCount += msgLine - b;
+                //}
 
+                lineCount += Math.Max(msgLine - b, 0);
                 h = Math.Max(h, phOnLabel);
             }
             else
