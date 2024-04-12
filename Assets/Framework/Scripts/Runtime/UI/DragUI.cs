@@ -204,6 +204,7 @@ namespace Framework
         [SerializeField] private MinMax<float> _dragRestrictZoneX, _dragRestrictZoneY;
 
         [SerializeField] private MinMax<Test> _testMinMax;
+        [MinMaxRange(0, 1)]
         [SerializeField] private MinMax<string> _testMinMaxStr;
         //[Space] public List<Vector2> v2s = new List<Vector2>();
 
