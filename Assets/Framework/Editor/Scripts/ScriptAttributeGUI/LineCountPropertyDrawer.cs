@@ -37,8 +37,8 @@ namespace Framework.Editor
         /// 单行行高（默认 18）
         /// </summary>
         protected float singleLineHeight { get => _singleLineHeight; set => _singleLineHeight = value; }
-        /// <summary>属性高度统计</summary>
-        protected float propertyHeight { get => _propertyHeight; private set => _propertyHeight = value; }
+        /// <summary>默认属性高度</summary>
+        protected float propertyHeight { get => _propertyHeight;  set => _propertyHeight = value; }
         /// <summary>
         /// 当前行数对应的高度，可用于定位最新行 y 的位置
         /// <para></para><see cref="lineCount"/> * <see cref="singleLineHeight"/>
@@ -60,12 +60,13 @@ namespace Framework.Editor
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             propertyHeight = EditorGUI.GetPropertyHeight(property, label, true);
-            //Debug.Log($"ph：{propertyHeight}，\totalHeight：{totalHeight}");
+            //Debug.Log($"{property.displayName}\tph：{propertyHeight}，\totalHeight：{totalHeight}");
             return totalHeight;
         }
 
         /// <summary>
-        /// 根据提供的文本和宽度计算所占行数（不支持富文本）
+        /// 根据提供的文本和宽度计算所占行数
+        /// （不支持富文本，使用 <see cref="singleCharWidth"/> 修改计算时的单个宽度，也不能处理不同字符在 gui 显示上的宽度不同的问题 例如：l 和 L）
         /// </summary>
         /// <returns></returns>
         public virtual int TextLine(string msg, float width)
@@ -80,7 +81,8 @@ namespace Framework.Editor
             return result;
         }
         /// <summary>
-        /// 根据提供的文本和宽度计算所占行数（不支持富文本），忽略换行符
+        /// 根据提供的文本和宽度计算忽略换行符所占行数
+        /// （不支持富文本，使用 <see cref="singleCharWidth"/> 修改计算时的单个宽度，也不能处理不同字符在 gui 显示上的宽度不同的问题 例如：l 和 L）
         /// </summary>
         /// <returns></returns>
         public int TextLineIgnoreNewlines(string msg, float width)

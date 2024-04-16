@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Codice.CM.Client.Differences.Graphic;
 using UnityEditor;
 using UnityEngine;
 
@@ -23,7 +22,10 @@ namespace Framework.Editor
                 EditorGUI.IntSlider(pos, property, (int)range.min, (int)range.max, label);
             }
             else
+            {
                 base.OnAttribute(pos, property, label);
+                //EditorGUI.LabelField(pos, label.text, "Use MinMaxRangeAttribute with float or int.");
+            }
         }
         protected override bool OnAttributeHint(SerializedProperty property, out string msg, out MessageType type)
         {

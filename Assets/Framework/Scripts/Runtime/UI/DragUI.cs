@@ -13,6 +13,7 @@ using UnityEngine.Events;
 
 namespace Framework
 {
+    using System.Security.Policy;
 #if UNITY_EDITOR
     using UnityEditor;
 
@@ -22,12 +23,15 @@ namespace Framework
     {
         protected static bool _showDragGUI = true;
         protected static bool _showMidpointGUI = true;
+        protected static bool _showDragRestrictZoneGUI = true;
 
         protected GUIStyle labelGUIStyle = new GUIStyle();
         protected GUIStyle labelGUIStyle1 = new GUIStyle();
         protected GUIStyle labelGUIStyle2 = new GUIStyle();
         protected GUIStyle labelGUIStyle2Red = new GUIStyle();
         protected GUIStyle labelGUIStyle3 = new GUIStyle();
+
+        RectHandles _dragTragetRectHandles, _dragRestrictZoneRectHandles;
 
         DragUI my => (DragUI)target;
 
@@ -47,6 +51,9 @@ namespace Framework
 
             labelGUIStyle3.normal.textColor = Color.yellow;
             labelGUIStyle3.alignment = TextAnchor.UpperCenter;
+
+            _dragTragetRectHandles ??= new RectHandles();
+            _dragRestrictZoneRectHandles ??= new RectHandles();
         }
 
 
@@ -66,11 +73,11 @@ namespace Framework
             rightUp.y += detectRectOffsetY.max;
             rightDown.x += detectRectOffsetX.max;
             rightDown.y -= detectRectOffsetY.min;
-            // 四边中点
-            var leftCenter = leftDown.Midpoint(leftUp);
-            var rightCenter = rightDown.Midpoint(rightUp);
-            var downCenter = leftDown.Midpoint(rightDown);
-            var upCenter = leftUp.Midpoint(rightUp);
+
+            _dragTragetRectHandles.leftDown = leftDown;
+            _dragTragetRectHandles.leftUp = leftUp;
+            _dragTragetRectHandles.rightDown = rightDown;
+            _dragTragetRectHandles.rightUp = rightUp;
 
             if (_showDragGUI)
             {
@@ -83,7 +90,7 @@ namespace Framework
 
                 /// scene 控件
                 // 标题
-                Handles.Label(new Vector2(upCenter.x, upCenter.y + 16), $"DragUI：拖拽隔离区偏移边界{(my.detectRectOffsetUseRatio ? $"（偏移使用比例）" : null)}", labelGUIStyle3);
+                Handles.Label(new Vector2(_dragTragetRectHandles.upCenter.x, _dragTragetRectHandles.upCenter.y + 16), $"DragUI：拖拽隔离区偏移边界{(my.detectRectOffsetUseRatio ? $"（偏移使用比例）" : null)}", labelGUIStyle3);
 
                 // 矩形视觉中心点
                 if (_showMidpointGUI)
@@ -93,31 +100,18 @@ namespace Framework
                     Handles.DotHandleCap(0, vcPos, my.target.rotation, 1, EventType.Repaint);
                 }
 
-                // 连接顶点线段，构成矩形
-                Handles.DrawLine(leftDown, leftUp);
-                Handles.DrawLine(leftDown, rightDown);
-                Handles.DrawLine(rightDown, rightUp);
-                Handles.DrawLine(rightUp, leftUp);
-                //var rPos = pos;
-                //rPos.x -= rect.width / 2;
-                //rect.position = rPos;
-                //Handles.DrawSolidRectangleWithOutline(rect, new Color(1,1,1, 0), Color.white);
-
-                // 边界中点
-                Handles.DotHandleCap(0, leftCenter, my.target.rotation, 1, EventType.Repaint);
-                Handles.DotHandleCap(0, rightCenter, my.target.rotation, 1, EventType.Repaint);
-                Handles.DotHandleCap(0, downCenter, my.target.rotation, 1, EventType.Repaint);
-                Handles.DotHandleCap(0, upCenter, my.target.rotation, 1, EventType.Repaint);
-
                 // 边界描述
-                Handles.Label(leftCenter,
+                Handles.Label(_dragTragetRectHandles.leftCenter,
                     $"x min{(!isRestrictLeft ? restrictDisableStr : null)}\r\n（{(my.detectRectOffsetUseRatio ? $"{my.detectRectOffsetMinRatio.x}：" : null)}{detectRectOffsetX.min}）", labelGUIStyle2);
-                Handles.Label(rightCenter,
+                Handles.Label(_dragTragetRectHandles.rightCenter,
                     $"x max{(!isRestrictRight ? restrictDisableStr : null)}\r\n（{(my.detectRectOffsetUseRatio ? $"{my.detectRectOffsetMaxRatio.x}：" : null)}{detectRectOffsetX.max}）", labelGUIStyle2);
-                Handles.Label(downCenter,
+                Handles.Label(_dragTragetRectHandles.downCenter,
                     $"y min{(!isRestrictDown ? restrictDisableStr : null)}\r\n（{(my.detectRectOffsetUseRatio ? $"{my.detectRectOffsetMinRatio.y}：" : null)}{detectRectOffsetY.min}）", labelGUIStyle2);
-                Handles.Label(upCenter,
+                Handles.Label(_dragTragetRectHandles.upCenter,
                     $"y max{(!isRestrictUp ? restrictDisableStr : null)}\r\n（{(my.detectRectOffsetUseRatio ? $"{my.detectRectOffsetMaxRatio.y}：" : null)}{detectRectOffsetY.max}）", labelGUIStyle2);
+
+                _dragTragetRectHandles.rotation = my.target.rotation;
+                _dragTragetRectHandles.OnSceneGUI();
 
                 // 控制
                 //EditorGUI.BeginChangeCheck();
@@ -131,21 +125,49 @@ namespace Framework
                 //    my.detectRectOffsetMin = droc;
                 //    Debug.Log(lcp.x - leftCenter.x);
                 //}
+
+                /// 拖拽限制区
+                if (_showDragRestrictZoneGUI)
+                {
+
+                    my.GetDragRestrictZone(out var drzX, out var drzY);
+                    _dragRestrictZoneRectHandles.leftDown = new Vector3(drzX.min, drzY.min);
+                    _dragRestrictZoneRectHandles.leftUp = new Vector3(drzX.min, drzY.max);
+                    _dragRestrictZoneRectHandles.rightDown = new Vector3(drzX.max, drzY.min);
+                    _dragRestrictZoneRectHandles.rightUp = new Vector3(drzX.max, drzY.max);
+
+                    _dragRestrictZoneRectHandles.handlesColorSide = Color.red;
+                    _dragRestrictZoneRectHandles.showSideLeft = isRestrictLeft;
+                    _dragRestrictZoneRectHandles.showSideRight = isRestrictRight;
+                    _dragRestrictZoneRectHandles.showSideDown = isRestrictDown;
+                    _dragRestrictZoneRectHandles.showSideUp = isRestrictUp;
+                    _dragRestrictZoneRectHandles.OnSceneGUI();
+
+                    var _dragRestrictZoneLabelGUIStyle = new GUIStyle(labelGUIStyle3);
+                    _dragRestrictZoneLabelGUIStyle.alignment = TextAnchor.UpperLeft;
+                    Handles.Label(new Vector2(_dragRestrictZoneRectHandles.leftUp.x, _dragRestrictZoneRectHandles.upCenter.y), $"DragUI：拖拽限制区边界（{my.dragRestrictZoneMode}）", _dragRestrictZoneLabelGUIStyle);
+                }
             }
 
             Handles.BeginGUI();
-            EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.MaxWidth(150));
+            EditorGUILayout.BeginVertical("Badge", GUILayout.MaxWidth(150));
+            //EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.MaxWidth(150));
+            //EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.MaxWidth(150));
             {
+
                 _showDragGUI = GUILayout.Toggle(_showDragGUI, "显示拖拽编辑");
                 //EditorGUI.indentLevel += 1;
                 //EditorGUI.indentLevel = 1;
-                _showMidpointGUI = GUILayout.Toggle(_showMidpointGUI, $"显示拖拽中点坐标");
+                _showMidpointGUI = GUILayout.Toggle(_showMidpointGUI, $"显示拖拽目标中点坐标");
                 //EditorGUI.indentLevel -= 1;
                 //EditorGUI.indentLevel =0;
+                _showDragRestrictZoneGUI = GUILayout.Toggle(_showDragRestrictZoneGUI, $"显示拖拽限制区");
             }
             EditorGUILayout.EndVertical();
             Handles.EndGUI();
         }
+
+
 
         void SetHandlesColor(Color color, Action action)
         {
@@ -165,6 +187,57 @@ namespace Framework
             //    }
             //}
         }
+
+        /// <summary>
+        /// 矩形控件，由矩形顶点控制
+        /// </summary>
+        public class RectHandles
+        {
+            public Quaternion rotation;
+            public Vector3 leftDown, leftUp, rightDown, rightUp;
+            public bool showSideLeft = true;
+            public bool showSideRight = true;
+            public bool showSideDown = true;
+            public bool showSideUp = true;
+
+            public Color handlesColor = Color.white;
+            public Color handlesColorSide = Color.green;
+            public Color handlesColorSideCenter = Color.green;
+
+            // 四边中点
+            public Vector3 leftCenter => leftDown.Midpoint(leftUp);
+            public Vector3 rightCenter => rightDown.Midpoint(rightUp);
+            public Vector3 downCenter => leftDown.Midpoint(rightDown);
+            public Vector3 upCenter => leftUp.Midpoint(rightUp);
+
+            public virtual void OnSceneGUI()
+            {
+                Color oldColor = Handles.color;
+                Handles.color = handlesColor;
+
+                // 连接顶点线段，构成矩形边界
+                Handles.color = handlesColorSide;
+                if (showSideLeft) Handles.DrawLine(leftDown, leftUp);
+                if (showSideDown) Handles.DrawLine(leftDown, rightDown);
+                if (showSideRight) Handles.DrawLine(rightDown, rightUp);
+                if (showSideUp) Handles.DrawLine(rightUp, leftUp);
+                //var rPos = pos;
+                //rPos.x -= rect.width / 2;
+                //rect.position = rPos;
+                //Handles.DrawSolidRectangleWithOutline(rect, new Color(1,1,1, 0), Color.white);
+                Handles.color = handlesColor;
+
+                // 边界中点
+                Handles.color = handlesColorSideCenter;
+                Handles.DotHandleCap(0, leftCenter, rotation, 1, EventType.Repaint);
+                Handles.DotHandleCap(0, rightCenter, rotation, 1, EventType.Repaint);
+                Handles.DotHandleCap(0, downCenter, rotation, 1, EventType.Repaint);
+                Handles.DotHandleCap(0, upCenter, rotation, 1, EventType.Repaint);
+                Handles.color = handlesColor;
+
+                Handles.color = oldColor;
+            }
+        }
     }
 #endif
 
@@ -178,21 +251,22 @@ namespace Framework
     {
         [Tooltip("拖拽目标")]
         [SerializeField] private RectTransform _target;
-        [Tooltip("检测区域")]
+        [Tooltip("拖拽检测区域")]
         [SerializeField] private RectTransform _detectRectTransform;// 检测区域
 
         private EventTrigger _detectEventTrigger;
         private Vector2 _pointerInitPos, _targetInitPos;// 拖拽开始时记录初始位置
 
+        // 这里是对拖拽目标的限制，不是拖拽限制区
         [Header("对目标的拖拽限制（注意：均不考虑旋转）")]
-        [Tooltip("是否将拖拽的目标限制在屏幕内")]
+        [Tooltip("是否限制拖拽目标")]
         [SerializeField] private bool _isDraggingRestrict;
         [SerializeField] private bool _isDraggingRestrictUp = true;
         [SerializeField] private bool _isDraggingRestrictDown = true;
         [SerializeField] private bool _isDraggingRestrictLeft = true;
         [SerializeField] private bool _isDraggingRestrictRight = true;
         //public Rect _detectRectOffset;
-        [Header("检测拖拽限制矩形的偏移（负值向内，正值向外）")]
+        [Header("检测拖拽矩形的偏移（负值向内，正值向外）")]
         [SerializeField] private Vector2 _detectRectOffsetMin;
         [SerializeField] private Vector2 _detectRectOffsetMax;
         [Header("偏移值使用百分比（1 = 100%）")]
@@ -200,12 +274,13 @@ namespace Framework
         [SerializeField] private Vector2 _detectRectOffsetMinRatio, _detectRectOffsetMaxRatio;
 
         [Header("拖拽限制区域设置")]
+        [Tooltip("将限制区颠倒，即 左、右互换，上、下互换，此功能仅用于一些特殊用途。例如：使用百分比偏移值时，将偏移全部设置成 -1，保持拖拽矩形比限制区大，这时可以使拖拽区始终包围限制区。")]
+        [SerializeField] private bool _dragRestrictZoneReversal;// 将限制区颠倒
         [SerializeField] private DragRestrictZoneMode _dragRestrictZoneMode;
         [SerializeField] private MinMax<float> _dragRestrictZoneX, _dragRestrictZoneY;
+        [SerializeField] private RectTransform _dragRestrictZoneTarget;
+        //[SerializeField] private MinMax<float>  _dragRestrictZoneY;
 
-        [SerializeField] private MinMax<Test> _testMinMax;
-        [MinMaxRange(0, 1)]
-        [SerializeField] private MinMax<string> _testMinMaxStr;
         //[Space] public List<Vector2> v2s = new List<Vector2>();
 
         [Space(16)]
@@ -225,6 +300,16 @@ namespace Framework
         public bool detectRectOffsetUseRatio { get => _detectRectOffsetUseRatio; set => _detectRectOffsetUseRatio = value; }
         public Vector2 detectRectOffsetMinRatio { get => _detectRectOffsetMinRatio; set => _detectRectOffsetMinRatio = value; }
         public Vector2 detectRectOffsetMaxRatio { get => _detectRectOffsetMaxRatio; set => _detectRectOffsetMaxRatio = value; }
+        /// <summary>将限制区颠倒，即 左、右互换，上、下互换，此功能仅用于一些特殊用途。例如：使用百分比偏移值时，将偏移全部设置成 -1，保持拖拽矩形比限制区大，这时可以使拖拽区始终包围限制区。</summary>
+        public bool dragRestrictZoneReversal { get => _dragRestrictZoneReversal; set => _dragRestrictZoneReversal = value; }
+        /// <summary>限制拖拽活动区域的方式</summary>
+        public DragRestrictZoneMode dragRestrictZoneMode { get => _dragRestrictZoneMode; set => _dragRestrictZoneMode = value; }
+        /// <summary>拖拽限制区域固定值 x 轴，<see cref="dragRestrictZoneMode"/> 为 <see cref="DragRestrictZoneMode.Fixed"/> 时生效</summary>
+        public MinMax<float> dragRestrictZoneX { get => _dragRestrictZoneX; set => _dragRestrictZoneX = value; }
+        /// <summary>拖拽限制区域固定值 y 轴，<see cref="dragRestrictZoneMode"/> 为 <see cref="DragRestrictZoneMode.Fixed"/> 时生效</summary>
+        public MinMax<float> dragRestrictZoneY { get => _dragRestrictZoneY; set => _dragRestrictZoneY = value; }
+        /// <summary>拖拽限制区域固定值目标，<see cref="dragRestrictZoneMode"/> 为 <see cref="DragRestrictZoneMode.Target"/> 时生效</summary>
+        public RectTransform dragRestrictZoneTarget { get => _dragRestrictZoneTarget; set => _dragRestrictZoneTarget = value; }
 
         public float targetWidth => target ? target.rect.width * target.lossyScale.x : 0;
         public float targetHeight => target ? target.rect.height * target.lossyScale.y : 0;
@@ -320,6 +405,7 @@ namespace Framework
 
         /// <summary>
         /// 修正位置
+        /// <para>无视 <see cref="isDraggingRestrict"/>，但边界的禁用限制依然有效</para>
         /// </summary>
         protected virtual void AmendPos()
         {
@@ -332,16 +418,28 @@ namespace Framework
             if (isSOx && !(sox.min != 0 && sox.max != 0))
             {
                 if (_isDraggingRestrictRight)
+                {
                     pos.x -= sox.max;
+
+                }
                 if (_isDraggingRestrictLeft)
+                {
                     pos.x -= sox.min;
+
+                }
             }
             if (isSOy && !(soy.min != 0 && soy.max != 0))
             {
                 if (_isDraggingRestrictUp)
+                {
+
                     pos.y -= soy.max;
+                }
                 if (_isDraggingRestrictDown)
+                {
+
                     pos.y -= soy.min;
+                }
             }
 
             _target.position = pos;
@@ -427,7 +525,23 @@ namespace Framework
         }
 
         /// <summary>
-        /// 检查 x 轴是否超出屏幕
+        /// 检查边界是否超出屏幕
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool SlopOver(Vector2 pos, out MinMax<float> sovX, out MinMax<float> sovY)
+        {
+            sovX = default; sovY = default;
+            if (_target == null) return false;
+
+            GetDragRestrictZone(out var restrictX, out var restrictY);
+            return SlopOver(_target, pos
+                , restrictX, restrictY
+                , GetDetectRectOffsetX(), GetDetectRectOffsetY()
+                , out sovX, out sovY
+                );
+        }
+        /// <summary>
+        /// 检查 x 轴边界是否超出屏幕
         /// </summary>
         /// <param name="pos"></param>
         /// <param name="sov"></param>
@@ -437,28 +551,50 @@ namespace Framework
             sov = default;
             if (_target == null) return false;
 
+            GetDragRestrictZone(out var restrict, out _);
             return SlopOverX(_target, pos
-                , new MinMax<float>(0, Screen.width)
+                , restrict
                 , GetDetectRectOffsetX()
                 , out sov);
         }
         /// <summary>
-        /// 检查 y 轴是否超出屏幕
+        /// 检查 y 轴边界是否超出屏幕
         /// </summary>
         protected virtual bool SlopOverY(Vector2 pos, out MinMax<float> sov)
         {
             sov = default;
             if (_target == null) return false;
 
+            GetDragRestrictZone(out _, out var restrict);
             return SlopOverY(_target, pos
-                , new MinMax<float>(0, Screen.height)
+                , restrict
                 , GetDetectRectOffsetY()
                 , out sov);
         }
 
-
         /// <summary>
-        /// 检查 x 轴是否超出限制
+        /// 检查边界是否超出限制
+        /// </summary>
+        protected virtual bool SlopOver(RectTransform target, Vector2 pos
+            , MinMax<float> restrictX, MinMax<float> restrictY
+            , MinMax<float> offsetX, MinMax<float> offsetY
+            , out MinMax<float> sovX, out MinMax<float> sovY)
+        {
+            var reslut = false;
+            sovX = default; sovY = default;
+            if (target == null) return reslut;
+
+            var pivot = target.pivot;
+            float sideW = target.GetWidth();
+            float sideH = target.GetHeight();
+
+            bool reslutX = SlopOverAxis(sideW, pivot.x, pos.x, restrictX, offsetX, out sovX);
+            bool reslutY = SlopOverAxis(sideH, pivot.y, pos.y, restrictY, offsetY, out sovY);
+            reslut = reslutX || reslutY;
+            return reslut;
+        }
+        /// <summary>
+        /// 检查 x 轴边界是否超出限制
         /// </summary>
         protected virtual bool SlopOverX(RectTransform target, Vector2 pos, MinMax<float> restrict, MinMax<float> offset, out MinMax<float> sov)
         {
@@ -472,7 +608,7 @@ namespace Framework
             return SlopOverAxis(side, pivot.x, pos.x, restrict, offset, out sov);
         }
         /// <summary>
-        /// 检查 y 轴是否超出限制
+        /// 检查 y 轴边界是否超出限制
         /// </summary>
         protected virtual bool SlopOverY(RectTransform target, Vector2 pos, MinMax<float> restrict, MinMax<float> offset, out MinMax<float> sov)
         {
@@ -492,7 +628,7 @@ namespace Framework
         /// <param name="pivot">支点，影响位置</param>
         /// <param name="pos">位置</param>
         /// <param name="restrict">限制范围</param>
-        /// <param name="sov">超出的值（min 始终是负值，max 始终是正值）</param>
+        /// <param name="sov">超出的值（min 始终是负值，max 始终是正值，0 表示未超出）</param>
         /// <returns></returns>
         protected bool SlopOverAxis(float side, float pivot, float pos, MinMax<float> restrict, MinMax<float> offset, out MinMax<float> sov)
         {
@@ -511,29 +647,83 @@ namespace Framework
             max += offset.max;
             min -= offset.min;
 
-            if (min <= restrict.min)
+            if (_dragRestrictZoneReversal)
             {
-                sov.min = min - restrict.min;// 始终是负值
-                reslut = true;
+                if (min <= restrict.max)
+                {
+                    sov.min = min - restrict.max;// 始终是负值
+                    reslut = true;
+                }
+                if (max >= restrict.min)
+                {
+                    sov.max = max - restrict.min;// 始终是正值
+                    reslut = true;
+                }
             }
-            if (max >= restrict.max)
+            else
             {
-                sov.max = max - restrict.max;// 始终是正值
-                reslut = true;
+
+                if (min <= restrict.min)
+                {
+                    sov.min = min - restrict.min;// 始终是负值
+                    reslut = true;
+                }
+                if (max >= restrict.max)
+                {
+                    sov.max = max - restrict.max;// 始终是正值
+                    reslut = true;
+                }
             }
             return reslut;
         }
 
-        //protected float 
-
-        //public enum DragRestrictMode
-        //{
-        //    None = 0,
-        //    Within
-        //}
+        /// <summary>
+        /// 获取拖拽限制区域
+        /// </summary>
+        /// <param name="drzX"></param>
+        /// <param name="drzY"></param>
+        /// <returns></returns>
+        public bool GetDragRestrictZone(out MinMax<float> drzX, out MinMax<float> drzY)
+            => GetDragRestrictZone(_dragRestrictZoneMode, out drzX, out drzY);
+        public bool GetDragRestrictZone(DragRestrictZoneMode mode, out MinMax<float> drzX, out MinMax<float> drzY)
+        {
+            bool r = true;
+            drzX = default; drzY = default;
+            if (mode == DragRestrictZoneMode.Sreen)
+            {
+                drzX = new MinMax<float>(0, Screen.width);
+                drzY = new MinMax<float>(0, Screen.height);
+            }
+            else if (mode == DragRestrictZoneMode.Fixed)
+            {
+                drzX = _dragRestrictZoneX;
+                drzY = _dragRestrictZoneY;
+            }
+            else if (mode == DragRestrictZoneMode.Target)
+            {
+                if (_dragRestrictZoneTarget)
+                {
+                    _dragRestrictZoneTarget.GetRectPrimaryVertex(
+                        out _
+                        , out var leftDown
+                        , out _
+                        , out _
+                        , out var rightUp
+                        );
+                    drzX = new MinMax<float>(leftDown.x, rightUp.x);
+                    drzY = new MinMax<float>(leftDown.y, rightUp.y);
+                }
+                else
+                {
+                    r = false;
+                    //Debug.LogError("dragRestrictZoneTarget 为空，缺少\"拖拽限制限制区域目标\"。");
+                }
+            }
+            return r;
+        }
 
         /// <summary>
-        /// 限制拖拽的活动区域
+        /// 限制拖拽活动区域的方式
         /// </summary>
         public enum DragRestrictZoneMode
         {

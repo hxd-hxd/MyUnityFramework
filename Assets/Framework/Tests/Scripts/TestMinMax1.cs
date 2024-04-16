@@ -15,31 +15,38 @@ namespace Framework.Test
     public class TestMinMax1 : MonoBehaviour
     {
         [MinMaxRange(0, 1)]
-        public Test1 _test1;
+        public MinMax<Vector4> _mmVector4;
         [MinMaxRange(0, 1)]
-        public Test _test;
+        public List<MinMax<Vector4>> _mmListVector4;
         [MinMaxRange(0, 1)]
-        public MinMax<Test> _mmTest;
-        [MinMaxRange(0, 1)]
-        public MinMax<string> _mmString;
+        public MinMax<Vector4>[] _mmArrayVector4;
 
-        [Header("List MinMax<T>")]
-        [MinMaxRange(0, 1)]
-        public List<MinMax<float>> _mmListFloat;
-        [MinMaxRange(0, 1)]
-        public List<MinMax<string>> _mmListString;
-        [MinMaxRange(0, 1)]
-        public List<MinMax<Test>> _mmListTest;
+        //[MinMaxRange(0, 1)]
+        //public Test1 _test1;
+        //[MinMaxRange(0, 1)]
+        //public Test _test;
+        //[MinMaxRange(0, 1)]
+        //public MinMax<Test> _mmTest;
+        //[MinMaxRange(0, 1)]
+        //public MinMax<string> _mmString;
 
-        [Header("List")]
-        [MinMaxRange(0, 1)]
-        public List<float> _listFloat;
-        [MinMaxRange(0, 1)]
-        public List<string> _listString;
-        [MinMaxRange(0, 1)]
-        public List<Test> _listTest;
-        [MinMaxRange(0, 1)]
-        public List<Test1> _listTest1;
+        //[Header("List MinMax<T>")]
+        //[MinMaxRange(0, 1)]
+        //public List<MinMax<float>> _mmListFloat;
+        //[MinMaxRange(0, 1)]
+        //public List<MinMax<string>> _mmListString;
+        //[MinMaxRange(0, 1)]
+        //public List<MinMax<Test>> _mmListTest;
+
+        //[Header("List")]
+        //[MinMaxRange(0, 1)]
+        //public List<float> _listFloat;
+        //[MinMaxRange(0, 1)]
+        //public List<string> _listString;
+        //[MinMaxRange(0, 1)]
+        //public List<Test> _listTest;
+        //[MinMaxRange(0, 1)]
+        //public List<Test1> _listTest1;
 
         // Start is called before the first frame update
         void Start()

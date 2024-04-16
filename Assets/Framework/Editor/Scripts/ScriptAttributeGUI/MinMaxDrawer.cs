@@ -1,29 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using System.Text.RegularExpressions;
+
 using UnityEditor;
 using UnityEngine;
-using System.Text.RegularExpressions;
-using System;
 
 namespace Framework.Editor
 {
 
     [CustomPropertyDrawer(typeof(MinMax<>))]
-    internal class MinMaxDrawer : LineCountPropertyDrawer
+    public class MinMaxDrawer : LineCountPropertyDrawer
     {
         /// <summary>
         /// 是否 <see cref="MinMax{T}"/>
         /// </summary>
         protected bool isMinMaxT = true;
+        /// <summary>
+        /// <see cref="MinMax{T}"/> 泛型 T 的类型
+        /// </summary>
+        protected SerializedPropertyType minMaxTType;
 
         public override void OnGUI(Rect pos, SerializedProperty property, GUIContent label)
         {
             base.OnGUI(pos, property, label);
             pos.height = singleLineHeight;
             label = EditorGUI.BeginProperty(pos, label, property);
-
-            var min = property.FindPropertyRelative("min");
-            var max = property.FindPropertyRelative("max");
 
             // 非 MinMax<T> 泛型类
             //if (min == null || max == null)
@@ -37,7 +39,11 @@ namespace Framework.Editor
                 return;
             }
 
+            var min = property.FindPropertyRelative("min");
+            var max = property.FindPropertyRelative("max");
+
             isMinMaxT = true;
+            minMaxTType = min.propertyType;
             if (IsUniline(min.propertyType))
             {
                 //绘制标签
@@ -56,6 +62,30 @@ namespace Framework.Editor
             }
 
             EditorGUI.EndProperty();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            // 调用父类更新
+            base.GetPropertyHeight(property, label);
+
+            // 修正属性高度
+            AmendPropertyHeight();
+
+            return totalHeight;
+        }
+        /// <summary>修正属性高度</summary>
+        protected virtual void AmendPropertyHeight()
+        {
+            // 处理 Vector4 内联布局的高度显示问题
+            if (IsUnilineSerializedPropertyType(SerializedPropertyType.Vector4)
+                && minMaxTType == SerializedPropertyType.Vector4)
+            {
+                // 除非 Unity 在后续版本中做了修改，否则这里的数值是固定的
+                if ((int)propertyHeight == 58) propertyHeight = 18;
+                else if ((int)propertyHeight == 138 || (int)propertyHeight == 218) propertyHeight = 100;
+            }
+
         }
 
         /// <summary>
@@ -120,10 +150,12 @@ namespace Framework.Editor
 
             return br;
         }
+        /// <summary>应用特性时的提示信息矩形定义 y 轴位置</summary>
         protected virtual float GetAttributeHintY()
         {
             return propertyHeight;// 始终保持在 gui 最后
         }
+        /// <summary>应用特性时的提示信息矩形定义高度</summary>
         protected virtual float GetAttributeHintH(float msgLine)
         {
             lineCount += msgLine;
@@ -132,12 +164,7 @@ namespace Framework.Editor
             return height;
         }
 
-        /// <summary>
-        /// 如果不满足单行回执条件，则使用默认绘制
-        /// </summary>
-        /// <param name="pos"></param>
-        /// <param name="property"></param>
-        /// <param name="label"></param>
+        /// <summary>默认绘制</summary>
         protected virtual void OnDefault(Rect pos, SerializedProperty property, GUIContent label)
         {
             //EditorGUI.indentLevel++;
@@ -210,20 +237,33 @@ namespace Framework.Editor
             }
             else
             {
+                // 如果不满足单行绘制条件，则使用默认绘制
                 OnDefault(pos, property, displayName);
             }
         }
 
+        /// <summary>是否在一行中显示</summary>
         protected bool IsUniline(SerializedPropertyType type)
+        {
+            //return false;
+            return IsUnilineSerializedPropertyType(type)
+                //|| !isMinMaxT
+                ;
+        }
+        /// <summary>指定的 <see cref="SerializedPropertyType"/> 是否在一行中显示</summary>
+        protected bool IsUnilineSerializedPropertyType(SerializedPropertyType type)
         {
             //return false;
             return type == SerializedPropertyType.Float
                 || type == SerializedPropertyType.Integer
                 || type == SerializedPropertyType.Boolean
                 || type == SerializedPropertyType.Enum
+                || type == SerializedPropertyType.Color
+                || type == SerializedPropertyType.Vector2 || type == SerializedPropertyType.Vector2Int
+                || type == SerializedPropertyType.Vector3 || type == SerializedPropertyType.Vector3Int
+                //|| type == SerializedPropertyType.Vector4
                 //|| !isMinMaxT
                 ;
         }
-
     }
 }

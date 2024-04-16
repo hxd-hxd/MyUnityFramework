@@ -14,6 +14,23 @@ namespace Framework.Test
 {
     public class TestMinMax : MonoBehaviour
     {
+        [MinMaxRange(0, 1)]
+        public Color _color = Color.white;
+        [MinMaxRange(0, 1)]
+        public MinMax<Color> _mmColor;
+        [MinMaxRange(0, 1)]
+        public Vector2 _vector2;
+        [MinMaxRange(0, 1)]
+        public MinMax<Vector2> _mmVector2;
+        [MinMaxRange(0, 1)]
+        public Vector3 _vector3;
+        [MinMaxRange(0, 1)]
+        public MinMax<Vector3> _mmVector3;
+        [MinMaxRange(0, 1)]
+        public Vector4 _vector4;
+        [MinMaxRange(0, 1)]
+        public MinMax<Vector4> _mmVector4;
+
         [Header("MinMaxRangeAttribute 应用于 其他类型")]
         [MinMaxRange(0, 1)]
         public float _float;
@@ -25,8 +42,6 @@ namespace Framework.Test
         public Test _test;
         [MinMaxRange(0, 1)]
         public string _string;
-        [MinMaxRange(0, 1)]
-        public Vector3 _vector3;
 
         [Header("MinMaxRangeAttribute 应用于 MinMax<T>")]
         //[TextArea(3, 10)]
@@ -47,7 +62,6 @@ namespace Framework.Test
         [MinMaxRange(0, 1)]
         public MinMax<float> _mmFloat;
         public MinMax<float> _mmFloat1;
-        public Vector2 _vector2;
         [MinMaxRange(0, 1)]
         public MinMax<Test> _mmTest;
         [MinMaxRange(0, 1)]

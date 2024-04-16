@@ -328,6 +328,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbdb8767d4c1ee34c86e67ea7f4ddd60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _mmColor:
+    min: {r: 0, g: 0, b: 0, a: 0}
+    max: {r: 0, g: 0, b: 0, a: 0}
+  _vector2: {x: 0, y: 0}
+  _mmVector2:
+    min: {x: 0, y: 0}
+    max: {x: 0, y: 0}
+  _vector3: {x: 0, y: 0, z: 0}
+  _mmVector3:
+    min: {x: 0, y: 0, z: 0}
+    max: {x: 0, y: 0, z: 0}
+  _vector4: {x: 0, y: 0, z: 0, w: 0}
+  _mmVector4:
+    min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
   _float: 0
   _logType: 0
   _logInfo:
@@ -340,7 +356,6 @@ MonoBehaviour:
     value: 0
     log: 0
   _string: 
-  _vector3: {x: 0, y: 0, z: 0}
   _mmString:
     min: 
     max: 
@@ -368,7 +383,6 @@ MonoBehaviour:
   _mmFloat1:
     min: 0
     max: 3
-  _vector2: {x: 0, y: 0}
   _mmTest:
     min:
       name: 
@@ -435,73 +449,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bb62fe437ef1c44d91e9a2bcaaa8a8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _test1:
-    name: 
-  _test:
-    name: 
-    value: 0
-    log: 0
-  _mmTest:
-    min:
-      name: 
-      value: 0
-      log: 0
-    max:
-      name: 
-      value: 0
-      log: 0
-  _mmString:
-    min: 
-    max: 
-  _mmListFloat:
-  - min: 0.42
-    max: 0.67
-  - min: 0.73
-    max: 0.38
-  - min: 0.22
-    max: 0.84
-  _mmListString:
-  - min: 
-    max: 
-  - min: 
-    max: 
-  _mmListTest:
-  - min:
-      name: 
-      value: 0
-      log: 0
-    max:
-      name: 
-      value: 0
-      log: 0
-  - min:
-      name: 
-      value: 0
-      log: 0
-    max:
-      name: 
-      value: 0
-      log: 0
-  _listFloat:
-  - 0
-  - 0.5
-  - 1
-  _listString:
-  - 
-  - 
-  _listTest:
-  - name: 
-    value: 0
-    log: 0
-  - name: 
-    value: 0
-    log: 0
-  - name: 
-    value: 0
-    log: 0
-  _listTest1:
-  - name: 
-  - name: 
+  _mmVector4:
+    min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
+  _mmListVector4:
+  - min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
+  - min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
+  - min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
+  _mmArrayVector4:
+  - min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
+  - min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
+  - min: {x: 0, y: 0, z: 0, w: 0}
+    max: {x: 0, y: 0, z: 0, w: 0}
 --- !u!4 &1472103528
 Transform:
   m_ObjectHideFlags: 0

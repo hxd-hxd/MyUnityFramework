@@ -186,6 +186,7 @@ namespace Framework
             ResetTransformLocal(t);
         }
 
+
         /// <summary>
         /// 获取宽度，考虑缩放 <see cref="Transform.lossyScale"/> 的影响
         /// </summary>
@@ -259,14 +260,14 @@ namespace Framework
             float hHalf = self.GetHeight() / 2;
 
             // 计算矩形四个顶点位置
-            leftDown = new Vector2(
-               center.x - wHalf, center.y - hHalf);
-            leftUp = new Vector2(
-               center.x - wHalf, center.y + hHalf);
-            rightUp = new Vector2(
-               center.x + wHalf, center.y + hHalf);
-            rightDown = new Vector2(
-               center.x + wHalf, center.y - hHalf);
+            leftDown = new Vector3(
+               center.x - wHalf, center.y - hHalf, center.z);
+            leftUp = new Vector3(
+               center.x - wHalf, center.y + hHalf, center.z);
+            rightUp = new Vector3(
+               center.x + wHalf, center.y + hHalf, center.z);
+            rightDown = new Vector3(
+               center.x + wHalf, center.y - hHalf, center.z);
         }
 
         /// <summary>
