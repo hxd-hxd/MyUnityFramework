@@ -43,6 +43,7 @@ namespace Framework.Test
         //public Rect _Rect_public;
         //public RectInt _RectInt;
 
+        //[SerializeField]
         AnimationCurve _animationCurve;
         public AnimationCurve _animationCurve_public;
 

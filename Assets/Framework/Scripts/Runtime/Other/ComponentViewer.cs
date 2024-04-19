@@ -194,7 +194,7 @@ namespace Framework
                             var ts = new GUIStyle(EditorStyles.foldout);
                             ts.fontStyle = FontStyle.BoldAndItalic;
                             //ts.fontSize = (int)(ts.fontSize * 0.95f);
-                            infos.Value.foldout = EditorGUILayout.Foldout(infos.Value.foldout, infos.Key.FullName, ts);
+                            infos.Value.foldout = EditorGUILayout.Foldout(infos.Value.foldout, infos.Key.FullName, true, ts);
                             if (infos.Value.foldout)
                             {
                                 EditorGUILayout.BeginVertical("box");
