@@ -13,13 +13,12 @@ using UnityEngine.Events;
 
 namespace Framework
 {
-    using System.Security.Policy;
 #if UNITY_EDITOR
     using UnityEditor;
 
     [CustomEditor(typeof(DragUI))]
     [CanEditMultipleObjects]
-    public class DragUIInspector : Editor
+    public partial class DragUIInspector : Editor
     {
         protected static bool _showDragGUI = true;
         protected static bool _showMidpointGUI = true;
@@ -54,8 +53,23 @@ namespace Framework
 
             _dragTragetRectHandles ??= new RectHandles();
             _dragRestrictZoneRectHandles ??= new RectHandles();
+
+            //HandleUtility.placeObjectCustomPasses -= OnPlaceObjectDelegate;
+            //HandleUtility.placeObjectCustomPasses += OnPlaceObjectDelegate;
+            //SceneView
         }
 
+        private void OnDisable()
+        {
+            //HandleUtility.placeObjectCustomPasses -= OnPlaceObjectDelegate;
+        }
+
+        bool OnPlaceObjectDelegate(Vector2 guiPosition, out Vector3 position, out Vector3 normal)
+        {
+            position = guiPosition; normal = guiPosition.normalized;
+            Debug.Log(guiPosition);
+            return true;
+        }
 
         protected virtual void OnSceneGUI()
         {
@@ -234,7 +248,7 @@ namespace Framework
                 Handles.DotHandleCap(0, downCenter, rotation, 1, EventType.Repaint);
                 Handles.DotHandleCap(0, upCenter, rotation, 1, EventType.Repaint);
                 Handles.color = handlesColor;
-
+                //HandleUtility
                 Handles.color = oldColor;
             }
         }
@@ -283,9 +297,12 @@ namespace Framework
 
         //[Space] public List<Vector2> v2s = new List<Vector2>();
 
+        // 事件
         [Space(16)]
         public UnityEvent beginDragEvent;
-        public UnityEvent dragEvent;
+        /// <summary>拖拽中事件</summary>
+        /// <remarks>参数 0：true：拖拽成功</remarks>
+        public UnityEvent<bool> dragEvent;
         public UnityEvent endDragEvent;
 
         public RectTransform target { get { return _target; } set { _target = value; } }
@@ -361,6 +378,7 @@ namespace Framework
         }
         protected virtual void OnDrag(BaseEventData data)
         {
+            bool canDrag = true;
             for (int _ = 0; _ < 1; _++)// 这里的 for 没有其他作用，仅用于跳出执行条件，以保证后续代码执行
             {
                 if (_target)
@@ -382,7 +400,10 @@ namespace Framework
                             }
                         }
                         if (eventSystemHandlers.Length > 1 && hasESHEnabled)
+                        {
+                            canDrag = false;
                             break;
+                        }
                     }
 
                     // 拖拽
@@ -400,7 +421,7 @@ namespace Framework
                 }
             }
 
-            dragEvent?.Invoke();
+            dragEvent?.Invoke(canDrag);
         }
 
         /// <summary>

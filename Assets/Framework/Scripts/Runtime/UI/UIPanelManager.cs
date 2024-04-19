@@ -59,7 +59,12 @@ namespace Framework
             {
                 if (!mainCanvas)
                 {
-                    var mc = Object.FindObjectOfType<MainCanvas>(true);
+                    MainCanvas mc;
+#if UNITY_2020_3_OR_NEWER
+                    mc = Object.FindObjectOfType<MainCanvas>(true);
+#else
+                    mc = Object.FindObjectOfType<MainCanvas>();
+#endif
                     if (mc)
                         mainCanvas = mc.m_mainCanvas;
                 }

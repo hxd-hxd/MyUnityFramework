@@ -31,5 +31,10 @@ namespace Framework
             this.min = min;
             this.max = max;
         }
+
+        public override string ToString()
+        {
+            return $"min:{min}\r\nmax:{max}";
+        }
     }
 }

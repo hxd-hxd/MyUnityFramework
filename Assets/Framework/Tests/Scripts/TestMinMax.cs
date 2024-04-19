@@ -17,7 +17,9 @@ namespace Framework.Test
         [MinMaxRange(0, 1)]
         public Color _color = Color.white;
         [MinMaxRange(0, 1)]
-        public MinMax<Color> _mmColor;
+        public MinMax<Color> _mmColor = new MinMax<Color>(Color.blue, Color.red);
+        [MinMaxRange(0, 1)]
+        public List<MinMax<Color>> _mmListColor;
         [MinMaxRange(0, 1)]
         public Vector2 _vector2;
         [MinMaxRange(0, 1)]
