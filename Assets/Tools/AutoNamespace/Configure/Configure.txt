@@ -17,6 +17,7 @@
         "TestMenu",
         "Framework",
         "Framework.Editor",
+        "Framework.Test",
         "BatchOperationToolsUtility"
     ]
 }

@@ -1,6 +1,6 @@
 // -------------------------
 // 由工具自动创建，请勿手动修改
-// 创建日期：2024/3/19 10:47:30
+// 创建日期：2024/4/10 14:42:55
 // -------------------------
 
 using UnityEngine;
@@ -59,6 +59,19 @@ namespace AutoNamespace
         // 本方法用于控制菜单按钮 Framework.Editor 的启用
         [MenuItem(Constant.Menu.MenuAutoNamespacePath + "/Framework.Editor", true, 1000)]
         private static bool NamespaceMenuEnable_Framework_Editor()
+        {
+            return AutoNamespaceUtility.Enable();
+        }
+        
+
+        [MenuItem(Constant.Menu.MenuAutoNamespacePath + "/Framework.Test", false, 1000)]
+        private static void NamespaceMenu_Framework_Test()
+        {
+            AutoNamespaceUtility.CreateCSharpScriptAsset("Framework.Test");
+        }
+        // 本方法用于控制菜单按钮 Framework.Test 的启用
+        [MenuItem(Constant.Menu.MenuAutoNamespacePath + "/Framework.Test", true, 1000)]
+        private static bool NamespaceMenuEnable_Framework_Test()
         {
             return AutoNamespaceUtility.Enable();
         }
