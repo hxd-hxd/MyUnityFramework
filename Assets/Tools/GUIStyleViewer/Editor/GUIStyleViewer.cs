@@ -67,11 +67,13 @@ namespace GUIStyleViewerEditor
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.SelectableLabel(style.name, style);
                 GUILayout.Space(40);
-                EditorGUILayout.SelectableLabel("", style, GUILayout.Height(40), GUILayout.Width(40));
-                GUILayout.Space(175);
+                //EditorGUILayout.SelectableLabel("", style, GUILayout.Height(40), GUILayout.Width(40));
+                EditorGUILayout.SelectableLabel("", style, GUILayout.Height(40));
+                //GUILayout.Space(175);
+                GUILayout.Space(100);
                 //GUILayout.FlexibleSpace();
                 //GUILayout.Space(style.fixedWidth);
-                if (GUILayout.Button("复制GUIStyle名字"))
+                if (GUILayout.Button("复制GUIStyle名字", GUILayout.MaxWidth(120)))
                 {
                     TextEditor textEditor = new TextEditor();
                     textEditor.text = style.name;
