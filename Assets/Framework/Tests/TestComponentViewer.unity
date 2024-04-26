@@ -167,95 +167,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animationCurve_public:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.2990468
-      value: 0.76760006
-      inSlope: 0.28214553
-      outSlope: 0.28214553
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.77366436
-      value: 0.4765637
-      inSlope: 1.2360046
-      outSlope: 1.2360046
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _gradient:
-    serializedVersion: 2
-    key0: {r: 0.9528302, g: 0.27566153, b: 0.27566153, a: 1}
-    key1: {r: 0.57005936, g: 0.9647059, b: 0.46274513, a: 0.6392157}
-    key2: {r: 0.9528302, g: 0.9390682, b: 0.149816, a: 1}
-    key3: {r: 1, g: 1, b: 1, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 31033
-    ctime2: 50308
-    ctime3: 65535
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 19468
-    atime2: 65150
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 4
-    m_NumAlphaKeys: 3
-  _Transform: {fileID: 0}
-  _GameObject: {fileID: 0}
-  _TextAsset: {fileID: 0}
-  _ScriptableObject: {fileID: 0}
-  _ints: 
-  _intArray: 
-  _UnityEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  _UnityEventInt:
-    m_PersistentCalls:
-      m_Calls: []
-  _UnityEventIntString:
-    m_PersistentCalls:
-      m_Calls: []
-  _info:
+  _ALong:
     name: 
-    num: 0
+    b:
+      name: 
+      c:
+        name: 
+        d:
+          name: 
+          e:
+            name: 
+            a:
+              name: 
+              b:
+                name: 
+                c:
+                  name: 
+                  d:
+                    name: 
+                    e:
+                      name: 
+                      a:
+                        name: 
 --- !u!4 &613539254
 Transform:
   m_ObjectHideFlags: 0
@@ -269,6 +202,71 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1520585282
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1520585284}
+  - component: {fileID: 1520585283}
+  m_Layer: 0
+  m_Name: TestComponentViewer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1520585283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520585282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _ALong:
+    name: 
+    b:
+      name: 
+      c:
+        name: 
+        d:
+          name: 
+          e:
+            name: 
+            a:
+              name: 
+              b:
+                name: 
+                c:
+                  name: 
+                  d:
+                    name: 
+                    e:
+                      name: 
+                      a:
+                        name: 
+--- !u!4 &1520585284
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520585282}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 865.18353, y: 473.8176, z: -120.42126}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1632464395
 GameObject:
