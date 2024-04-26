@@ -69,7 +69,8 @@ namespace Framework.Test
         //public Scene _Scene;
         //public Matrix4x4 _matrix4X4;
         //public LayerMask _LayerMask = new LayerMask() { value = -1 };
-        public RectOffset _RectOffset;
+        //public RectOffset _RectOffset;
+        //public GUIStyle _GUIStyle;
 
         //public UnityEvent _UnityEvent;
         //public UnityEvent<int> _UnityEventInt;
@@ -143,6 +144,8 @@ namespace Framework.Test
         #endregion
 
         #region 属性
+
+        public Scene locationScene => gameObject.scene;
 
         //public Color color { get => _color; }
         //private Color color_Private { get => _color; }
