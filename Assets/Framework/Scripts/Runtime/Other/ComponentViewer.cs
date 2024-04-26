@@ -34,7 +34,7 @@ namespace Framework
         // 此函数在脚本启动时调用
         protected virtual void Awake()
         {
-            Debug.Log($"{nameof(ComponentViewerInspector)}.Awake");
+            //Debug.Log($"{nameof(ComponentViewerInspector)}.Awake");
 
             script = MonoScript.FromMonoBehaviour(my);
 
@@ -990,6 +990,12 @@ namespace Framework
                 {
                     string n = EditorGUILayout.TextField(label, vHash128.ToString());
                     newV = Hash128.Parse(n);
+                }
+                
+                else if (TypeCast(v, out LayerMask vLayerMask, type))
+                {
+                    vLayerMask.value = EditorGUILayout.LayerField(label, vLayerMask.value);
+                    newV = vLayerMask;
                 }
 
                 else if (TypeCast(v, out Vector2 vVector2, type))

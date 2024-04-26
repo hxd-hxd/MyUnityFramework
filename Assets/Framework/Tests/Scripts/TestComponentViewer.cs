@@ -68,6 +68,8 @@ namespace Framework.Test
         //public Hash128 _Hash128;
         //public Scene _Scene;
         //public Matrix4x4 _matrix4X4;
+        //public LayerMask _LayerMask = new LayerMask() { value = -1 };
+        public RectOffset _RectOffset;
 
         //public UnityEvent _UnityEvent;
         //public UnityEvent<int> _UnityEventInt;
@@ -111,8 +113,8 @@ namespace Framework.Test
         //[Header("单链 循环")]
         //public A _A;
         //public B _B;
-        [Header("长链 循环")]
-        public ALong _ALong;
+        //[Header("长链 循环")]
+        //public ALong _ALong;
         //[Header("自循环")]
         //public ANested _ANested;
         //[Header("继承式自循环")]
