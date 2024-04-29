@@ -24,7 +24,7 @@ namespace Framework.Test
         //public float _float;
         //public double _double;
         //public bool _bool;
-        //public string _string;
+        //public string _string = "你好吗？\r\n人类";
         //public char _char;
         //public TestType _testType;
         //public TestTypeFlags _testTypeFlags;
@@ -74,20 +74,24 @@ namespace Framework.Test
 
         //public UnityEvent _UnityEvent;
         //public UnityEvent<int> _UnityEventInt;
-        ////public UnityEvent<int, string> _UnityEventIntString;
+        //public UnityEvent<int, string> _UnityEventIntString;
         //public List<UnityEvent> _UnityEvents;
 
         /// 其他类型
         /// 基础容器 List、一维数组 unity 支持直接序列化
-        //public List<int> _ints;
+        public List<int> _ints;
         //public int[] _intArray;
         /// 以下复杂容器不支持
         //public List<object> _objects;
         //public List<List<int>> _intsList;
         //public List<int[]> _intsArray;
-        //public Queue<int> _intQueue;
+        //public Queue _intQueue;
+        //public Queue<int> _intQueueInt;
+        //public Stack _intStack;
+        //public Stack<int> _intStackInt;
+        //public Array _Array;
 
-        //// 自定义 结构体
+        /// 自定义 结构体
         //public InfoStruct _InfoStruct;
         //public InfoStructNonSerializable _InfoStructNonSerializable;
         //public AStruct _AStruct;
@@ -95,7 +99,7 @@ namespace Framework.Test
         //public List<AStruct> _AStructs;
         //private List<AStruct> _AStructs_private;
 
-        //// 自定义 类
+        /// 自定义 类
         //public Info _info;
         //Info _info_private;
         //public List<Info> _infos;
@@ -113,6 +117,8 @@ namespace Framework.Test
         */
         //[Header("单链 循环")]
         //public A _A;
+        //private A _A_private;// 测试 创建实例
+        //private A_NonSerializable _A_NonSerializable_private;// 测试 创建实例
         //public B _B;
         //[Header("长链 循环")]
         //public ALong _ALong;
@@ -145,7 +151,7 @@ namespace Framework.Test
 
         #region 属性
 
-        public Scene locationScene => gameObject.scene;
+        //public Scene locationScene => gameObject.scene;
 
         //public Color color { get => _color; }
         //private Color color_Private { get => _color; }
@@ -157,6 +163,7 @@ namespace Framework.Test
         //public int intP_setOnly { set => _intP = value; }
         //protected int intP_setOnlyProtected { set => _intP = value; }
         //private int intP_setOnlyPrivate { set => _intP = value; }
+        //// 以下属性的字段由编译器生成
         //public int intP { get; set; } = 10;
         //public int intP_setProtected { get; protected set; }
         //public int intP_setPrivate { get; private set; }
@@ -266,6 +273,11 @@ namespace Framework.Test
         #region 单链循环嵌套
         [Serializable]
         public class A
+        {
+            public string name;
+            public B b;
+        }
+        public class A_NonSerializable // 没有 序列化特性
         {
             public string name;
             public B b;

@@ -13,9 +13,9 @@ namespace Framework
 #if UNITY_EDITOR
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.InteropServices;
     using System.Text;
     using UnityEditor;
+    using UnityEditorInternal;
     using Object = UnityEngine.Object;
 
     [CustomEditor(typeof(ComponentViewer))]
@@ -27,7 +27,9 @@ namespace Framework
         protected GenericsTypeGUI cTargetGUI;
         protected GenericsTypeGUI _numGUI;
 
+        protected static bool cTargetSettingsFoldout = true;
         protected static bool showNonsupportMember = true;
+        protected static bool showInheritRelation = true;
 
         ComponentViewer my => (ComponentViewer)target;
 
@@ -46,6 +48,7 @@ namespace Framework
             //cTargetGUI.showInheritRelation = false;
             cTargetGUI.setValueStartEvent = (_, v, _info) =>
             {
+                Undo.RecordObject(my.target.gameObject, $"修改组件查看器目标 {_info.MemberType} {_info.Name}");
                 Undo.RecordObject(my.target, $"修改组件查看器目标 {_info.MemberType} {_info.Name}");
                 EditorUtility.SetDirty(my.target);
             };
@@ -54,8 +57,8 @@ namespace Framework
             _numGUI.foldout = true;
             _numGUI.setValueStartEvent = (_, v, _info) =>
             {
-                Undo.RecordObject(target, $"修改组件查看器 {_info.MemberType} {_info.Name}");
-                EditorUtility.SetDirty(target);
+                Undo.RecordObject(my, $"修改组件查看器 {_info.MemberType} {_info.Name}");
+                EditorUtility.SetDirty(my);
             };
 
             Init();
@@ -111,7 +114,7 @@ namespace Framework
         // 温馨提示
         protected virtual void OnHelpGUI()
         {
-            EditorGUILayout.HelpBox("将暴露所有 “非公开的” 字段和属性，请谨慎修改！\r\n部分属性及字段修改将不能被 Unity 序列化！且不支持撤回！\r\n有关 Unity 序列化规则可自行查阅资料，比较简单的的判断方式是：能在原组件的 Inspector 中显示的都是可序列化的（本组件除外）。", MessageType.Warning);
+            EditorGUILayout.HelpBox("将暴露所有 “非公开的” 字段和属性，请谨慎修改！\r\n部分属性及字段修改将不能被 Unity 序列化！数据会丢失，且不支持撤回！\r\n有关 Unity 序列化规则可自行查阅资料，比较简单的的判断方式是：能在原组件的 Inspector 中显示的都是可序列化的（本组件除外）。", MessageType.Warning);
         }
 
         // 目标 gui
@@ -155,8 +158,7 @@ namespace Framework
         // 目标组件的成员（字段、属性） gui
         protected virtual void OnCTargetMemberGUI()
         {
-            showNonsupportMember = EditorGUILayout.Toggle("显示不支持类型的成员", showNonsupportMember);
-            cTargetGUI.showNonsupportMember = showNonsupportMember;
+            OnCTargetSettingsGUI();
 
             CheckCTargetChange();
 
@@ -175,6 +177,24 @@ namespace Framework
                 Init();
             }
         }
+        // 设置查看器目标的 gui
+        protected virtual void OnCTargetSettingsGUI()
+        {
+            cTargetSettingsFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(cTargetSettingsFoldout, "设置");
+            if (cTargetSettingsFoldout)
+            {
+                EditorGUI.indentLevel++;
+
+                showNonsupportMember = EditorGUILayout.Toggle("显示不支持类型的成员", showNonsupportMember);
+                cTargetGUI.showNonsupportMember = showNonsupportMember;
+
+                showInheritRelation = EditorGUILayout.Toggle("显示类型成员的继承关系", showInheritRelation);
+                cTargetGUI.showInheritRelation = showInheritRelation;
+
+                EditorGUI.indentLevel--;
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
 
         /// <summary>
         /// 获取类型，如果是可 <c>null</c> 类型且值为 <c>null</c>，则获取非实例类型
@@ -182,22 +202,11 @@ namespace Framework
         /// <typeparam name="TIn"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static Type GetType<TIn>(TIn obj)
-        {
-            // 如果 T 是引用类型，且值是 null，则无法调用 .GetType()，此时要通过 typeof 来获取 Type
-            Type type = typeof(TIn);
-            if (obj is UnityEngine.Object uObj)
-            {
-                type = uObj ? uObj.GetType() : type;
-            }
-            else
-                type = obj?.GetType() ?? type;
-            return type;
-        }
+        public static Type GetType<TIn>(TIn obj) => GenericsTypeGUI.GetType(obj);
 
         public struct TypeGUIArgs
         {
-            public object target;   // 成员所属者
+            public object owner;    // 成员所属者
 
             public MemberInfo info; // 成员的信息
             public string name;
@@ -209,9 +218,9 @@ namespace Framework
             public Type type;   // 成员的类型
             public Func<object, bool> setter;// gui 修改后的新值回调
 
-            public TypeGUIArgs(object target, MemberInfo info, string name, bool readOnly, bool showGUI, object value, Type type, Func<object, bool> setter)
+            public TypeGUIArgs(object owner, MemberInfo info, string name, bool readOnly, bool showGUI, object value, Type type, Func<object, bool> setter)
             {
-                this.target = target;
+                this.owner = owner;
                 this.info = info;
                 this.name = name;
                 this.readOnly = readOnly;
@@ -223,9 +232,9 @@ namespace Framework
                 showLabel = true;
                 label = GUIContent.none;
             }
-            public TypeGUIArgs(object target, MemberInfo info, string name, GUIContent label, bool showLabel, bool readOnly, bool showGUI, object value, Type type, Func<object, bool> setter)
+            public TypeGUIArgs(object owner, MemberInfo info, string name, GUIContent label, bool showLabel, bool readOnly, bool showGUI, object value, Type type, Func<object, bool> setter)
             {
-                this.target = target;
+                this.owner = owner;
                 this.info = info;
                 this.name = name;
                 this.readOnly = readOnly;
@@ -257,9 +266,6 @@ namespace Framework
         {
             public T value;
 
-            // 折页
-            public bool foldout = true;
-
             public Control()
             {
 
@@ -272,6 +278,9 @@ namespace Framework
         }
         public class ControlList<T> : Control<List<T>>
         {
+            // 折页
+            public bool foldout = true;
+
             public ControlList()
             {
                 value = new List<T>(2);
@@ -288,31 +297,37 @@ namespace Framework
         /// </summary>
         public class GenericsTypeGUI
         {
-            protected object _objInstance;// 成员所属的对象实例
-
-            protected object _target;
-            protected MemberInfo _info;// 目标所属的成员
+            protected object _objInstance;  // 成员所属的对象实例
+            protected MemberInfo _info;     // 目标所属的成员，即 _objInstance 的成员
+            protected object _target;       // 为其创建 gui 的目标
 
             protected ControlList<FieldInfo> _fieldInfos = new ControlList<FieldInfo>();
             protected ControlList<PropertyInfo> _propertyInfos = new ControlList<PropertyInfo>();
             protected Dictionary<Type, ControlList<FieldInfo>> _typeFieldInfos = new Dictionary<Type, ControlList<FieldInfo>>(3);
             protected Dictionary<Type, ControlList<PropertyInfo>> _typePropertyInfos = new Dictionary<Type, ControlList<PropertyInfo>>(3);
 
+            protected bool _showFiled = true, _showProperty = true;
             protected bool _showNonsupportMember = true;
             protected bool _showReadonlyProperty = true;
             protected bool _showInheritRelation = true;
             protected bool _foldout = false, _fieldFoldout = true, _propertyFoldout = true;
+            protected bool _showFieldFoldout = true, _showPropertyFoldout = true;
 
             private int _maxDepth = 10;
             protected bool _allowSelfNested = false;// 允许自我嵌套的类型
 
             protected GenericsTypeGUI _parent;
             protected List<GenericsTypeGUI> _childs = new List<GenericsTypeGUI>(1);
+            protected List<ReorderableList> _rLists = new List<ReorderableList>(1);
 
             protected Action<object, object, MemberInfo> _setValueStartEvent;
             protected Action<object, object, MemberInfo> _setValueEndEvent;
             protected Func<GenericsTypeGUI> _createChildGUIEvent;
+            protected Action _fieldStartGUIEvent, _fieldEndGUIEvent;
+            protected Action _propertyStartGUIEvent, _propertyEndGUIEvent;
+            protected Action _memberStartGUIEvent, _memberEndGUIEvent;
 
+            #region 属性
             /// <summary>
             /// 开始为目标字段或属性设置值事件，包括为 <see cref="target"/> 赋值
             /// <para></para>arg1：旧值，arg2：新值，arg3：设置值的目标字段或属性
@@ -336,14 +351,28 @@ namespace Framework
                 set => root._setValueEndEvent = value;
             }
             /// <summary>创建子 gui 对象事件</summary>
-            /// <remarks>此属性始终是 <see cref="root"/> 的</remarks>
+            /// <remarks>
+            /// <para></para>return 新实例
+            /// <para></para>此属性始终是 <see cref="root"/> 的
+            /// </remarks>
             public Func<GenericsTypeGUI> createChildGUIEvent
             {
                 get => root._createChildGUIEvent;
                 set => root._createChildGUIEvent = value;
             }
 
+            /// <summary>显示字段</summary>
+            public bool showFiled { get => _showFiled; set => _showFiled = value; }
+            /// <summary>显示属性</summary>
+            public bool showProperty { get => _showProperty; set => _showProperty = value; }
+
+            /// <summary>折页</summary>
             public bool foldout { get => _foldout; set => _foldout = value; }
+
+            /// <summary>显示 字段 折页，否则直接显示 字段 </summary>
+            public bool showFieldFoldout { get => _showFieldFoldout; set => _showFieldFoldout = value; }
+            /// <summary>显示 属性 折页，否则直接显示 属性 </summary>
+            public bool showPropertyFoldout { get => _showPropertyFoldout; set => _showPropertyFoldout = value; }
 
             /// <summary>显示不支持的成员</summary>
             /// <remarks>此属性始终是 <see cref="root"/> 的</remarks>
@@ -383,7 +412,7 @@ namespace Framework
                 }
             }
             /// <summary>允许自我嵌套的类型
-            /// <para>自嵌：1、类中有自身类型作为成员；2、即两个类有继承关系，且父类中有子类作为其成员</para>
+            /// <para>自嵌：1、类中有自身类型作为成员；2、两个类有继承关系，且父类中有子类作为其成员</para>
             /// <para>此属性始终是 <see cref="root"/> 的</para>
             /// </summary>
             public virtual bool allowSelfNested
@@ -392,25 +421,6 @@ namespace Framework
                 set
                 {
                     root._allowSelfNested = value;
-                }
-            }
-
-            /// <summary>目标成员所属的对象实例</summary>
-            /// <remarks>如果 <see cref="parent"/> 不为空的话，始终表示为 <see cref="parent"/> 的 <see cref="target"/></remarks>
-            public object objInstance
-            {
-                get
-                {
-                    if (parent != null) return parent._target;
-
-                    return _objInstance;
-                }
-                set
-                {
-                    if (parent == null)
-                    {
-                        _objInstance = value;
-                    }
                 }
             }
 
@@ -458,9 +468,7 @@ namespace Framework
                         root._maxDepth = value;
                 }
             }
-            /// <summary>
-            /// 当前对象的深度
-            /// </summary>
+            /// <summary>当前对象的深度</summary>
             public int currentDepth
             {
                 get
@@ -475,9 +483,7 @@ namespace Framework
                     return depth;
                 }
             }
-            /// <summary>
-            /// 总深度
-            /// </summary>
+            /// <summary>总深度</summary>
             public int depth
             {
                 get
@@ -493,10 +499,37 @@ namespace Framework
                 }
             }
 
+            /// <summary>目标成员所属的对象实例</summary>
+            /// <remarks>如果 <see cref="parent"/> 不为空的话，始终表示为 <see cref="parent"/> 的 <see cref="target"/></remarks>
+            public object objInstance
+            {
+                get
+                {
+                    if (parent != null) return parent._target;
+
+                    return _objInstance;
+                }
+                set
+                {
+                    if (parent == null)
+                    {
+                        _objInstance = value;
+                    }
+                }
+            }
+            /// <summary>如果设置了 <see cref="objInstance"/>，则必须为 <see cref="objInstance"/> 的成员</summary>
+            public MemberInfo info
+            {
+                get => _info;
+                set
+                {
+                    _info = value;
+                }
+            }
             /// <summary>
-            /// 要创建 gui 的目标对象
+            /// 要创建 gui 的目标对象，如果设置了 <see cref="info"/>，则必须为其所表示的类型
             /// </summary>
-            public object target
+            public virtual object target
             {
                 get { return _target; }
                 set
@@ -519,14 +552,14 @@ namespace Framework
                     }
                 }
             }
-            /// <summary>
-            /// 目标 <see cref="target"/> 的类型
-            /// </summary>
+            /// <summary>目标 <see cref="target"/> 的类型，可为 null</summary>
             public Type type => _target?.GetType();
+
             public ControlList<FieldInfo> fieldInfos { get => _fieldInfos; }
             public ControlList<PropertyInfo> propertyInfos { get => _propertyInfos; }
             public Dictionary<Type, ControlList<FieldInfo>> typeFieldInfos { get => _typeFieldInfos; }
-            public Dictionary<Type, ControlList<PropertyInfo>> typePropertyInfos { get => _typePropertyInfos; }
+            public Dictionary<Type, ControlList<PropertyInfo>> typePropertyInfos { get => _typePropertyInfos; } 
+            #endregion
 
             public GenericsTypeGUI() { }
             public GenericsTypeGUI(object target)
@@ -549,44 +582,53 @@ namespace Framework
             /// </summary>
             /// <typeparam name="TIn"></typeparam>
             /// <typeparam name="TOut"></typeparam>
-            /// <param name="obj"></param>
-            /// <param name="v"></param>
+            /// <param name="inObj"></param>
+            /// <param name="outObj"></param>
             /// <param name="inherit">true：有继承关系</param>
             /// <returns>是否转换成功</returns>
-            public static bool TypeCast<TIn, TOut>(TIn obj, out TOut v, bool inherit = false)
+            public static bool TypeCast<TIn, TOut>(TIn inObj, out TOut outObj, bool inherit = false)
             {
-                v = default;
-                return TypeCast(obj, out v, GetType(obj), inherit);
+                outObj = default;
+                return TypeCast(inObj, out outObj, GetType(inObj), inherit);
             }
             /// <summary>
             /// 类型转换
             /// </summary>
             /// <typeparam name="TIn">要转换的对象类型</typeparam>
             /// <typeparam name="TOut">转换后的对象类型</typeparam>
-            /// <param name="obj">要转换的值</param>
-            /// <param name="v">转换后的值</param>
+            /// <param name="inObj">要转换的值</param>
+            /// <param name="outObj">转换后的值</param>
             /// <param name="inType">指定输入的类型</param>
             /// <param name="inherit">true：有继承关系</param>
             /// <returns>是否转换成功</returns>
-            public static bool TypeCast<TIn, TOut>(TIn obj, out TOut v, Type inType, bool inherit = false)
+            public static bool TypeCast<TIn, TOut>(TIn inObj, out TOut outObj, Type inType, bool inherit = false)
             {
-                object vObj = obj;
-                v = default;
-                Type outType = GetType(v);
+                object vObj = inObj;
+                outObj = default;
+                Type outType = GetType(outObj);
                 bool isType = inType == outType;
-                if (inherit) isType = isType || inType.IsSubclassOf(outType) || obj is TOut;// 是否有继承关系
+                if (inherit) isType = isType || inType.IsSubclassOf(outType) || inObj is TOut;// 是否有继承关系
                 if (isType && vObj != null)
                 {
-                    v = (TOut)vObj;
+                    outObj = (TOut)vObj;
                 }
                 return isType;
             }
-            /// <summary>
-            /// 获取类型，如果是可 <c>null</c> 类型且值为 <c>null</c>，则获取非实例类型
-            /// </summary>
-            /// <typeparam name="TIn"></typeparam>
-            /// <param name="obj"></param>
-            /// <returns></returns>
+            public static bool TypeCast<TIn, TOut>(TIn inObj, Type outType, Type inType, bool inherit = false)
+            {
+                bool isType = inType == outType;
+                if (inherit) isType = isType || inType.IsSubclassOf(outType) || inObj is TOut;// 是否有继承关系
+                return isType;
+            }
+
+            /// <summary>是否相同或存在直系关系（同类型，或其中一方继承另一方）</summary>
+            public static bool IsLineal(Type t1, Type t2)
+            {
+                if (t1 == null || t2 == null) return false;
+                return t1 == t2 || t1.IsSubclassOf(t2) || t2.IsSubclassOf(t1);
+            }
+
+            /// <summary>获取类型，如果是可 <c>null</c> 类型且值为 <c>null</c>，则获取非实例类型</summary>
             public static Type GetType<TIn>(TIn obj)
             {
                 // 如果 T 是引用类型，且值是 null，则无法调用 .GetType()，此时要通过 typeof 来获取 Type
@@ -599,24 +641,29 @@ namespace Framework
                     type = obj?.GetType() ?? type;
                 return type;
             }
-
-            /// <summary>
-            /// 是否相同或存在直系关系
-            /// </summary>
-            /// <param name="t1"></param>
-            /// <param name="t2"></param>
-            /// <returns></returns>
-            public static bool IsLineal(Type t1, Type t2)
+            public static Type GetType(MemberInfo info)
             {
-                if (t1 == null || t2 == null) return false;
-                return t1 == t2 || t1.IsSubclassOf(t2) || t2.IsSubclassOf(t1);
+                if (info is FieldInfo fieldInfo)
+                {
+                    return fieldInfo.FieldType;
+                }
+                else if (info is PropertyInfo propertyInfo)
+                {
+                    return propertyInfo.PropertyType;
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             public static bool IsReadOnly(PropertyInfo info) => !info.CanWrite && info.CanRead;
             public static bool IsWriteOnly(PropertyInfo info) => info.CanWrite && !info.CanRead;
             // 是否标记为过时
             public static bool IsObsoleteMember(MemberInfo info) => IsHasAttribute<ObsoleteAttribute>(info);
-            public static bool IsHasAttribute<T>(MemberInfo info) where T : Attribute => info.GetCustomAttributes(typeof(T), true).Length > 0;
+            // 是否有指定的特性
+            public static bool IsHasAttribute<T>(MemberInfo info) where T : Attribute => IsHasAttribute(info, typeof(T), true);
+            public static bool IsHasAttribute(MemberInfo info, Type attributeType, bool inherit) => info.GetCustomAttributes(attributeType, inherit).Length > 0;
 
             // 获取成员声明时的权限访问修饰符
             public static string GetMemberDeclareVisit(MemberInfo info)
@@ -678,6 +725,8 @@ namespace Framework
             public virtual void Init()
             {
                 GetMemberInfo();
+
+                CreateSpecialHandling(this);
             }
 
             public virtual void OnGUI(bool bringLabel = true) => OnGUI(IsGenericsType(), bringLabel);
@@ -716,44 +765,53 @@ namespace Framework
             {
                 CheckTargetChange();
 
+                _memberStartGUIEvent?.Invoke();
+
                 // 字段
-                if (typeFieldInfos.Count > 0)
-                    OnMemberGUI(ref _fieldFoldout, "字段", typeFieldInfos
+                if (typeFieldInfos.Count > 0 && _showFiled)
+                    OnMemberGUI(ref _fieldFoldout, _showFieldFoldout, "字段", typeFieldInfos
                     , () =>
                     {
                         if (IsRoot)
-                            OnFieldStartGUI();
+                            OnRootFieldStartGUI();
+                        _fieldStartGUIEvent?.Invoke();
                     }
                     , () =>
                     {
                         if (IsRoot)
-                            OnFieldEndGUI();
+                            OnRootFieldEndGUI();
+                        _fieldEndGUIEvent?.Invoke();
                     });
 
                 // 属性
-                if (typePropertyInfos.Count > 0)
-                    OnMemberGUI(ref _propertyFoldout, "属性", typePropertyInfos
-                        , () =>
-                        {
-                            if (IsRoot)
-                                OnPropertyStartGUI();
-                        }
-                        , () =>
-                        {
-                            if (IsRoot)
-                                OnPropertyEndGUI();
-                        });
+                if (typePropertyInfos.Count > 0 && _showProperty)
+                    OnMemberGUI(ref _propertyFoldout, _showPropertyFoldout, "属性", typePropertyInfos
+                    , () =>
+                    {
+                        if (IsRoot)
+                            OnRootPropertyStartGUI();
+                        _propertyStartGUIEvent?.Invoke();
+                    }
+                    , () =>
+                    {
+                        if (IsRoot)
+                            OnRootPropertyEndGUI();
+                        _propertyEndGUIEvent?.Invoke();
+                    });
+
+                _memberEndGUIEvent?.Invoke();
             }
             // 成员区分字段、属性等阶段
-            protected virtual void OnMemberGUI<T>(ref bool foldout, string label, Dictionary<Type, ControlList<T>> typeInfos, Action start = null, Action end = null) where T : MemberInfo
+            protected virtual void OnMemberGUI<T>(ref bool foldout, bool showFoldout, string label, Dictionary<Type, ControlList<T>> typeInfos, Action start = null, Action end = null) where T : MemberInfo
             {
+                if(showFoldout)
                 {
                     var ts = new GUIStyle(EditorStyles.foldout);
                     ts.fontStyle = FontStyle.Bold;
                     foldout = EditorGUILayout.Foldout(foldout, label, true, ts);
                 }
                 //foldout = EditorGUILayout.BeginFoldoutHeaderGroup(foldout, label);
-                if (foldout)
+                if (foldout || !showFoldout)
                 {
                     if (typeInfos.Count > 0)
                     {
@@ -846,27 +904,24 @@ namespace Framework
                 return targetChange;
             }
 
-            // 只能在 root 里显示
+            // 只能在 root 里显示，和对应的事件 _fieldStartGUIEvent 等不冲突，且在事件之前
             // 在 字段 gui 开始时的 gui
-            protected virtual void OnFieldStartGUI()
+            protected virtual void OnRootFieldStartGUI()
             {
-
             }
             // 在 字段 gui 结束时的 gui
-            protected virtual void OnFieldEndGUI()
+            protected virtual void OnRootFieldEndGUI()
             {
-
             }
             // 在 属性 gui 开始时的 gui
-            protected virtual void OnPropertyStartGUI()
+            protected virtual void OnRootPropertyStartGUI()
             {
                 showReadonlyProperty = EditorGUILayout.ToggleLeft("显示只读属性（即只有 Get 访问器）", showReadonlyProperty);
                 //EditorGUILayout.Space(4);
             }
             // 在 属性 gui 结束时的 gui
-            protected virtual void OnPropertyEndGUI()
+            protected virtual void OnRootPropertyEndGUI()
             {
-
             }
 
             // 成员
@@ -874,15 +929,15 @@ namespace Framework
             {
                 TypeGUI(info, target, true);
             }
-            protected virtual void TypeGUI<TInfo>(TInfo info, object target, bool showLabel) where TInfo : MemberInfo
+            protected virtual void TypeGUI<TInfo>(TInfo info, object owner, bool showLabel) where TInfo : MemberInfo
             {
                 if (info is FieldInfo fieldInfo)
                 {
-                    TypeGUI(fieldInfo, target, showLabel);
+                    TypeGUI(fieldInfo, owner, showLabel);
                 }
                 else if (info is PropertyInfo propertyInfo)
                 {
-                    TypeGUI(propertyInfo, target, showLabel);
+                    TypeGUI(propertyInfo, owner, showLabel);
                 }
                 else
                 {
@@ -891,19 +946,19 @@ namespace Framework
             }
             // 字段
             protected virtual void TypeGUI(FieldInfo info) => TypeGUI(info, target, true);
-            protected virtual void TypeGUI(FieldInfo info, object target, bool showLabel)
+            protected virtual void TypeGUI(FieldInfo info, object owner, bool showLabel)
             {
                 //Debug.Log($"字段：{info.Name}");
                 if (IsObsoleteMember(info)) return;
-                TypeGUI(GetTypeGUIArgs(info, target, showLabel));
+                TypeGUI(GetTypeGUIArgs(info, owner, showLabel));
             }
             // 属性
             protected virtual void TypeGUI(PropertyInfo info) => TypeGUI(info, target, true);
-            protected virtual void TypeGUI(PropertyInfo info, object target, bool showLabel)
+            protected virtual void TypeGUI(PropertyInfo info, object owner, bool showLabel)
             {
                 //Debug.Log($"属性：{info.Name}");
                 if (IsObsoleteMember(info)) return;
-                TypeGUI(GetTypeGUIArgs(info, target, showLabel));
+                TypeGUI(GetTypeGUIArgs(info, owner, showLabel));
             }
             // 类型信息
             protected virtual void TypeGUI(TypeGUIArgs args)
@@ -978,7 +1033,17 @@ namespace Framework
                 }
                 else if (TypeCast(v, out string vString, type))
                 {
-                    newV = EditorGUILayout.TextField(label, vString);
+                    label.tooltip = $"{label.tooltip}\r\n字符串长度：{vString?.Length ?? 0}";
+
+                    // 是否属于 Component 的标签
+                    if (IsLineal(this.type, typeof(Component)) && info != null && info.Name == "tag" && info.DeclaringType == typeof(Component))
+                    {
+                        newV = EditorGUILayout.TagField(label, vString);
+                    }
+                    else
+                    {
+                        newV = TextField(label, vString);
+                    }
                 }
                 else if (TypeCast(v, out char vChar, type))// 不直接支持
                 {
@@ -988,10 +1053,11 @@ namespace Framework
 
                 else if (TypeCast(v, out Hash128 vHash128, type))// 不直接支持
                 {
-                    string n = EditorGUILayout.TextField(label, vHash128.ToString());
+                    //string n = EditorGUILayout.TextField(label, vHash128.ToString());
+                    string n = TextField(label, vHash128.ToString());
                     newV = Hash128.Parse(n);
                 }
-                
+
                 else if (TypeCast(v, out LayerMask vLayerMask, type))
                 {
                     vLayerMask.value = EditorGUILayout.LayerField(label, vLayerMask.value);
@@ -1049,10 +1115,20 @@ namespace Framework
                     newV = EditorGUILayout.BoundsIntField(label, vBoundsInt);
                 }
 
+                //// Matrix4x4 类型改为创建时 CreateGenericsTypeGUI 内联处理
+                //else if (TypeCast(v, out Matrix4x4 vMatrix4x4, type))// 不直接支持
+                //{
+                //    var gui = ExpectChild(v, type);
+                //    gui.target = v;
+                //    gui.showProperty = false;
+                //    newV = GenericsField(label, gui, type);
+                //}
+
                 else if (TypeCast(v, out Enum vEnum, type, true))// 允许继承转换
                 {
                     // 有枚举标志位特性
-                    if (type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
+                    //if (type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
+                    if (IsHasAttribute<FlagsAttribute>(type)/* type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0*/)
                     {
                         newV = EditorGUILayout.EnumFlagsField(label, vEnum);
                     }
@@ -1073,6 +1149,21 @@ namespace Framework
                 {
                     newV = EditorGUILayout.ObjectField(label, vUnityObject, type, true);
                 }
+
+                // 处理容器类
+                //else if (TypeCast(v, out IList vIList, type, true))
+                //{
+                //    Type ilistType = typeof(IList);
+                //    //ReorderableList
+                //    OnShowNonsupportMemberGUI(label);
+
+                //}
+                //else if (TypeCastList(type))
+                //{
+
+                //}
+
+                // 其他自定义
                 else
                 {
                     isGenericsType = true;
@@ -1083,20 +1174,94 @@ namespace Framework
                 if (isGenericsType)
                 {
                     // untiy 不直接提供 gui 的类型
-                    //ReorderableList
                     newV = GenericsField(label, v, type, info);
 
-                    //OnshowNonsupportMemberGUI(label);
+                    //OnShowNonsupportMemberGUI(label);
 
                 }
 
-                //return EditorGUI.EndChangeCheck();
                 return isChange;
             }
 
+            [Obsolete]
+            protected bool TypeCastList(Type type)
+            {
+                bool r = false;
+                var label = GUIContent.none;
+
+                Type typeIList = typeof(IList);
+                Type typeIList1 = typeof(IList<>);
+                //ReorderableList
+
+                var genericTypeDefinition = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+                var genericTypeDefinitionInterfaces = genericTypeDefinition?.GetInterfaces();
+                var interfaces = type.GetInterfaces();
+
+                //if (type == typeIList1)
+                //{
+                //    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList<>1");
+                //}
+                //else if (typeIList1.IsAssignableFrom(type))
+                //{
+                //    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList<>2");
+                //}
+                //else if (interfaces.Contains(typeIList1))
+                //{
+                //    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList<>3");
+                //}
+                //else if (genericTypeDefinitionInterfaces?.Contains(typeIList1) ?? false)
+                //{
+                //    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList<>4");
+                //}
+                //else if (type.GetInterface("IList^1") != null)
+                //{
+                //    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList<>5");
+                //}
+
+                //else 
+                if (type == typeIList || typeIList.IsAssignableFrom(type))
+                {
+                    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList 1");
+                }
+                //else if (genericTypeDefinition != null && typeIList.IsAssignableFrom(genericTypeDefinition))
+                //{
+                //    OnShowNonsupportMemberGUI(label, $"不支持该类型 IList 3");
+                //}
+
+                return r;
+            }
+
+            // 处理列表
+            protected virtual object ListField(GUIContent label, IList v, Type type, MemberInfo info)
+            {
+                ReorderableList rList = new ReorderableList(v, type.GetElementType());
+                return null;
+            }
+
+            // 经过处理的文本字段 gui
+            protected virtual string TextField(GUIContent label, string text)
+            {
+                if (text != null
+                    && (text.Length > 50
+                    || text.Contains("\r\n") || text.Contains("\n")
+                    || text.Contains("\t")
+                    //|| vString.Split('\t').Length > 10
+                    ))
+                {
+                    EditorGUILayout.LabelField(label);
+                    //newV = EditorGUILayout.TextArea(vString);
+                    text = GUILayout.TextArea(text);
+                }
+                else
+                {
+                    text = EditorGUILayout.TextField(label, text);
+                }
+                return text;
+            }
+
             // 显示不支持类型的 gui
-            protected void OnshowNonsupportMemberGUI(GUIContent label) => OnshowNonsupportMemberGUI(label, $"不支持该类型");
-            protected void OnshowNonsupportMemberGUI(GUIContent label, string text)
+            protected void OnShowNonsupportMemberGUI(GUIContent label) => OnShowNonsupportMemberGUI(label, $"不支持该类型");
+            protected void OnShowNonsupportMemberGUI(GUIContent label, string text)
             {
                 if (showNonsupportMember)
                 {
@@ -1111,12 +1276,19 @@ namespace Framework
                 }
             }
 
+            /// <summary>可为该自定义类型创建实例</summary>
+            protected virtual bool CanCreateInstanceGenerics(Type type)
+            {
+                return type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null) != null// 有不带参数的构造函数
+                    ;
+            }
+
             /// <summary><see cref="target"/> 是否自定义类型</summary>
-            public bool IsGenericsType() => IsGenericsType(target);
+            public bool IsGenericsType() => IsGenericsType(target, type ?? GetType(info));
             /// <summary>是否自定义类型</summary>
             public bool IsGenericsType(object v) => IsGenericsType(v, GetType(v));
             /// <summary>是否自定义类型</summary>
-            /// <remarks>如果重写了 <see cref="TypeGUI(GUIContent, object, Type, out object, MemberInfo)"/>，扩展了类型 gui，必须也重写 <see cref="IsGenericsType(object, Type)"/> ，添加对应类型</remarks>
+            /// <remarks>如果重写了 <see cref="TypeGUI(GUIContent, object, Type, out object, MemberInfo)"/>，扩展了类型 gui，必须也重写本方法，添加对应类型</remarks>
             public virtual bool IsGenericsType(object v, Type type)
             {
                 bool r = TypeCast(v, out int _, type)
@@ -1130,10 +1302,12 @@ namespace Framework
                     || TypeCast(v, out char _, type)
 
                     || TypeCast(v, out Hash128 _, type)
+                    || TypeCast(v, out LayerMask _, type)
                     || TypeCast(v, out Vector2 _, type)
                     || TypeCast(v, out Vector2Int _, type)
                     || TypeCast(v, out Vector3 _, type)
                     || TypeCast(v, out Vector3Int _, type)
+                    || TypeCast(v, out Vector4 _, type)
                     || TypeCast(v, out Quaternion _, type)
                     || TypeCast(v, out Color _, type)
                     || TypeCast(v, out Color32 _, type)
@@ -1141,7 +1315,6 @@ namespace Framework
                     || TypeCast(v, out RectInt _, type)
                     || TypeCast(v, out Bounds _, type)
                     || TypeCast(v, out BoundsInt _, type)
-                    || TypeCast(v, out RectInt _, type)
 
                     || TypeCast(v, out Enum _, type, true)
                     || TypeCast(v, out AnimationCurve _, type)
@@ -1153,7 +1326,7 @@ namespace Framework
             }
 
             /// <summary>其他自定义类型字段</summary>
-            public virtual object GenericsField(GUIContent label, object v, Type type, MemberInfo info)
+            public virtual object GenericsField1(GUIContent label, object v, Type type, MemberInfo info)
             {
                 GenericsTypeGUI gui = null;
 
@@ -1162,32 +1335,24 @@ namespace Framework
                 bool lineal = IsLineal(type, this.type);// 是否有直接关系
                 bool allowSelfLoop = lineal && allowSelfNested;
                 bool depthStandards = currentDepth < maxDepth;
-                if ((!lineal ||         // 没有直接关系
-                    allowSelfLoop)      // 有直接关系，但允许自循环
+                if ((!lineal            // 没有直接关系
+                    || allowSelfLoop)   // 有直接关系，但允许自循环
                     && depthStandards   // 深度未达上限
                     )
                 {
-                    gui = _childs.Find(v => v._info == info);
-                    if (gui == null)
-                    {
-                        gui = AddChild(v, info);
-                    }
+                    // 查找是否已有成员的 gui 实例，没有则创建
+                    gui = ExpectChild(v, info);
 
                     if (v == null)
                     {
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.PrefixLabel(label);
                         // 如果值是空的，则让其创建一个
-                        if (type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null) != null)// 有不带参数的构造函数
+                        if (CanCreateInstanceGenerics(type))
                         {
                             if (GUILayout.Button("创建实例"))
                             {
-                                gui.target = Activator.CreateInstance(type);
-                                //SyncSelfTargetValue();
-                                if (parent != null && objInstance != null)
-                                {
-                                    SetValue(objInstance, _info, target);
-                                }
+                                CreateTargetInstance(gui, type);
                             }
                         }
                         else
@@ -1205,20 +1370,139 @@ namespace Framework
                 else
                 {
                     if (!depthStandards)
-                        OnshowNonsupportMemberGUI(label, $"已达深度上限 {maxDepth}");
+                        OnShowNonsupportMemberGUI(label, $"已达深度上限 {maxDepth}");
                     else if (!allowSelfLoop)
-                        OnshowNonsupportMemberGUI(label, $"不支持自循环类型");
+                        OnShowNonsupportMemberGUI(label, $"不支持自循环类型");
                     else
-                        OnshowNonsupportMemberGUI(label);
+                        OnShowNonsupportMemberGUI(label);
                 }
 
                 return gui?.target;
             }
-            /// <summary>创建 <see cref="GenericsTypeGUI"/></summary>
+            /// <summary>其他自定义类型字段</summary>
+            public virtual object GenericsField(GUIContent label, object v, Type type, MemberInfo info)
+            {
+                GenericsTypeGUI gui = null;
+
+                // 处理循环依赖
+                // 当 type 继承 this.type 时必定循环
+                bool lineal = IsLineal(type, this.type);// 是否有直接关系
+                bool allowSelfLoop = lineal && allowSelfNested;
+                bool depthStandards = currentDepth < maxDepth;
+                if ((!lineal            // 没有直接关系
+                    || allowSelfLoop)   // 有直接关系，但允许自循环
+                    && depthStandards   // 深度未达上限
+                    )
+                {
+                    // 查找是否已有成员的 gui 实例，没有则创建
+                    gui = ExpectChild(v, info);
+
+                    if (v == null)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.PrefixLabel(label);
+                        // 如果值是空的，则让其创建一个
+                        if (CanCreateInstanceGenerics(type))
+                        {
+                            if (GUILayout.Button("创建实例"))
+                            {
+                                CreateTargetInstance(gui, type);
+                            }
+                        }
+                        else
+                        {
+                            EditorGUILayout.LabelField("该类型不支持直接创建实例。");
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    else
+                    {
+                        gui.target = v;
+                        gui.OnGUI(true);
+                    }
+                }
+                else
+                {
+                    if (!depthStandards)
+                        OnShowNonsupportMemberGUI(label, $"已达深度上限 {maxDepth}");
+                    else if (!allowSelfLoop)
+                        OnShowNonsupportMemberGUI(label, $"不支持自循环类型");
+                    else
+                        OnShowNonsupportMemberGUI(label);
+                }
+
+                return gui?.target;
+            }
+            /// <summary>其他自定义类型字段</summary>
+            protected virtual object GenericsField(GUIContent label, GenericsTypeGUI gui, Type type)
+            {
+                object v = gui.target;
+
+                // 处理循环依赖
+                // 当 type 继承 this.type 时必定循环
+                bool lineal = IsLineal(type, this.type);// 是否有直接关系
+                bool allowSelfLoop = lineal && allowSelfNested;
+                bool depthStandards = currentDepth < maxDepth;
+                if ((!lineal            // 没有直接关系
+                    || allowSelfLoop)   // 有直接关系，但允许自循环
+                    && depthStandards   // 深度未达上限
+                    )
+                {
+                    if (v == null)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.PrefixLabel(label);
+                        // 如果值是空的，则让其创建一个
+                        if (CanCreateInstanceGenerics(type))
+                        {
+                            if (GUILayout.Button("创建实例"))
+                            {
+                                CreateTargetInstance(gui, type);
+                            }
+                        }
+                        else
+                        {
+                            EditorGUILayout.LabelField("该类型不支持直接创建实例。");
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    else
+                    {
+                        gui.OnGUI(true);
+                    }
+                }
+                else
+                {
+                    if (!depthStandards)
+                        OnShowNonsupportMemberGUI(label, $"已达深度上限 {maxDepth}");
+                    else if (!allowSelfLoop)
+                        OnShowNonsupportMemberGUI(label, $"不支持自循环类型");
+                    else
+                        OnShowNonsupportMemberGUI(label);
+                }
+
+                return gui?.target;
+            }
+
+            /// <summary>期望获取子 <see cref="GenericsTypeGUI"/></summary>
+            protected virtual GenericsTypeGUI ExpectChild(MemberInfo info) => ExpectChild(null, info);
+            /// <summary>期望获取子 <see cref="GenericsTypeGUI"/></summary>
+            protected virtual GenericsTypeGUI ExpectChild(object target, MemberInfo info)
+            {
+                var gui = _childs.Find(v => v._info == info);
+                if (gui == null)
+                {
+                    gui = AddChild(target, info);
+                }
+                return gui;
+            }
+            /// <summary>添加子 <see cref="GenericsTypeGUI"/></summary>
             protected virtual GenericsTypeGUI AddChild(object target, MemberInfo info)
             {
                 var gui = CreateGenericsTypeGUI(target, info);
                 gui.parent = this;
+                gui.foldout = false;
+                gui.showInheritRelation = false;
                 _childs.Add(gui);
                 return gui;
             }
@@ -1230,15 +1514,48 @@ namespace Framework
                 gui.target = target;
                 gui._info = info;
                 gui.Init();
-                gui.foldout = false;
-                gui.showInheritRelation = false;
                 return gui;
+            }
+
+            /// <summary>为 <see cref="target"/> 创建实例</summary>
+            protected virtual GenericsTypeGUI CreateTargetInstance(GenericsTypeGUI gui, Type type)
+            {
+                gui.target = Activator.CreateInstance(type);
+                //SyncSelfTargetValue();
+                if (gui.parent != null && gui.objInstance != null)
+                {
+                    SetValue(gui.objInstance, gui._info, gui.target);
+                }
+                return gui;
+            }
+
+            /// <summary>
+            /// 创建时需要特殊处理
+            /// </summary>
+            /// <param name="gui"></param>
+            public virtual void CreateSpecialHandling(GenericsTypeGUI gui)
+            {
+                if (gui.type == typeof(Matrix4x4) || GetType(gui.info) == typeof(Matrix4x4))
+                {
+                    gui.showProperty = false;
+                    gui.showFieldFoldout = false;
+                    gui._memberEndGUIEvent -= MemberEndGUITypeEvent_Inline_NoShowProperty;
+                    gui._memberEndGUIEvent += MemberEndGUITypeEvent_Inline_NoShowProperty;
+                }
+            }
+            // 内联
+            protected void MemberEndGUITypeEvent_Inline_NoShowProperty()
+            {
+                //EditorGUILayout.LabelField("该类型不支持显示属性");
+                EditorGUILayout.HelpBox("该类型不支持显示属性", MessageType.Info);
             }
 
             // 获取标签
             protected virtual GUIContent GetLabel(TypeGUIArgs args, bool showDepth = false)
             {
-                return GetLabel(args.name, args.type, args.info, showDepth);
+                var label = GetLabel(args.name, args.type, args.info, showDepth);
+                //label.tooltip = $"{label.tooltip}\r\n{}";
+                return label;
             }
             protected virtual GUIContent GetLabel(string name, Type type, MemberInfo info, bool showDepth = false)
             {
@@ -1266,7 +1583,7 @@ namespace Framework
             protected virtual void SyncSelfTargetValue()
             {
                 var t = this;
-                while (t != null && t.parent != null && t.objInstance != null && t.type.IsValueType)
+                while (t != null && t.parent != null && t.objInstance != null && (t.type.IsValueType /*|| t.type == typeof(string)*/))
                 {
                     t.SetValue(t.objInstance, t._info, t.target);
                     t = t.parent;
@@ -1308,15 +1625,15 @@ namespace Framework
                 }
             }
 
-            // 获取 TypeGUIArgs 实例，info 为 target 的成员
+            // 获取 TypeGUIArgs 实例，info 为 owner 的成员
             public TypeGUIArgs GetTypeGUIArgs(FieldInfo info) => GetTypeGUIArgs(info, target);
             public TypeGUIArgs GetTypeGUIArgs(PropertyInfo info) => GetTypeGUIArgs(info, target);
-            public TypeGUIArgs GetTypeGUIArgs(FieldInfo info, object target, bool showLabel = true)
+            public TypeGUIArgs GetTypeGUIArgs(FieldInfo info, object owner, bool showLabel = true)
             {
-                object value = target != null ? info.GetValue(target) : null;
+                object value = owner != null ? info.GetValue(owner) : null;
                 Type type = info.FieldType;
                 var r = new TypeGUIArgs(
-                    target
+                    owner
                     , info
                     , info.Name
                     , false
@@ -1326,7 +1643,7 @@ namespace Framework
                     , (newValue) =>
                     {
                         setValueStartEvent?.Invoke(value, newValue, info);
-                        info.SetValue(target, newValue);
+                        info.SetValue(owner, newValue);
                         setValueStartEvent?.Invoke(value, newValue, info);
                         return true;
                     }
@@ -1335,13 +1652,13 @@ namespace Framework
                 r.showLabel = showLabel;
                 return r;
             }
-            public TypeGUIArgs GetTypeGUIArgs(PropertyInfo info, object target, bool showLabel = true)
+            public TypeGUIArgs GetTypeGUIArgs(PropertyInfo info, object owner, bool showLabel = true)
             {
                 bool readOnly = IsReadOnly(info);
-                object value = !IsWriteOnly(info) && target != null ? info.GetValue(target) : null;
+                object value = !IsWriteOnly(info) && owner != null ? info.GetValue(owner) : null;
                 Type type = info.PropertyType;
                 var r = new TypeGUIArgs(
-                    target
+                    owner
                     , info
                     , info.Name
                     , readOnly
@@ -1353,7 +1670,7 @@ namespace Framework
                         if (info.CanWrite)
                         {
                             setValueStartEvent?.Invoke(value, newValue, info);
-                            info.SetValue(target, newValue);
+                            info.SetValue(owner, newValue);
                             setValueStartEvent?.Invoke(value, newValue, info);
                             return true;
                         }
@@ -1365,6 +1682,9 @@ namespace Framework
                 return r;
             }
 
+            /// <summary>
+            /// 获取 <see cref="target"/> 目标的字段、属性成员
+            /// </summary>
             protected virtual void GetMemberInfo()
             {
                 _fieldInfos.value.Clear();
@@ -1406,8 +1726,9 @@ namespace Framework
 
             public virtual void Clear()
             {
-                target = null;
+                _objInstance = null;
                 _info = null;
+                target = null;
                 _fieldInfos.value.Clear();
                 _propertyInfos.value.Clear();
                 _typeFieldInfos.Clear();
@@ -1416,9 +1737,16 @@ namespace Framework
                 parent = null;
                 _childs.Clear();
 
-                setValueStartEvent = null;
-                setValueEndEvent = null;
+                _setValueStartEvent = null;
+                _setValueEndEvent = null;
                 _createChildGUIEvent = null;
+
+                _fieldStartGUIEvent = null;
+                _fieldEndGUIEvent = null;
+                _propertyStartGUIEvent = null;
+                _propertyEndGUIEvent = null;
+                _memberStartGUIEvent = null;
+                _memberEndGUIEvent = null;
             }
         }
     }
