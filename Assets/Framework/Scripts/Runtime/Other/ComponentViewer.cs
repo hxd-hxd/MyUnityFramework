@@ -162,7 +162,14 @@ namespace Framework
 
             CheckCTargetChange();
 
-            cTargetGUI.OnGUI(true, false);
+            if (my.target == null)
+            {
+                EditorGUILayout.HelpBox("设置 Target 以操作字段、属性！", MessageType.Info);
+            }
+            else
+            {
+                cTargetGUI.OnGUI(true, false);
+            }
         }
         // 检查目标变化，有变化则自动更新目标成员信息
         protected virtual void CheckCTargetChange()
