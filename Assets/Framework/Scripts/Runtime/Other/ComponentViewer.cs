@@ -295,7 +295,7 @@ namespace Framework
         /// <summary>
         /// 自定义类型 gui
         /// </summary>
-        public class GenericsTypeGUI
+        public partial class GenericsTypeGUI
         {
             /*
                 重写此类比较麻烦，需要同时提供 自动布局版 和 非自动布局版，如非必要不建议重写
@@ -1803,6 +1803,7 @@ namespace Framework
                     // 使两个 gui 之间有间隙
                     //rect.height = EditorGUIUtility.singleLineHeight;
                     rect.height -= 2;
+
                     Type etype = rlist.list[index]?.GetType() ?? elementType;// 获取实际类型，否则使用指定元素类型
                     //Type etype = gui.referenceType.GetElementType();
                     eStart = rect;
