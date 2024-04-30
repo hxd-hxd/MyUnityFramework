@@ -78,8 +78,9 @@ namespace Framework.Test
         //public List<UnityEvent> _UnityEvents;
 
         /// 其他类型
+        //public object _object;
         /// 基础容器 List、一维数组 unity 支持直接序列化
-        public List<int> _ints;
+        //public List<int> _ints;
         //public int[] _intArray;
         /// 以下复杂容器不支持
         //public List<object> _objects;
