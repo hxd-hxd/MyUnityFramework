@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c93f964fff93a14599e9f230064b8f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _target: {fileID: 613539253}
+  _target: {fileID: 1520585285}
   _num: 0
 --- !u!114 &613539253
 MonoBehaviour:
@@ -167,6 +167,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _info:
+    name: 
+    num: 92
+  _infos:
+  - name: 33
+    num: 0
+  - name: 54151
+    num: 0
+  - name: 6
+    num: 0
+  - name: 
+    num: 0
 --- !u!4 &613539254
 Transform:
   m_ObjectHideFlags: 0
@@ -191,6 +203,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1520585284}
   - component: {fileID: 1520585283}
+  - component: {fileID: 1520585285}
   m_Layer: 0
   m_Name: TestComponentViewer
   m_TagString: Untagged
@@ -210,6 +223,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _info:
+    name: 
+    num: 0
+  _infos: []
 --- !u!4 &1520585284
 Transform:
   m_ObjectHideFlags: 0
@@ -224,6 +241,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1520585285
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520585282}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1632464395
 GameObject:
   m_ObjectHideFlags: 0

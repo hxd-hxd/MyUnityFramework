@@ -543,7 +543,7 @@ namespace Framework
                 }
             }
             /// <summary>
-            /// 要创建 gui 的目标对象，如果设置了 <see cref="info"/>，则必须为其所表示的类型
+            /// 要创建 gui 的目标对象，如果设置了 <see cref="info"/>，则必须为其所表示的可赋值类型
             /// </summary>
             public virtual object target
             {
@@ -573,6 +573,11 @@ namespace Framework
             ///// <summary>当 <see cref="info"/> 为 null 时，且 <see cref="target"/> 作为 <see cref="Array"/>、 <see cref="List{T}"/> 等实现 <see cref="IList"/> 的容器时，可指定其元素类型</summary>
             /// <summary>当 <see cref="info"/> 和 <see cref="target"/> 为 <paramref name="null"/> 时，将以此作为参考类型</summary>
             public Type referenceType { get; set; }
+
+            /// <summary>是否列表容器</summary>
+            public bool isIList => TypeCast(typeof(IList), type ?? referenceType, true);
+            /// <summary>是否是元素</summary>
+            public bool isElement => parent?.isIList ?? false;
 
             public ControlList<FieldInfo> fieldInfos { get => _fieldInfos; }
             public ControlList<PropertyInfo> propertyInfos { get => _propertyInfos; }
@@ -631,20 +636,33 @@ namespace Framework
                 outObj = default;
                 Type outType = GetType(outObj);
                 bool isType = inType == outType;
+
                 bool inIsOutSubclass = (inType?.IsSubclassOf(outType) ?? false);
                 bool inIsOutAssignable = outType.IsInterface ? (outType?.IsAssignableFrom(inType) ?? false) : false;
                 bool inIsOut = inObj is TOut;
-                if (inherit) isType = isType || inIsOutSubclass || inIsOutAssignable || inObj is TOut;// 是否有继承关系
+                if (inherit) isType = isType || inIsOutSubclass || inIsOutAssignable || inIsOut;// 是否有继承关系
+
                 if (isType && vObj != null)
                 {
                     outObj = (TOut)vObj;
                 }
                 return isType;
             }
-            public static bool TypeCast<TIn, TOut>(TIn inObj, Type outType, Type inType, bool inherit = false)
+            /// <summary>
+            /// 类型转换
+            /// </summary>
+            /// <param name="outType">转换后的类型</param>
+            /// <param name="inType">指定输入的类型</param>
+            /// <param name="inherit">true：有继承关系</param>
+            /// <returns>是否转换成功</returns>
+            public static bool TypeCast(Type outType, Type inType, bool inherit = false)
             {
                 bool isType = inType == outType;
-                if (inherit) isType = isType || inType.IsSubclassOf(outType) || inObj is TOut;// 是否有继承关系
+
+                bool inIsOutSubclass = (inType?.IsSubclassOf(outType) ?? false);
+                bool inIsOutAssignable = outType.IsInterface ? (outType?.IsAssignableFrom(inType) ?? false) : false;
+                if (inherit) isType = isType || inIsOutSubclass || inIsOutAssignable;// 是否有继承关系
+
                 return isType;
             }
 
@@ -758,6 +776,32 @@ namespace Framework
 
             public virtual void OnGUI(bool bringLabel = true) => OnGUI(IsGenericsType(), bringLabel);
             public virtual void OnGUI(ref Rect rect, bool bringLabel = true) => OnGUI(ref rect, IsGenericsType(), bringLabel);
+            public virtual void OnGUI(GUIContent label) => OnGUI(IsGenericsType(), label);
+            public virtual void OnGUI(ref Rect rect, GUIContent label) => OnGUI(ref rect, IsGenericsType(), label);
+            public virtual void OnGUI(bool showMember, GUIContent label)
+            {
+                if (showMember)
+                {
+                    OnTargetLabelMemberGUI(label);
+                }
+                else
+                {
+                    OnGUI(label, target, type, out var newV);
+                    target = newV;
+                }
+            }
+            public virtual void OnGUI(ref Rect rect, bool showMember, GUIContent label)
+            {
+                if (showMember)
+                {
+                    OnTargetLabelMemberGUI(ref rect, label);
+                }
+                else
+                {
+                    OnGUI(ref rect, label, target, type, out var newV);
+                    target = newV;
+                }
+            }
             public virtual void OnGUI(bool showMember, bool bringLabel = true)
             {
                 if (showMember)
@@ -816,18 +860,20 @@ namespace Framework
             }
 
             // 带标签
-            protected virtual void OnTargetLabelMemberGUI(ref Rect rect)
+            protected virtual void OnTargetLabelMemberGUI(ref Rect rect) => OnTargetLabelMemberGUI(ref rect, GetLabel(_info?.Name, type, _info));
+            protected virtual void OnTargetLabelMemberGUI(ref Rect rect, GUIContent label)
             {
-                _foldout = EditorGUI.Foldout(rect, _foldout, GetLabel(_info?.Name, type, _info), true);
+                _foldout = EditorGUI.Foldout(rect, _foldout, label, true);
                 rect.y += EditorGUIUtility.singleLineHeight;
                 if (_foldout)
                 {
                     OnMemberGUI(ref rect);
                 }
             }
-            protected virtual void OnTargetLabelMemberGUI()
+            protected virtual void OnTargetLabelMemberGUI() => OnTargetLabelMemberGUI(GetLabel(_info?.Name, type, _info));
+            protected virtual void OnTargetLabelMemberGUI(GUIContent label)
             {
-                _foldout = EditorGUILayout.Foldout(_foldout, GetLabel(_info?.Name, type, _info), true);
+                _foldout = EditorGUILayout.Foldout(_foldout, label, true);
                 if (_foldout)
                 {
                     EditorGUI.indentLevel += 1;
@@ -1259,172 +1305,17 @@ namespace Framework
                     }
                 }
             }
-            /// <summary>
-            /// 根据对象类型自动提供适合其的 gui
-            /// </summary>
-            /// <returns>gui 是否发生变化</returns>
-            /// <remarks>如果重写了此方法，扩展了类型 gui，必须也重写 <see cref="IsGenericsType(object, Type)"/> ，添加对应类型</remarks>
             protected virtual bool TypeGUI(ref Rect rect, GUIContent label, object v, Type type, out object newV, MemberInfo info = null)
             {
                 newV = default;
-                bool isGenericsType = false;
-                bool isChange = false;
+                bool isGenericsType = false;// readme：是否由 本类 处理，而并非是 unity 提供的 api 直接处理
+                bool isChange = false;      // readme：由 unity 直接处理的才能设置此值
+                Type t = type;
+                type = v?.GetType() ?? type;// 以实例类型为准
 
                 EditorGUI.BeginChangeCheck();
-                if (TypeCast(v, out int vInt, type))
-                {
-                    newV = EditorGUI.IntField(rect, label, vInt);
-                }
-                else if (TypeCast(v, out uint vUint, type))// 不直接支持
-                {
-                    int n = EditorGUI.IntField(rect, label, (int)vUint);
-                    newV = n < 0 ? 0u : (uint)n;
-                    //Debug.Log($"{dispalyName}：{newV}");
-                }
-                else if (TypeCast(v, out long vLong, type))
-                {
-                    newV = EditorGUI.LongField(rect, label, vLong);
-                }
-                else if (TypeCast(v, out ulong vUlong, type))// 不直接支持
-                {
-                    long n = EditorGUI.LongField(rect, label, (long)vUlong);
-                    newV = n < 0 ? 0ul : (ulong)n;
-                }
-                else if (TypeCast(v, out float vFloat, type))
-                {
-                    newV = EditorGUI.FloatField(rect, label, vFloat);
-                }
-                else if (TypeCast(v, out double vDouble, type))
-                {
-                    newV = EditorGUI.DoubleField(rect, label, vDouble);
-                }
-                else if (TypeCast(v, out bool vBool, type))
-                {
-                    newV = EditorGUI.Toggle(rect, label, vBool);
-                }
-                else if (TypeCast(v, out string vString, type))
-                {
-                    label.tooltip = $"{label.tooltip}\r\n字符串长度：{vString?.Length ?? 0}";
 
-                    // 是否属于 Component 的标签
-                    if (IsLineal(this.type, typeof(Component)) && info != null && info.Name == "tag" && info.DeclaringType == typeof(Component))
-                    {
-                        newV = EditorGUI.TagField(rect, label, vString);
-                    }
-                    else
-                    {
-                        newV = TextFieldGUI(ref rect, label, vString);
-                    }
-                }
-                else if (TypeCast(v, out char vChar, type))// 不直接支持
-                {
-                    string n = EditorGUI.TextField(rect, label, new String(vChar, 1));
-                    newV = n == null || n == "" ? default : n[0];
-                }
-
-                else if (TypeCast(v, out Hash128 vHash128, type))// 不直接支持
-                {
-                    string n = TextFieldGUI(ref rect, label, vHash128.ToString());
-                    newV = Hash128.Parse(n);
-                }
-
-                else if (TypeCast(v, out LayerMask vLayerMask, type))
-                {
-                    vLayerMask.value = EditorGUI.LayerField(rect, label, vLayerMask.value);
-                    newV = vLayerMask;
-                }
-
-                else if (TypeCast(v, out Vector2 vVector2, type))
-                {
-                    newV = EditorGUI.Vector2Field(rect, label, vVector2);
-                }
-                else if (TypeCast(v, out Vector2Int vVector2Int, type))
-                {
-                    newV = EditorGUI.Vector2IntField(rect, label, vVector2Int);
-                }
-                else if (TypeCast(v, out Vector3 vVector3, type))
-                {
-                    newV = EditorGUI.Vector3Field(rect, label, vVector3);
-                }
-                else if (TypeCast(v, out Vector3Int vVector3Int, type))
-                {
-                    newV = EditorGUI.Vector3IntField(rect, label, vVector3Int);
-                }
-                else if (TypeCast(v, out Vector4 vVector4, type))
-                {
-                    newV = EditorGUI.Vector4Field(rect, label, vVector4);
-                }
-                else if (TypeCast(v, out Quaternion vQuaternion, type))// 不直接支持
-                {
-                    var v4 = new Vector4(vQuaternion.x, vQuaternion.y, vQuaternion.z, vQuaternion.w);
-                    v4 = EditorGUI.Vector4Field(rect, label, v4);
-                    newV = new Quaternion(v4.x, v4.y, v4.z, v4.w);
-                }
-                else if (TypeCast(v, out Color vColor, type))
-                {
-                    newV = EditorGUI.ColorField(rect, label, vColor);
-                }
-                else if (TypeCast(v, out Color32 vColor32, type))
-                {
-                    newV = (Color32)EditorGUI.ColorField(rect, label, vColor32);
-                }
-                else if (TypeCast(v, out Rect vRect, type))
-                {
-                    newV = EditorGUI.RectField(rect, label, vRect);
-                }
-                else if (TypeCast(v, out RectInt vRectInt, type))
-                {
-                    newV = EditorGUI.RectIntField(rect, label, vRectInt);
-                }
-                else if (TypeCast(v, out Bounds vBounds, type))
-                {
-                    newV = EditorGUI.BoundsField(rect, label, vBounds);
-                }
-                else if (TypeCast(v, out BoundsInt vBoundsInt, type))
-                {
-                    newV = EditorGUI.BoundsIntField(rect, label, vBoundsInt);
-                }
-
-                else if (TypeCast(v, out Enum vEnum, type, true))// 允许继承转换
-                {
-                    // 有枚举标志位特性
-                    //if (type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
-                    if (IsHasAttribute<FlagsAttribute>(type)/* type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0*/)
-                    {
-                        newV = EditorGUI.EnumFlagsField(rect, label, vEnum);
-                    }
-                    else
-                        newV = EditorGUI.EnumPopup(rect, label, vEnum);
-                }
-
-                else if (TypeCast(v, out AnimationCurve vAnimationCurve, type))
-                {
-                    newV = EditorGUI.CurveField(rect, label, vAnimationCurve ?? new AnimationCurve());
-                }
-                else if (TypeCast(v, out Gradient vGradient, type))
-                {
-                    newV = EditorGUI.GradientField(rect, label, vGradient ?? new Gradient());
-                }
-
-                else if (TypeCast(v, out Object vUnityObject, type, true))// 允许继承转换
-                {
-                    newV = EditorGUI.ObjectField(rect, label, vUnityObject, type, true);
-                }
-
-                // 处理容器类
-                //else if (TypeCast(v, out IList vIList, type, true))
-                //{
-                //    //Type ilistType = typeof(IList);
-                //    //OnShowNonsupportMemberGUI(label);
-
-                //    ListFieldGUI(ref rect, label, vIList, type, info);
-                //}
-
-                // 其他自定义
-                else
-                {
-                    isGenericsType = true;
-                }
+                isGenericsType = !UnityTypeGUI(ref rect, label, v, type, out newV, info);
 
                 isChange = EditorGUI.EndChangeCheck();
 
@@ -1433,10 +1324,7 @@ namespace Framework
                     // 处理容器类
                     if (TypeCast(v, out IList vIList, type, true))
                     {
-                        //Type ilistType = typeof(IList);
-                        //OnShowNonsupportMemberGUI(label);
-
-                        ListFieldGUI(ref rect, label, vIList, type, info);
+                        newV = ListFieldGUI(ref rect, label, vIList, type, info);
                     }
                     else
                     {
@@ -1446,18 +1334,93 @@ namespace Framework
                         //OnShowNonsupportMemberGUI(label);
                     }
                 }
+                else
+                {
+                    rect.y += EditorGUIUtility.singleLineHeight;
+                }
 
                 return isChange;
             }
+            /// <summary>
+            /// 根据对象类型自动提供适合其的 gui
+            /// </summary>
+            /// <returns>gui 是否发生变化</returns>
+            /// <remarks>如果重写了此方法，扩展了类型 gui，必须也重写 <see cref="IsGenericsType(object, Type)"/> ，添加对应类型</remarks>
             protected virtual bool TypeGUI(GUIContent label, object v, Type type, out object newV, MemberInfo info = null)
             {
                 newV = default;
-                bool isGenericsType = false;
-                bool isChange = false;
+                bool isGenericsType = false;// readme：是否由 本类 处理，而并非是 unity 提供的 api 直接处理
+                bool isChange = false;      // readme：由 unity 直接处理的才能设置此值
                 Type t = type;
-                type = v?.GetType() ?? type;
+                type = v?.GetType() ?? type;// 以实例类型为准
 
                 EditorGUI.BeginChangeCheck();
+
+                isGenericsType = !UnityTypeGUI(label, v, type, out newV, info);
+
+                isChange = EditorGUI.EndChangeCheck();
+
+                if (isGenericsType)
+                {
+                    // 处理容器类
+                    if (TypeCast(v, out IList vIList, type, true))
+                    {
+                        ListFieldGUI(label, vIList, type, info);
+                    }
+                    else
+                    {
+                        // untiy 不直接提供 gui 的类型
+                        newV = GenericsFieldGUI(label, v, type, info);
+
+                        //OnShowNonsupportMemberGUI(label);
+                    }
+                }
+
+                return isChange;
+            }
+            protected virtual bool TypeGUI(ref Rect rect, GUIContent label, object v, Type type, out object newV, int index)
+            {
+                newV = default;
+                bool isGenericsType = false;// readme：是否由 本类 处理，而并非是 unity 提供的 api 直接处理
+                bool isChange = false;      // readme：由 unity 直接处理的才能设置此值
+                Type t = type;
+                type = v?.GetType() ?? type;// 以实例类型为准
+
+                EditorGUI.BeginChangeCheck();
+
+                isGenericsType = !UnityTypeGUI(ref rect, label, v, type, out newV, null);
+
+                isChange = EditorGUI.EndChangeCheck();
+
+                if (isGenericsType)
+                {
+                    // 处理容器类
+                    if (TypeCast(v, out IList vIList, type, true))
+                    {
+                        newV = ListFieldGUI(ref rect, label, vIList, type, index);
+                    }
+                    else
+                    {
+                        // untiy 不直接提供 gui 的类型
+                        newV = GenericsFieldGUI(ref rect, label, v, type, index);
+
+                        //OnShowNonsupportMemberGUI(label);
+                    }
+                }
+                else
+                {
+                    rect.y += EditorGUIUtility.singleLineHeight;
+                }
+
+                return isChange;
+            }
+
+            // 由 unity 直接提供 gui 支持的
+            protected virtual bool UnityTypeGUI(GUIContent label, object v, Type type, out object newV, MemberInfo info = null)
+            {
+                newV = default;
+                bool r = true;
+
                 if (TypeCast(v, out int vInt, type))
                 {
                     newV = EditorGUILayout.IntField(label, vInt);
@@ -1585,8 +1548,7 @@ namespace Framework
                 else if (TypeCast(v, out Enum vEnum, type, true))// 允许继承转换
                 {
                     // 有枚举标志位特性
-                    //if (type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
-                    if (IsHasAttribute<FlagsAttribute>(type)/* type.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0*/)
+                    if (IsHasAttribute<FlagsAttribute>(type))
                     {
                         newV = EditorGUILayout.EnumFlagsField(label, vEnum);
                     }
@@ -1608,43 +1570,162 @@ namespace Framework
                     newV = EditorGUILayout.ObjectField(label, vUnityObject, type, true);
                 }
 
-                //// 处理容器类
-                //else if (TypeCast(v, out IList vIList, type, true))
-                //{
-                //    //Type ilistType = typeof(IList);
-                //    //OnShowNonsupportMemberGUI(label);
-
-                //    ListFieldGUI(label, vIList, type, info);
-                //}
-
-                // 其他自定义
                 else
                 {
-                    isGenericsType = true;
+                    r = false;
                 }
 
-                isChange = EditorGUI.EndChangeCheck();
-
-                if (isGenericsType)
+                return r;
+            }
+            protected virtual bool UnityTypeGUI(ref Rect rect, GUIContent label, object v, Type type, out object newV, MemberInfo info = null)
+            {
+                newV = default;
+                bool r = true;
+                if (TypeCast(v, out int vInt, type))
                 {
-                    // 处理容器类
-                    if (TypeCast(v, out IList vIList, type, true))
-                    {
-                        //Type ilistType = typeof(IList);
-                        //OnShowNonsupportMemberGUI(label);
+                    newV = EditorGUI.IntField(rect, label, vInt);
+                }
+                else if (TypeCast(v, out uint vUint, type))// 不直接支持
+                {
+                    int n = EditorGUI.IntField(rect, label, (int)vUint);
+                    newV = n < 0 ? 0u : (uint)n;
+                    //Debug.Log($"{dispalyName}：{newV}");
+                }
+                else if (TypeCast(v, out long vLong, type))
+                {
+                    newV = EditorGUI.LongField(rect, label, vLong);
+                }
+                else if (TypeCast(v, out ulong vUlong, type))// 不直接支持
+                {
+                    long n = EditorGUI.LongField(rect, label, (long)vUlong);
+                    newV = n < 0 ? 0ul : (ulong)n;
+                }
+                else if (TypeCast(v, out float vFloat, type))
+                {
+                    newV = EditorGUI.FloatField(rect, label, vFloat);
+                }
+                else if (TypeCast(v, out double vDouble, type))
+                {
+                    newV = EditorGUI.DoubleField(rect, label, vDouble);
+                }
+                else if (TypeCast(v, out bool vBool, type))
+                {
+                    newV = EditorGUI.Toggle(rect, label, vBool);
+                }
+                else if (TypeCast(v, out string vString, type))
+                {
+                    label.tooltip = $"{label.tooltip}\r\n字符串长度：{vString?.Length ?? 0}";
 
-                        ListFieldGUI(label, vIList, type, info);
+                    // 是否属于 Component 的标签
+                    if (IsLineal(this.type, typeof(Component)) && info != null && info.Name == "tag" && info.DeclaringType == typeof(Component))
+                    {
+                        newV = EditorGUI.TagField(rect, label, vString);
                     }
                     else
                     {
-                        // untiy 不直接提供 gui 的类型
-                        newV = GenericsFieldGUI(label, v, type, info);
-
-                        //OnShowNonsupportMemberGUI(label);
+                        newV = TextFieldGUI(ref rect, label, vString);
                     }
                 }
+                else if (TypeCast(v, out char vChar, type))// 不直接支持
+                {
+                    string n = EditorGUI.TextField(rect, label, new String(vChar, 1));
+                    newV = n == null || n == "" ? default : n[0];
+                }
 
-                return isChange;
+                else if (TypeCast(v, out Hash128 vHash128, type))// 不直接支持
+                {
+                    string n = TextFieldGUI(ref rect, label, vHash128.ToString());
+                    newV = Hash128.Parse(n);
+                }
+
+                else if (TypeCast(v, out LayerMask vLayerMask, type))
+                {
+                    vLayerMask.value = EditorGUI.LayerField(rect, label, vLayerMask.value);
+                    newV = vLayerMask;
+                }
+
+                else if (TypeCast(v, out Vector2 vVector2, type))
+                {
+                    newV = EditorGUI.Vector2Field(rect, label, vVector2);
+                }
+                else if (TypeCast(v, out Vector2Int vVector2Int, type))
+                {
+                    newV = EditorGUI.Vector2IntField(rect, label, vVector2Int);
+                }
+                else if (TypeCast(v, out Vector3 vVector3, type))
+                {
+                    newV = EditorGUI.Vector3Field(rect, label, vVector3);
+                }
+                else if (TypeCast(v, out Vector3Int vVector3Int, type))
+                {
+                    newV = EditorGUI.Vector3IntField(rect, label, vVector3Int);
+                }
+                else if (TypeCast(v, out Vector4 vVector4, type))
+                {
+                    newV = EditorGUI.Vector4Field(rect, label, vVector4);
+                }
+                else if (TypeCast(v, out Quaternion vQuaternion, type))// 不直接支持
+                {
+                    var v4 = new Vector4(vQuaternion.x, vQuaternion.y, vQuaternion.z, vQuaternion.w);
+                    v4 = EditorGUI.Vector4Field(rect, label, v4);
+                    newV = new Quaternion(v4.x, v4.y, v4.z, v4.w);
+                }
+                else if (TypeCast(v, out Color vColor, type))
+                {
+                    newV = EditorGUI.ColorField(rect, label, vColor);
+                }
+                else if (TypeCast(v, out Color32 vColor32, type))
+                {
+                    newV = (Color32)EditorGUI.ColorField(rect, label, vColor32);
+                }
+                else if (TypeCast(v, out Rect vRect, type))
+                {
+                    newV = EditorGUI.RectField(rect, label, vRect);
+                }
+                else if (TypeCast(v, out RectInt vRectInt, type))
+                {
+                    newV = EditorGUI.RectIntField(rect, label, vRectInt);
+                }
+                else if (TypeCast(v, out Bounds vBounds, type))
+                {
+                    newV = EditorGUI.BoundsField(rect, label, vBounds);
+                }
+                else if (TypeCast(v, out BoundsInt vBoundsInt, type))
+                {
+                    newV = EditorGUI.BoundsIntField(rect, label, vBoundsInt);
+                }
+
+                else if (TypeCast(v, out Enum vEnum, type, true))// 允许继承转换
+                {
+                    // 有枚举标志位特性
+                    if (IsHasAttribute<FlagsAttribute>(type))
+                    {
+                        newV = EditorGUI.EnumFlagsField(rect, label, vEnum);
+                    }
+                    else
+                        newV = EditorGUI.EnumPopup(rect, label, vEnum);
+                }
+
+                else if (TypeCast(v, out AnimationCurve vAnimationCurve, type))
+                {
+                    newV = EditorGUI.CurveField(rect, label, vAnimationCurve ?? new AnimationCurve());
+                }
+                else if (TypeCast(v, out Gradient vGradient, type))
+                {
+                    newV = EditorGUI.GradientField(rect, label, vGradient ?? new Gradient());
+                }
+
+                else if (TypeCast(v, out Object vUnityObject, type, true))// 允许继承转换
+                {
+                    newV = EditorGUI.ObjectField(rect, label, vUnityObject, type, true);
+                }
+
+                else
+                {
+                    r = false;
+                }
+
+                return r;
             }
 
             [Obsolete]
@@ -1696,6 +1777,30 @@ namespace Framework
             }
 
             // 处理列表 gui
+            protected virtual object ListFieldGUI(ref Rect rect, GUIContent label, IList v, Type type, int index)
+            {
+                // 怎么获取到代表 info 的 ReorderableList 实例
+                // 判断是 target 的成员还是 objInstance 的成员
+                GenericsTypeGUI gui = null;
+
+                //// 判断是否自身
+                //if (gui)
+                //{
+                //    gui = this;
+                //}
+                //else
+                {
+                    gui = ExpectChild(v, index, out bool find);
+                    if (!find)
+                    {
+                        gui._foldout = true;
+                        gui.referenceType = type;
+                    }
+                }
+
+                ListFieldGUI(ref rect, label, gui, v, type);
+                return gui?.target;
+            }
             protected virtual object ListFieldGUI(ref Rect rect, GUIContent label, IList v, Type type, MemberInfo info)
             {
                 // 怎么获取到代表 info 的 ReorderableList 实例
@@ -1709,11 +1814,71 @@ namespace Framework
                 }
                 else
                 {
-                    gui = ExpectChild(v, info);
-                    gui._foldout = true;
-                    gui.referenceType = type;
+                    gui = ExpectChild(v, info, out bool find);
+                    if (!find)
+                    {
+                        gui._foldout = true;
+                        gui.referenceType = type;
+                    }
                 }
 
+                ListFieldGUI(ref rect, label, gui, v, type);
+                return gui?.target;
+            }
+            protected virtual object ListFieldGUI(GUIContent label, IList v, Type type, int index)
+            {
+                // 怎么获取到代表 info 的 ReorderableList 实例
+                // 判断是 target 的成员还是 objInstance 的成员
+                GenericsTypeGUI gui = null;
+
+                // 判断是否自身
+                if (info == null || info == this.info)
+                {
+                    gui = this;
+                }
+                else
+                {
+                    gui = ExpectChild(v, index
+                        , out bool find
+                        );
+                    if (!find)
+                    {
+                        gui._foldout = true;
+                        gui.referenceType = type;
+                    }
+                }
+
+                ListFieldGUI(label, gui, v, type);
+                return gui?.target;
+            }
+            protected virtual object ListFieldGUI(GUIContent label, IList v, Type type, MemberInfo info)
+            {
+                // 怎么获取到代表 info 的 ReorderableList 实例
+                // 判断是 target 的成员还是 objInstance 的成员
+                GenericsTypeGUI gui = null;
+
+                // 判断是否自身
+                if (info == null || info == this.info)
+                {
+                    gui = this;
+                }
+                else
+                {
+                    gui = ExpectChild(v, info
+                        , out bool find
+                        );
+                    if (!find)
+                    {
+                        gui._foldout = true;
+                        gui.referenceType = type;
+                    }
+                }
+
+                ListFieldGUI(label, gui, v, type);
+                return gui?.target;
+            }
+            protected virtual void ListFieldGUI(ref Rect rect, GUIContent label, GenericsTypeGUI gui, IList v, Type type)
+            {
                 if (v == null)
                 {
                     OnCreateTargetInstanceGUI(ref rect, label, gui, type);
@@ -1745,27 +1910,9 @@ namespace Framework
 
                     rect.y += EditorGUIUtility.singleLineHeight;
                 }
-
-                return gui?.target;
             }
-            protected virtual object ListFieldGUI(GUIContent label, IList v, Type type, MemberInfo info)
+            protected virtual void ListFieldGUI(GUIContent label, GenericsTypeGUI gui, IList v, Type type)
             {
-                // 怎么获取到代表 info 的 ReorderableList 实例
-                // 判断是 target 的成员还是 objInstance 的成员
-                GenericsTypeGUI gui = null;
-
-                // 判断是否自身
-                if (info == null || info == this.info)
-                {
-                    gui = this;
-                }
-                else
-                {
-                    gui = ExpectChild(v, info);
-                    gui._foldout = true;
-                    gui.referenceType = type;
-                }
-
                 if (v == null)
                 {
                     OnCreateTargetInstanceGUI(label, gui, type);
@@ -1776,7 +1923,7 @@ namespace Framework
                     if (gui._rlist == null)
                     {
                         Type elementType = type.GetElementType();
-                        // 如果是泛型，则应获取其泛型参数
+                        // 如果是泛型，例如 List<>，则应获取其泛型参数
                         if (elementType == null && type.IsGenericType)
                         {
                             elementType = type.GetGenericArguments()[0];
@@ -1794,8 +1941,6 @@ namespace Framework
                         gui._rlist.DoLayoutList();
                     }
                 }
-
-                return gui?.target;
             }
             // 创建 ReorderableList 实例并做初始绑定
             protected virtual ReorderableList CreateReorderableListGUI(IList v, Type elementType, GUIContent label, GenericsTypeGUI gui)
@@ -1804,18 +1949,27 @@ namespace Framework
 
                 Rect eStart = default;
                 Rect eEnd = default;
+                Dictionary<int, float> elementHeightDic = new Dictionary<int, float>();
 
+                // 绘制 元素
                 rlist.drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
                     // 使两个 gui 之间有间隙
-                    //rect.height = EditorGUIUtility.singleLineHeight;
+                    rect.height = EditorGUIUtility.singleLineHeight;
                     rect.height -= 2;
+                    // 前面的拖拽留空
+                    float fSpace = 10;
+                    rect.width -= fSpace;
+                    rect.x += fSpace;
 
-                    Type etype = rlist.list[index]?.GetType() ?? elementType;// 获取实际类型，否则使用指定元素类型
                     //Type etype = gui.referenceType.GetElementType();
+                    //Type etype = rlist.list[index]?.GetType() ?? elementType;// 获取实际类型，否则使用指定元素类型
+                    Type etype = elementType;// TypeGUI 内部处理，否则使用上面注释的
+
                     eStart = rect;
+
                     var eLabel = new GUIContent($"元素 {index}", $"类型：{etype.FullName}");
-                    bool change = TypeGUI(ref rect, eLabel, rlist.list[index], etype, out var newV);
+                    bool change = gui.TypeGUI(ref rect, eLabel, rlist.list[index], etype, out var newV, index);
                     if (change)
                     {
                         _setValueStartEvent?.Invoke(rlist.list, rlist.list, gui._info);
@@ -1828,8 +1982,21 @@ namespace Framework
                     }
 
                     eEnd = rect;
+                    elementHeightDic[index] = eEnd.y - eStart.y;
                 };
 
+                // 绘制 元素
+                rlist.elementHeightCallback = (index) =>
+                {
+                    float h = EditorGUIUtility.singleLineHeight;
+                    if (elementHeightDic.TryGetValue(index, out h))
+                    {
+
+                    }
+                    return h;
+                };
+
+                // 重新排序 元素
                 rlist.onReorderCallbackWithDetails = (_, oldIndex, newIndex) =>
                 {
                     _setValueStartEvent?.Invoke(rlist.list, rlist.list, gui._info);
@@ -1838,27 +2005,38 @@ namespace Framework
                     rlist.list[oldIndex] = rlist.list[newIndex];
                     rlist.list[newIndex] = temp;
 
+                    if (IsGenericsType(rlist.list[oldIndex], rlist.list[oldIndex]?.GetType() ?? elementType)
+                    || IsGenericsType(rlist.list[newIndex], rlist.list[newIndex]?.GetType() ?? elementType))
+                    {
+                        var tempGUI = gui._childs[oldIndex];
+                        gui._childs[oldIndex] = gui._childs[newIndex];
+                        gui._childs[newIndex] = tempGUI;
+                    }
+
                     _setValueEndEvent?.Invoke(rlist.list, rlist.list, gui._info);
                     //gui.SetValue();
                     SyncSelfTargetValue();
                 };
 
+                // 添加 元素
                 rlist.onAddCallback = (_) =>
                 {
                     _setValueStartEvent?.Invoke(rlist.list, rlist.list, gui._info);
 
                     // 获取实际类型，否则使用指定元素类型
-                    Type etype = elementType;
                     var e = rlist.list.Count > 0 ? rlist.list[rlist.list.Count - 1] : null;
-                    etype = e?.GetType() ?? etype;
+                    Type etype = e?.GetType() ?? elementType;
 
                     var inst = Activator.CreateInstance(etype);
 
                     int index = rlist.index > -1 ? rlist.index : rlist.count - 1;
-
+                    if (IsGenericsType(inst, etype))
+                    {
+                        gui.AddChild(inst, null, index + 1);
+                    }
                     if (gui.type.IsArray)
                     {
-                        // 处理：NotSupportedException: Collection was of a fixed size.
+                        // 因为数组大小是不可变的，处理：NotSupportedException: Collection was of a fixed size.
                         //Activator
                         var tempList = new ArrayList(rlist.list);
                         tempList.Insert(index + 1, inst);
@@ -1875,6 +2053,7 @@ namespace Framework
                     //gui.SetValue();
                     SyncSelfTargetValue();
                 };
+                // 移除 元素
                 rlist.onRemoveCallback = (_) =>
                 {
                     if (rlist.list.Count < 1) return;
@@ -1883,9 +2062,14 @@ namespace Framework
 
                     int index = rlist.index > -1 ? rlist.index : rlist.count - 1;
 
+                    Type etype = rlist.list[index]?.GetType() ?? elementType;
+                    if (IsGenericsType(rlist.list[index], etype))
+                    {
+                        gui.RemoveChild(index);
+                    }
                     if (gui.type.IsArray)
                     {
-                        // 处理：NotSupportedException: Collection was of a fixed size.
+                        // 因为数组大小是不可变的，处理：NotSupportedException: Collection was of a fixed size.
                         var tempList = new ArrayList(rlist.list);
                         tempList.RemoveAt(index);
                         rlist.list = tempList.ToArray(elementType);
@@ -1996,35 +2180,69 @@ namespace Framework
             /// <remarks>如果重写了 <see cref="TypeGUI(GUIContent, object, Type, out object, MemberInfo)"/>，扩展了类型 gui，必须也重写本方法，添加对应类型</remarks>
             public virtual bool IsGenericsType(object v, Type type)
             {
-                bool r = TypeCast(v, out int _, type)
-                    || TypeCast(v, out uint _, type)
-                    || TypeCast(v, out long _, type)
-                    || TypeCast(v, out ulong _, type)
-                    || TypeCast(v, out float _, type)
-                    || TypeCast(v, out double _, type)
-                    || TypeCast(v, out bool _, type)
-                    || TypeCast(v, out string _, type)
-                    || TypeCast(v, out char _, type)
+                Type t = v?.GetType() ?? type;
+                bool r =
+                       TypeCast(typeof(int), t)
+                    || TypeCast(typeof(uint), t)
+                    || TypeCast(typeof(long), t)
+                    || TypeCast(typeof(ulong), t)
+                    || TypeCast(typeof(float), t)
+                    || TypeCast(typeof(double), t)
+                    || TypeCast(typeof(bool), t)
+                    || TypeCast(typeof(string), t)
+                    || TypeCast(typeof(char), t)
 
-                    || TypeCast(v, out Hash128 _, type)
-                    || TypeCast(v, out LayerMask _, type)
-                    || TypeCast(v, out Vector2 _, type)
-                    || TypeCast(v, out Vector2Int _, type)
-                    || TypeCast(v, out Vector3 _, type)
-                    || TypeCast(v, out Vector3Int _, type)
-                    || TypeCast(v, out Vector4 _, type)
-                    || TypeCast(v, out Quaternion _, type)
-                    || TypeCast(v, out Color _, type)
-                    || TypeCast(v, out Color32 _, type)
-                    || TypeCast(v, out Rect _, type)
-                    || TypeCast(v, out RectInt _, type)
-                    || TypeCast(v, out Bounds _, type)
-                    || TypeCast(v, out BoundsInt _, type)
+                    || TypeCast(typeof(Hash128), t)
+                    || TypeCast(typeof(LayerMask), t)
+                    || TypeCast(typeof(Vector2), t)
+                    || TypeCast(typeof(Vector2Int), t)
+                    || TypeCast(typeof(Vector3), t)
+                    || TypeCast(typeof(Vector3Int), t)
+                    || TypeCast(typeof(Vector4), t)
+                    || TypeCast(typeof(Quaternion), t)
+                    || TypeCast(typeof(Color), t)
+                    || TypeCast(typeof(Color32), t)
+                    || TypeCast(typeof(Rect), t)
+                    || TypeCast(typeof(RectInt), t)
+                    || TypeCast(typeof(Bounds), t)
+                    || TypeCast(typeof(BoundsInt), t)
 
-                    || TypeCast(v, out Enum _, type, true)
-                    || TypeCast(v, out AnimationCurve _, type)
-                    || TypeCast(v, out Gradient _, type)
-                    || TypeCast(v, out Object _, type, true)
+                    || TypeCast(typeof(Enum), t)
+                    || TypeCast(typeof(AnimationCurve), t)
+                    || TypeCast(typeof(Gradient), t)
+                    || TypeCast(typeof(Object), t)
+
+                #region 
+                    //TypeCast(v, out int _, type)
+                    //|| TypeCast(v, out uint _, type)
+                    //|| TypeCast(v, out long _, type)
+                    //|| TypeCast(v, out ulong _, type)
+                    //|| TypeCast(v, out float _, type)
+                    //|| TypeCast(v, out double _, type)
+                    //|| TypeCast(v, out bool _, type)
+                    //|| TypeCast(v, out string _, type)
+                    //|| TypeCast(v, out char _, type)
+
+                    //|| TypeCast(v, out Hash128 _, type)
+                    //|| TypeCast(v, out LayerMask _, type)
+                    //|| TypeCast(v, out Vector2 _, type)
+                    //|| TypeCast(v, out Vector2Int _, type)
+                    //|| TypeCast(v, out Vector3 _, type)
+                    //|| TypeCast(v, out Vector3Int _, type)
+                    //|| TypeCast(v, out Vector4 _, type)
+                    //|| TypeCast(v, out Quaternion _, type)
+                    //|| TypeCast(v, out Color _, type)
+                    //|| TypeCast(v, out Color32 _, type)
+                    //|| TypeCast(v, out Rect _, type)
+                    //|| TypeCast(v, out RectInt _, type)
+                    //|| TypeCast(v, out Bounds _, type)
+                    //|| TypeCast(v, out BoundsInt _, type)
+
+                    //|| TypeCast(v, out Enum _, type, true)
+                    //|| TypeCast(v, out AnimationCurve _, type)
+                    //|| TypeCast(v, out Gradient _, type)
+                    //|| TypeCast(v, out Object _, type, true) 
+                #endregion
                     ;
 
                 return !r;// 不能转换为上述类型，则以通用类型显示 gui
@@ -2047,7 +2265,54 @@ namespace Framework
                     else
                     {
                         gui.target = v;
-                        gui.OnGUI(ref rect, true);
+
+                        if (gui.isElement)
+                        {
+                            gui.OnGUI(ref rect, label);
+                        }
+                        else
+                        {
+                            gui.OnGUI(ref rect, true);
+                        }
+                    }
+                }
+                else
+                {
+                    if (!depthStandards)
+                        OnShowNonsupportMemberGUI(ref rect, label, $"已达深度上限 {maxDepth}");
+                    else if (!allowSelfLoop)
+                        OnShowNonsupportMemberGUI(ref rect, label, $"不支持自循环类型");
+                    else
+                        OnShowNonsupportMemberGUI(ref rect, label);
+                }
+
+                return gui?.target;
+            }
+            public virtual object GenericsFieldGUI(ref Rect rect, GUIContent label, object v, Type type, int index)
+            {
+                GenericsTypeGUI gui = null;
+
+                // 处理循环依赖
+                if (CheckGenericsFieldType(type, out bool lineal, out bool allowSelfLoop, out bool depthStandards))
+                {
+                    gui = ExpectChild(v, index);
+
+                    if (v == null)
+                    {
+                        OnCreateTargetInstanceGUI(ref rect, label, gui, type);
+                    }
+                    else
+                    {
+                        gui.target = v;
+
+                        if (gui.isElement)
+                        {
+                            gui.OnGUI(ref rect, label);
+                        }
+                        else
+                        {
+                            gui.OnGUI(ref rect, true);
+                        }
                     }
                 }
                 else
@@ -2068,14 +2333,7 @@ namespace Framework
                 GenericsTypeGUI gui = null;
 
                 // 处理循环依赖
-                // 当 type 继承 this.type 时必定循环
-                bool lineal = IsLineal(type, this.type);// 是否有直接关系
-                bool allowSelfLoop = lineal && allowSelfNested;
-                bool depthStandards = currentDepth < maxDepth;
-                if ((!lineal            // 没有直接关系
-                    || allowSelfLoop)   // 有直接关系，但允许自循环
-                    && depthStandards   // 深度未达上限
-                    )
+                if (CheckGenericsFieldType(type, out bool lineal, out bool allowSelfLoop, out bool depthStandards))
                 {
                     gui = ExpectChild(v, info);
 
@@ -2086,7 +2344,54 @@ namespace Framework
                     else
                     {
                         gui.target = v;
-                        gui.OnGUI(true);
+
+                        if (gui.isElement)
+                        {
+                            gui.OnGUI(label);
+                        }
+                        else
+                        {
+                            gui.OnGUI(true);
+                        }
+                    }
+                }
+                else
+                {
+                    if (!depthStandards)
+                        OnShowNonsupportMemberGUI(label, $"已达深度上限 {maxDepth}");
+                    else if (!allowSelfLoop)
+                        OnShowNonsupportMemberGUI(label, $"不支持自循环类型");
+                    else
+                        OnShowNonsupportMemberGUI(label);
+                }
+
+                return gui?.target;
+            }
+            public virtual object GenericsFieldGUI(GUIContent label, object v, Type type, int index)
+            {
+                GenericsTypeGUI gui = null;
+
+                // 处理循环依赖
+                if (CheckGenericsFieldType(type, out bool lineal, out bool allowSelfLoop, out bool depthStandards))
+                {
+                    gui = ExpectChild(v, index);
+
+                    if (v == null)
+                    {
+                        OnCreateTargetInstanceGUI(label, gui, type);
+                    }
+                    else
+                    {
+                        gui.target = v;
+
+                        if (gui.isElement)
+                        {
+                            gui.OnGUI(label);
+                        }
+                        else
+                        {
+                            gui.OnGUI(true);
+                        }
                     }
                 }
                 else
@@ -2159,17 +2464,57 @@ namespace Framework
                 EditorGUILayout.EndHorizontal();
             }
 
-            /// <summary>期望获取子 <see cref="GenericsTypeGUI"/></summary>
-            protected virtual GenericsTypeGUI ExpectChild(MemberInfo info) => ExpectChild(null, info);
             /// <summary>期望获取子 <see cref="GenericsTypeGUI"/>，查找是否已有成员的 gui 实例，没有则创建</summary>
             protected virtual GenericsTypeGUI ExpectChild(object v, MemberInfo info)
             {
+                var gui = ExpectChild(v, info, out bool _);
+                return gui;
+            }
+            /// <summary>期望获取子 <see cref="GenericsTypeGUI"/>，查找是否已有成员的 gui 实例，没有则创建</summary>
+            /// <remarks><paramref name="find"/>：true 是找到已有的，否则是创建的</remarks>
+            protected virtual GenericsTypeGUI ExpectChild(object v, MemberInfo info, out bool find)
+            {
+                find = true;
                 var gui = _childs.Find(v => v._info == info);
                 if (gui == null)
                 {
+                    find = false;
                     gui = AddChild(v, info);
                 }
                 return gui;
+            }
+            protected virtual GenericsTypeGUI ExpectChild(object v, int index)
+            {
+                var gui = ExpectChild(v, index, out bool _);
+                return gui;
+            }
+            protected virtual GenericsTypeGUI ExpectChild(object v, int index, out bool find)
+            {
+                find = true;
+                GenericsTypeGUI gui = GetChild(index);
+                if (gui == null)
+                {
+                    find = false;
+                    gui = AddChild(v, null);
+                }
+                return gui;
+            }
+            protected virtual GenericsTypeGUI GetChild(int index)
+            {
+                GenericsTypeGUI gui = null;
+                if (index > -1 && _childs.Count > index)
+                {
+                    gui = _childs[index];
+                }
+                return gui;
+            }
+            /// <summary>移除子 <see cref="GenericsTypeGUI"/></summary>
+            protected virtual void RemoveChild(int index)
+            {
+                if (index > -1 && _childs.Count > index)
+                {
+                    _childs.RemoveAt(index);
+                }
             }
             /// <summary>添加子 <see cref="GenericsTypeGUI"/></summary>
             protected virtual GenericsTypeGUI AddChild(object v, MemberInfo info)
@@ -2179,6 +2524,15 @@ namespace Framework
                 gui.foldout = false;
                 gui.showInheritRelation = false;
                 _childs.Add(gui);
+                return gui;
+            }
+            protected virtual GenericsTypeGUI AddChild(object v, MemberInfo info, int index)
+            {
+                var gui = CreateGenericsTypeGUIInstance(v, info);
+                gui.parent = this;
+                gui.foldout = false;
+                gui.showInheritRelation = false;
+                _childs.Insert(index, gui);
                 return gui;
             }
             /// <summary>创建 <see cref="GenericsTypeGUI"/></summary>

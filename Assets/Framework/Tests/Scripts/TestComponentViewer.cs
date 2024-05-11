@@ -101,9 +101,9 @@ namespace Framework.Test
         //private List<AStruct> _AStructs_private;
 
         /// 自定义 类
-        //public Info _info;
+        public Info _info;
         //Info _info_private;
-        //public List<Info> _infos;
+        public List<Info> _infos;
         //// 未添加 [Serializable]
         //public InfoNonSerializable _InfoNonSerializable;
 
