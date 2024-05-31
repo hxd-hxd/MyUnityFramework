@@ -10,6 +10,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
+using UObject = UnityEngine.Object;
+
 namespace Framework.Test
 {
     public class TestComponentViewer : MonoBehaviour
@@ -60,6 +62,7 @@ namespace Framework.Test
         //public GradientInherit _GradientInherit;
         //public AnimationCurveInherit _AnimationCurveInherit;
 
+        //public UObject _uObject;
         //public Transform _Transform;
         //public GameObject _GameObject;
         //public TextAsset _TextAsset;
@@ -72,25 +75,43 @@ namespace Framework.Test
         //public RectOffset _RectOffset;
         //public GUIStyle _GUIStyle;
 
-        //public UnityEvent _UnityEvent;
+        /// 暂不支持的 unity 类型
+        public UnityEvent _UnityEvent;
         //public UnityEvent<int> _UnityEventInt;
         //public UnityEvent<int, string> _UnityEventIntString;
         //public List<UnityEvent> _UnityEvents;
 
+        // 用于 UnityEvent 事件绑定
+        public void UnityEvent_func(bool b)
+        {
+            
+        }
+
         /// 其他类型
         //public object _object;
+        /// 接口
+        //public IList _objsIList = new List<int>() { 1, 2 };
+        //public IList _objArrayIList = new int[] { 1, 2 };
         /// 基础容器 List、一维数组 unity 支持直接序列化
         //public List<int> _ints;
         //public int[] _intArray;
-        /// 以下复杂容器不支持
-        //public List<object> _objects;
-        //public List<List<int>> _intsList;
-        //public List<int[]> _intsArray;
-        //public Queue _intQueue;
-        //public Queue<int> _intQueueInt;
-        //public Stack _intStack;
-        //public Stack<int> _intStackInt;
+        //int[] _intArray_private;
+        /// unity 不支持，但工具支持
+        //public List<object> _objects = new List<object>() { 1, new Info(), Vector3.zero, new List<object>() { "子列表\r\n第二行", Color.red, default(UObject) } };// 元素支持继承的类型
+        //public List<List<int>> _intsList = new List<List<int>>() { new List<int>() { 1 }, new List<int>() { 2 } };
+        //public List<int[]> _intsArray = new List<int[]>();
         //public Array _Array;
+        //public Array _Array1 = new string[] { "你好，世盖" };
+        /// 以下复杂容器暂不支持
+        //public Queue _intQueue;
+        //public Queue _intQueue1 = new Queue();// 在构造函数中初始化
+        //public Queue<int> _intQueueInt;
+        //public Queue<int> _intQueueInt1;// 在构造函数中初始化
+        //public Stack _intStack;
+        //public Stack _intStack1;        // 在构造函数中初始化
+        //public Stack<int> _intStackInt;
+        //public Stack<int> _intStackInt1;// 在构造函数中初始化
+        //public Dictionary<int, int> _dicIntInt;
 
         /// 自定义 结构体
         //public InfoStruct _InfoStruct;
@@ -101,9 +122,9 @@ namespace Framework.Test
         //private List<AStruct> _AStructs_private;
 
         /// 自定义 类
-        public Info _info;
+        //public Info _info;
         //Info _info_private;
-        public List<Info> _infos;
+        //public List<Info> _infos;
         //// 未添加 [Serializable]
         //public InfoNonSerializable _InfoNonSerializable;
 
@@ -174,8 +195,23 @@ namespace Framework.Test
 
         #endregion
 
-        #region 类
+        public TestComponentViewer()
+        {
+            //_intQueue1 ??= new Queue();
+            //_intQueue1.Enqueue(1);
+            //_intQueue1.Enqueue(Color.red);
 
+            //_intQueueInt1 ??= new Queue<int>();
+            //_intQueueInt1.Enqueue(1);
+
+            //_intStack1 ??= new Stack();
+            //_intStack1.Push(1);
+
+            //_intStackInt1 ??= new Stack<int>();
+            //_intStackInt1.Push(1);
+        }
+
+        #region 类
 
         [Serializable]
         public struct AStruct
@@ -335,6 +371,11 @@ namespace Framework.Test
         {
             public string name;
             public int num;
+
+            public override string ToString()
+            {
+                return $"name：{name}";
+            }
         }
 
         // 没有无参构造
