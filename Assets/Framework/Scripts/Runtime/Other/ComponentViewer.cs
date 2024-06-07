@@ -2541,7 +2541,7 @@ namespace Framework
                 }
                 else
                 {
-                    EditorGUI.LabelField(r, "该类型不支持直接创建实例。");
+                    EditorGUI.LabelField(r, "该类型不支持直接创建实例");
                 }
 
                 rect.y += EditorGUIUtility.singleLineHeight;
@@ -2562,7 +2562,10 @@ namespace Framework
                 }
                 else
                 {
+                    int l = EditorGUI.indentLevel;
+                    EditorGUI.indentLevel = 0;
                     EditorGUILayout.LabelField("该类型不支持直接创建实例");
+                    EditorGUI.indentLevel = l;
                 }
                 EditorGUILayout.EndHorizontal();
             }
