@@ -89,9 +89,18 @@ namespace Framework.Test
 
         /// 其他类型
         //public object _object;
-        /// 接口
+        /// 声明类型和实例类型
+        // 接口
         //public IList _objsIList = new List<int>() { 1, 2 };
-        //public IList _objArrayIList = new int[] { 1, 2 };
+        public IList _objArrayIList = new int[] { 1, 2 };
+        // 值类型
+        //public ValueType _valueTypeInt = 1;
+        //public ValueType _valueTypeVector3 = Vector3.one;
+        //public ValueType _valueTypeHideFlags = HideFlags.None;
+        // 枚举
+        //public Enum _enumTestType = TestType.None;
+        //public Enum _enumTestTypeFlags = TestTypeFlags.None;
+        //public Enum _enumHideFlags = HideFlags.None;
         /// 基础容器 List、一维数组 unity 支持直接序列化
         //public List<int> _ints;
         //public int[] _intArray;
@@ -127,6 +136,7 @@ namespace Framework.Test
         //public List<Info> _infos;
         //// 未添加 [Serializable]
         //public InfoNonSerializable _InfoNonSerializable;
+        public TypePool _typePool;
 
         //// 没有无参构造
         //public InfoNonCtor _infoNonCtor;

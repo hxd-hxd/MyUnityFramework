@@ -1889,12 +1889,12 @@ namespace Framework
                 // 判断是 target 的成员还是 objInstance 的成员
                 GenericsTypeGUI gui = null;
 
-                // 判断是否自身
-                if (info == null || info == this.info)
-                {
-                    gui = this;
-                }
-                else
+                //// 判断是否自身
+                //if (info == null || info == this.info)
+                //{
+                //    gui = this;
+                //}
+                //else
                 {
                     gui = ExpectChild(v, index
                         , out bool find
@@ -2826,7 +2826,8 @@ namespace Framework
             public TypeGUIArgs GetTypeGUIArgs(FieldInfo info, object owner, bool showLabel = true)
             {
                 object value = owner != null ? info.GetValue(owner) : null;
-                Type type = value?.GetType() ?? info.FieldType;
+                //Type type = value?.GetType() ?? info.FieldType;
+                Type type = info.FieldType;
                 var r = new TypeGUIArgs(
                     owner
                     , info
@@ -2851,8 +2852,17 @@ namespace Framework
             public TypeGUIArgs GetTypeGUIArgs(PropertyInfo info, object owner, bool showLabel = true)
             {
                 bool readOnly = IsReadOnly(info);
-                object value = !IsWriteOnly(info) && owner != null ? info.GetValue(owner) : null;
-                Type type = value?.GetType() ?? info.PropertyType;
+                object value = null;
+                try
+                {
+                    value = !IsWriteOnly(info) && owner != null ? info.GetValue(owner) : null;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"获取属性 {info.Name} 值时异常：{e}");
+                }
+                //Type type = value?.GetType() ?? info.PropertyType;
+                Type type = info.PropertyType;
                 var r = new TypeGUIArgs(
                     owner
                     , info
