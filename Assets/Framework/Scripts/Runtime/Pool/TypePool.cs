@@ -7,7 +7,6 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 using System.Linq;
 
 namespace Framework
@@ -35,7 +34,7 @@ namespace Framework
             _pool = new Dictionary<Type, List<object>>(capacity);
         }
 
-        public Dictionary<Type, List<object>> Pool => _pool;
+        public Dictionary<Type, List<object>> pool => _pool;
 
         /// <summary>
         /// 池子数量，每个类型对应一个池子

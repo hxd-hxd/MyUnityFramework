@@ -2266,7 +2266,7 @@ namespace Framework
                 }
             }
 
-            /// <summary>可为该自定义类型创建实例</summary>
+            /// <summary>可为该类型创建实例</summary>
             protected virtual bool CanCreateInstanceGenerics(Type type)
             {
                 return type.IsArray || type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null) != null// 有不带参数的构造函数
