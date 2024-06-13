@@ -338,7 +338,7 @@ namespace Framework
         /// <returns>Coroutine</returns>
         public static Coroutine LoopPlayAnim(this Animator animator, Action animCallBack, Func<bool> judge)
         {
-            Coroutine coroutine = Coroutines.Instance.StartCoroutine(LoopPlayAnimCoroutine(animator, animCallBack, judge));
+            Coroutine coroutine = Coroutines.BeginCoroutine(LoopPlayAnimCoroutine(animator, animCallBack, judge));
             return coroutine;
         }
         /// <summary>
@@ -530,7 +530,7 @@ namespace Framework
         /// <returns></returns>
         public static void CanvasGroupVanish(this CanvasGroup canvasGroup, float aTarget, float vanishDuration)
         {
-            Coroutines.Instance.StartCoroutine(UIVanish(canvasGroup, aTarget, vanishDuration, null));
+            Coroutines.BeginCoroutine(UIVanish(canvasGroup, aTarget, vanishDuration, null));
         }
         /// <summary>
         /// UI 整体透明度变化
@@ -542,7 +542,7 @@ namespace Framework
         /// <returns></returns>
         public static void CanvasGroupVanish(this CanvasGroup canvasGroup, float aTarget, float vanishDuration, Action finish)
         {
-            Coroutines.Instance.StartCoroutine(UIVanish(canvasGroup, aTarget, vanishDuration, finish));
+            Coroutines.BeginCoroutine(UIVanish(canvasGroup, aTarget, vanishDuration, finish));
         }
 
         static IEnumerator DelayCoroutine(float time, System.Action e)

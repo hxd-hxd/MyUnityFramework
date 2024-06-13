@@ -10,6 +10,8 @@ using UnityEngine;
 public class Coroutines : MonoBehaviour
 {
 
+    static Dictionary<string, Coroutine> coroutineDic = new Dictionary<string, Coroutine>();
+
     static Coroutines instance;
     public static Coroutines Instance
     {
@@ -18,8 +20,6 @@ public class Coroutines : MonoBehaviour
 
     [SerializeField]
     private int useNum;
-
-    static Dictionary<string, Coroutine> coroutineDic = new Dictionary<string, Coroutine>();
 
     /// <summary>
     /// 协程使用的次数
@@ -35,7 +35,7 @@ public class Coroutines : MonoBehaviour
     static void OnRuntimeMethodLoad()
     {
         GameObject go = new GameObject();
-        go.name = "Coroutines";
+        go.name = "[Coroutines]";
         go.AddComponent<Coroutines>();
     }
 
@@ -50,37 +50,45 @@ public class Coroutines : MonoBehaviour
     /// </summary>
     /// <param name="coroutine">要开启的协程</param>
     /// <returns></returns>
-    public Coroutine BeginCoroutine(IEnumerator coroutine)
+    public static Coroutine BeginCoroutine(IEnumerator coroutine)
     {
-        Coroutine cor = StartCoroutine(coroutine);
-        UseNum++;
+        Coroutine cor = instance.StartCoroutine(coroutine);
+        instance.UseNum++;
         return cor;
     }
 
     /// <summary>
     /// 关闭所有协程
     /// </summary>
-    public void StopCoroutinesAll()
+    public static void StopCoroutinesAll()
     {
-        StopAllCoroutines();
+        instance.StopAllCoroutines();
     }
 
     /// <summary>
     /// 关闭协程
     /// </summary>
     /// <param name="coroutine">要关闭的协程</param>
-    public void StopCoroutines(IEnumerator coroutine)
+    public static void StopCoroutines(IEnumerator coroutine)
     {
-        StopCoroutine(coroutine);
+        instance.StopCoroutine(coroutine);
+    }
+    /// <summary>
+    /// 关闭协程
+    /// </summary>
+    /// <param name="coroutine">要关闭的协程</param>
+    public static void StopCoroutines(Coroutine coroutine)
+    {
+        instance.StopCoroutine(coroutine);
     }
 
 
-    protected IEnumerator DelayCoroutine(float time, System.Action e)
+    protected static IEnumerator DelayCoroutine(float time, System.Action e)
     {
         yield return Yielder.WaitForSeconds(time);
         e?.Invoke();
     }
-    protected IEnumerator DelayCoroutine(System.Action e)
+    protected static IEnumerator DelayCoroutine(System.Action e)
     {
         yield return null;
         e?.Invoke();
@@ -91,18 +99,17 @@ public class Coroutines : MonoBehaviour
     /// </summary>
     /// <param name="time">延迟的时间</param>
     /// <param name="e">要处理的事件</param>
-    public Coroutine OnDelay(float time, System.Action e)
+    public static Coroutine OnDelay(float time, System.Action e)
     {
-        return StartCoroutine(DelayCoroutine(time, e));
+        return BeginCoroutine(DelayCoroutine(time, e));
     }
-
     /// <summary>
     /// 在下一帧处理
     /// </summary>
     /// <param name="e">要处理的事件</param>
-    public Coroutine OnDelay(System.Action e)
+    public static Coroutine OnDelay(System.Action e)
     {
-        return StartCoroutine(DelayCoroutine(e));
+        return BeginCoroutine(DelayCoroutine(e));
     }
 
     /// <summary>
@@ -113,7 +120,7 @@ public class Coroutines : MonoBehaviour
     {
         if (_coroutine != null)
         {
-            Instance?.StopCoroutine(_coroutine);
+            StopCoroutines(_coroutine);
             _coroutine = null;
         }
     }
@@ -127,7 +134,7 @@ public class Coroutines : MonoBehaviour
     public static Coroutine Delay(float time, System.Action e)
     {
         if (instance == null) return null;
-        return Instance.StartCoroutine(Instance.DelayCoroutine(time, e));
+        return instance.StartCoroutine(DelayCoroutine(time, e));
     }
     /// <summary>
     /// 延时一帧处理
@@ -137,7 +144,7 @@ public class Coroutines : MonoBehaviour
     public static Coroutine Delay(System.Action e)
     {
         if (instance == null) return null;
-        return Instance.StartCoroutine(Instance.DelayCoroutine(e));
+        return instance.StartCoroutine(DelayCoroutine(e));
     }
 }
 

@@ -70,13 +70,16 @@ namespace Framework.Test
 
         //public Hash128 _Hash128;
         //public Scene _Scene;
-        //public Matrix4x4 _matrix4X4;
         //public LayerMask _LayerMask = new LayerMask() { value = -1 };
         //public RectOffset _RectOffset;
         //public GUIStyle _GUIStyle;
 
+        /* TODO：Matrix4x4：报错 Assertion failed on expression: 'ValidTRS()' */
+        //public Matrix4x4 _matrix4X4;
+
+
         /// 暂不支持的 unity 类型
-        public UnityEvent _UnityEvent;
+        //public UnityEvent _UnityEvent;
         //public UnityEvent<int> _UnityEventInt;
         //public UnityEvent<int, string> _UnityEventIntString;
         //public List<UnityEvent> _UnityEvents;
@@ -84,7 +87,7 @@ namespace Framework.Test
         // 用于 UnityEvent 事件绑定
         public void UnityEvent_func(bool b)
         {
-            
+
         }
 
         /// 其他类型
@@ -92,7 +95,7 @@ namespace Framework.Test
         /// 声明类型和实例类型
         // 接口
         //public IList _objsIList = new List<int>() { 1, 2 };
-        public IList _objArrayIList = new int[] { 1, 2 };
+        //public IList _objArrayIList = new int[] { 1, 2 };
         // 值类型
         //public ValueType _valueTypeInt = 1;
         //public ValueType _valueTypeVector3 = Vector3.one;
@@ -101,16 +104,18 @@ namespace Framework.Test
         //public Enum _enumTestType = TestType.None;
         //public Enum _enumTestTypeFlags = TestTypeFlags.None;
         //public Enum _enumHideFlags = HideFlags.None;
+
         /// 基础容器 List、一维数组 unity 支持直接序列化
         //public List<int> _ints;
         //public int[] _intArray;
-        //int[] _intArray_private;
         /// unity 不支持，但工具支持
+        //int[] _intArray_private;
         //public List<object> _objects = new List<object>() { 1, new Info(), Vector3.zero, new List<object>() { "子列表\r\n第二行", Color.red, default(UObject) } };// 元素支持继承的类型
         //public List<List<int>> _intsList = new List<List<int>>() { new List<int>() { 1 }, new List<int>() { 2 } };
         //public List<int[]> _intsArray = new List<int[]>();
         //public Array _Array;
         //public Array _Array1 = new string[] { "你好，世盖" };
+        //public List<Matrix4x4> _matrix4X4s;
         /// 以下复杂容器暂不支持
         //public Queue _intQueue;
         //public Queue _intQueue1 = new Queue();// 在构造函数中初始化
@@ -121,6 +126,9 @@ namespace Framework.Test
         //public Stack<int> _intStackInt;
         //public Stack<int> _intStackInt1;// 在构造函数中初始化
         //public Dictionary<int, int> _dicIntInt;
+
+        public Hashtable _Hashtable;
+        public HashSet<int> _HashSetInt;
 
         /// 自定义 结构体
         //public InfoStruct _InfoStruct;
@@ -136,7 +144,17 @@ namespace Framework.Test
         //public List<Info> _infos;
         //// 未添加 [Serializable]
         //public InfoNonSerializable _InfoNonSerializable;
-        public TypePool _typePool;
+        //public TypePool _typePool;
+
+        // 索引器
+        /* 
+            报错：
+                获取属性 Item 值时异常：System.Reflection.TargetParameterCountException: Number of parameters specified does not match the expected number.
+
+            一个类可以有多个索引器，所有索引器都会有一个默认属性“Item”，由编译器自动创建。
+            需要为索引器传索引参数，否则获取其值会导致以上错误。
+        */
+        //public Indexer _Indexer;
 
         //// 没有无参构造
         //public InfoNonCtor _infoNonCtor;
@@ -222,6 +240,36 @@ namespace Framework.Test
         }
 
         #region 类
+
+        // 测试索引器类
+        [Serializable]
+        public class Indexer
+        {
+            public string this[long index]
+            {
+                get
+                {
+                    switch (index)
+                    {
+                        case 0: return "1";
+                        case 1: return "2";
+                        case 2: return "3";
+                        default:
+                            return "-1";
+                    }
+                }
+            }
+
+            public object this[long index1, string index2]
+            {
+                get
+                {
+                    return null;
+                }
+            }
+
+            //public int Item => 0;
+        }
 
         [Serializable]
         public struct AStruct
@@ -338,6 +386,7 @@ namespace Framework.Test
         #endregion
 
         #region 长链循环嵌套
+
         [Serializable]
         public class ALong
         {

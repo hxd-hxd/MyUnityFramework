@@ -91,11 +91,11 @@ namespace Framework
         /// <summary>
         /// 模板池
         /// </summary>
-        public Dictionary<GameObject, Queue<GameObject>> Pool => _pool;
+        public Dictionary<GameObject, Queue<GameObject>> pool => _pool;
         /// <summary>
         /// 默认模板
         /// </summary>
-        public GameObject Template { get => _template; set => _template = value; }
+        public GameObject template { get => _template; set => _template = value; }
 
         /// <summary>
         /// 池子的数量
@@ -178,7 +178,7 @@ namespace Framework
         /// <param name="num"></param>
         public virtual Coroutine PreCreateInstanceAsync(GameObject template, int num)
         {
-            var c = Coroutines.Instance.BeginCoroutine(_PreCreateInstanceCoroutine(template, num));
+            var c = Coroutines.BeginCoroutine(_PreCreateInstanceCoroutine(template, num));
             _preCreateInstanceCoroutines.Add(c);
             return c;
         }
@@ -200,12 +200,12 @@ namespace Framework
             foreach (var item in _preCreateInstanceCoroutines)
             {
                 if (item != null)
-                    Coroutines.Instance.StopCoroutine(item);
+                    Coroutines.StopCoroutines(item);
             }
             _preCreateInstanceCoroutines.Clear();
         }
 
-        /// <summary>从对象池获取，从默认模板 <see cref="Template"/> 对应的池子里取</summary>
+        /// <summary>从对象池获取，从默认模板 <see cref="template"/> 对应的池子里取</summary>
         public virtual GameObject Get()
         {
             return Get(_template);
@@ -236,7 +236,7 @@ namespace Framework
             return obj;
         }
 
-        /// <summary>返回对象池，默认返回到 <see cref="Template"/> 对应的池子，如果不确定请使用 <see cref="Return(GameObject, GameObject)"/> 已指定返回到哪个池子</summary>
+        /// <summary>返回对象池，默认返回到 <see cref="template"/> 对应的池子，如果不确定请使用 <see cref="Return(GameObject, GameObject)"/> 已指定返回到哪个池子</summary>
         /// <remarks>和 <see cref="TypePool.Return{T}(T)"/> 一样，会执行 <see cref="ITypePoolObject.Clear"/> 的清理操作，清理操作会在其他操作之后进行。</remarks>
         public virtual void Return(GameObject obj) => Return(obj, _template);
         /// <summary>返回对象池</summary>

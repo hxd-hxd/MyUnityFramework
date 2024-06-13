@@ -27,7 +27,7 @@ namespace Framework
         /// </summary>
         public event Action ExecuteEndEvent;
 
-        protected bool m_isExecuteEndEvent = false;  // 执行结束
+        protected bool _isExecuteEndEvent = false;  // 执行结束
 
         protected Coroutine coroutinePrepare;
 
@@ -36,7 +36,7 @@ namespace Framework
         /// </summary>
         public bool isExecuteEndEvent
         {
-            get { return m_isExecuteEndEvent; }
+            get { return _isExecuteEndEvent; }
         }
 
         public int OnceMax { get => onceMax; set => onceMax = value; }
@@ -168,7 +168,7 @@ namespace Framework
             end = fillBeforeNum == fillAfterNum;// 结束
 
             // 没有结束，并且已经执行过结束事件，则重置
-            if (!end && m_isExecuteEndEvent) m_isExecuteEndEvent = false;
+            if (!end && _isExecuteEndEvent) _isExecuteEndEvent = false;
         }
         /// <summary>
         /// 执行
@@ -185,9 +185,9 @@ namespace Framework
 
             if (end)
             {
-                if (!m_isExecuteEndEvent)
+                if (!_isExecuteEndEvent)
                 {
-                    m_isExecuteEndEvent = true;
+                    _isExecuteEndEvent = true;
                     ExecuteEndEvent?.Invoke();
                 }
             }

@@ -167,45 +167,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _UnityEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 613539251}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 613539253}
-        m_TargetAssemblyTypeName: Framework.Test.TestComponentViewer, Assembly-CSharp
-        m_MethodName: UnityEvent_func
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Framework.Test.TestComponentViewer, Assembly-CSharp
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!4 &613539254
 Transform:
   m_ObjectHideFlags: 0
@@ -250,9 +211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _UnityEvent:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1520585284
 Transform:
   m_ObjectHideFlags: 0

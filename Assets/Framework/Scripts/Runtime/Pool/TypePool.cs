@@ -24,6 +24,8 @@ namespace Framework
 
         protected Dictionary<Type, List<object>> _pool;
 
+        protected Type[] _tempTypes1 = new Type[1], _tempTypes2 = new Type[2];
+
         public TypePool()
         {
             _pool = new Dictionary<Type, List<object>>();
@@ -72,15 +74,21 @@ namespace Framework
         /// <returns></returns>
         protected virtual object CreateInstance(Type type, params object[] args) => Activator.CreateInstance(type, args);
 
-        /// <summary>从对象池获取</summary>
-        public virtual T Get<T>(params object[] ctorArgs)
+        /// <summary>从对象池获取
+        /// <para><paramref name="ctorArgs"/>：仅用于创建对象实例时，向构造函数传递的参数</para>
+        /// <para>注意：要获取 <see cref="Array"/> 请使用 <paramref name="GetArray"/></para>
+        /// </summary>
+        public virtual T Get<T>(object[] ctorArgs = null)
         {
             var target = typeof(T);
             T obj = (T)Get(target, ctorArgs);
             return obj;
         }
-        /// <summary>从对象池获取</summary>
-        public virtual object Get(Type type, params object[] ctorArgs)
+        /// <summary>从对象池获取
+        /// <para><paramref name="ctorArgs"/>：仅用于创建对象实例时，向构造函数传递的参数</para>
+        /// <para>注意：要获取 <see cref="Array"/> 请使用 <paramref name="GetArray"/></para>
+        /// </summary>
+        public virtual object Get(Type type, object[] ctorArgs = null)
         {
             object obj = null;
 
@@ -100,31 +108,96 @@ namespace Framework
                 _pool[target] = tPool;
             }
 
-            if (ctorArgs == null || ctorArgs.Length < 1)
-                obj ??= CreateInstance(type);
-            else
-                obj ??= CreateInstance(type, ctorArgs);
+            if (obj == null)
+            {
+                if (ctorArgs == null || ctorArgs.Length < 1)
+                    obj = CreateInstance(type);
+                else
+                    obj = CreateInstance(type, ctorArgs);
+            }
 
             //Debug.Log($"目标是 {target} ,\r\n有池子 {has}，\t从池子里取出的 <color=yellow>{_o}</color> ，\t最终得到的 {obj}");
 
             return obj;
         }
+
         /// <summary>获取 <see cref="List{T}"/></summary>
         public List<T> GetList<T>() => Get<List<T>>();
+        /// <summary>获取 <see cref="List{T}"/></summary>
+        public IList GetList(Type itemType)
+        {
+            _tempTypes1[0] = itemType;
+            Type target = typeof(List<>).MakeGenericType(_tempTypes1);
+            return Get(target) as IList;
+        }
+
+        /// <summary>获取 <see cref="Dictionary{TKey, TValue}"/></summary>
+        public Dictionary<TKey, TValue> GetDic<TKey, TValue>() => Get<Dictionary<TKey, TValue>>();
+        /// <summary>获取 <see cref="Dictionary{TKey, TValue}"/></summary>
+        public IDictionary GetDic(Type keyType, Type valueType)
+        {
+            _tempTypes2[0] = keyType;
+            _tempTypes2[1] = valueType;
+            Type target = typeof(Dictionary<,>).MakeGenericType(_tempTypes2);
+            return Get(target) as IDictionary;
+        }
+
+        /// <summary>获取 <see cref="Queue{T}"/></summary>
+        public Queue<T> GetQueue<T>() => Get<Queue<T>>();
+        /// <summary>获取 <see cref="Stack{T}"/></summary>
+        public Stack<T> GetStack<T>() => Get<Stack<T>>();
+        /// <summary>获取 <see cref="HashSet{T}"/></summary>
+        public HashSet<T> GetHashSet<T>() => Get<HashSet<T>>();
+
         /// <summary>获取 <typeparamref name="T"/>[]</summary>
-        public T[] GetArray<T>(int length)
+        //public T[] GetArray<T>(int length)
+        //{
+        //    object obj = null;
+
+        //    var target = typeof(T[]);
+        //    var has = _pool.TryGetValue(target, out var tPool);
+
+        //    if (has && tPool.Count > 0)
+        //    {
+        //        int index = 0;
+        //        for (var i = 0; i < tPool.Count; i++)
+        //        {
+        //            if ((tPool[i] as T[]).Length == length)
+        //            {
+        //                index = i;
+        //                break;
+        //            }
+        //        }
+        //        obj = Fetch(tPool, index);
+        //    }
+        //    else
+        //    {
+        //        tPool = CreatePool();
+        //        _pool[target] = tPool;
+        //    }
+
+        //    if (obj == null)
+        //    {
+        //        obj = Array.CreateInstance(typeof(T), length);
+        //    }
+
+        //    return obj as T[];
+        //}
+        public T[] GetArray<T>(int length) => GetArray(typeof(T), length) as T[];
+        /// <summary>获取 <see cref="Array"/></summary>
+        public Array GetArray(Type elementType, int length)
         {
             object obj = null;
 
-            var target = typeof(T[]);
-            var has = _pool.TryGetValue(target, out var tPool);
+            Type target = elementType.MakeArrayType();
+            bool has = _pool.TryGetValue(target, out var tPool);
 
             if (has && tPool.Count > 0)
             {
                 int index = 0;
                 for (var i = 0; i < tPool.Count; i++)
                 {
-                    if ((tPool[i] as T[]).Length == length)
+                    if ((tPool[i] as Array).Length == length)
                     {
                         index = i;
                         break;
@@ -140,13 +213,12 @@ namespace Framework
 
             if (obj == null)
             {
-                obj = Array.CreateInstance(typeof(T), length);
+                obj = Array.CreateInstance(elementType, length);
             }
 
-            return obj as T[];
+            return obj as Array;
         }
-        /// <summary>获取 <see cref="Dictionary{TKey, TValue}"/></summary>
-        public Dictionary<TKey, TValue> GetDic<TKey, TValue>() => Get<Dictionary<TKey, TValue>>();
+
 
         /// <summary>返回对象池</summary>
         public virtual void Return<T>(T obj) where T : class
@@ -332,7 +404,7 @@ namespace Framework
         }
         protected List<object> CreatePool()
         {
-            return new List<object>();
+            return new List<object>(5);
         }
 
         /// <summary>

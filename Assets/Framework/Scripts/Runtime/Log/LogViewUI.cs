@@ -47,7 +47,7 @@ namespace Framework.LogSystem
             set
             {
                 _logInfoItemUITemplate = value;
-                _logInfoItemUIPool.Template = value;
+                _logInfoItemUIPool.template = value;
             }
         }
 

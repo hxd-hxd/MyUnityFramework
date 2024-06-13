@@ -221,41 +221,11 @@ namespace Framework
             public bool showLabel;
             public bool readOnly;
             public bool showGUI;
-            public object value;// 成员的值
-            public Type type;   // 成员的类型
+            public bool isIndexer;  // 是否索引器
+            public object value;    // 成员的值
+            public Type type;       // 成员的类型
             public Type declareType;
             public Func<object, bool> setter;// gui 修改后的新值回调
-
-            public TypeGUIArgs(object owner, MemberInfo info, string name, bool readOnly, bool showGUI, object value, Type type, Func<object, bool> setter)
-            {
-                this.owner = owner;
-                this.info = info;
-                this.name = name;
-                this.readOnly = readOnly;
-                this.showGUI = showGUI;
-                this.value = value;
-                this.type = type;
-                this.setter = setter;
-
-                showLabel = true;
-                label = GUIContent.none;
-                declareType = type;
-            }
-            public TypeGUIArgs(object owner, MemberInfo info, string name, GUIContent label, bool showLabel, bool readOnly, bool showGUI, object value, Type type, Type declareType, Func<object, bool> setter)
-            {
-                this.owner = owner;
-                this.info = info;
-                this.name = name;
-                this.readOnly = readOnly;
-                this.showGUI = showGUI;
-                this.value = value;
-                this.type = type;
-                this.setter = setter;
-
-                this.showLabel = showLabel;
-                this.label = label;
-                this.declareType = declareType;
-            }
 
             public FieldInfo fieldInfo => info as FieldInfo;
             public PropertyInfo propertyInfo => info as PropertyInfo;
@@ -614,7 +584,8 @@ namespace Framework
                     }
                     else
                     {
-                        st = referenceType;
+                        st ??= referenceType;
+                        st ??= referenceElementType;
                     }
                     return st;
                 }
@@ -831,6 +802,7 @@ namespace Framework
             public virtual void OnGUI(ref Rect rect, bool bringLabel = true) => OnGUI(ref rect, IsGenericsType(), bringLabel);
             public virtual void OnGUI(GUIContent label) => OnGUI(IsGenericsType(), label);
             public virtual void OnGUI(ref Rect rect, GUIContent label) => OnGUI(ref rect, IsGenericsType(), label);
+
             public virtual void OnGUI(bool showMember, GUIContent label)
             {
                 if (showMember)
@@ -891,6 +863,7 @@ namespace Framework
                     TypeGUI(ref rect, _info, objInstance, bringLabel);
                 }
             }
+
             /// <summary>
             /// 根据对象类型自动提供适合其的 gui
             /// </summary>
@@ -1320,6 +1293,13 @@ namespace Framework
 
                 if (!showGUI) return;
 
+                // 处理索引器
+                if (args.isIndexer)
+                {
+                    OnShowNonsupportMemberGUI(ref rect, label, "不支持操作索引器");
+                    return;
+                }
+
                 EditorGUI.BeginDisabledGroup(readOnly);
                 bool change = TypeGUI(ref rect, label, v, type, out object newV, info);
                 EditorGUI.EndDisabledGroup();
@@ -1346,6 +1326,13 @@ namespace Framework
                 var setter = args.setter;
 
                 if (!showGUI) return;
+
+                // 处理索引器
+                if (args.isIndexer)
+                {
+                    OnShowNonsupportMemberGUI(label, "不支持操作索引器");
+                    return;
+                }
 
                 EditorGUI.BeginDisabledGroup(readOnly);
                 bool change = TypeGUI(label, v, type, out object newV, info);
@@ -2234,8 +2221,9 @@ namespace Framework
                 return text;
             }
 
-            // 显示不支持类型的 gui
+            /// <summary>显示不支持成员的 gui</summary>
             protected void OnShowNonsupportMemberGUI(ref Rect rect, GUIContent label) => OnShowNonsupportMemberGUI(ref rect, label, $"不支持该类型");
+            /// <summary>显示不支持成员的 gui</summary>
             protected void OnShowNonsupportMemberGUI(ref Rect rect, GUIContent label, string text)
             {
                 if (showNonsupportMember)
@@ -2250,7 +2238,9 @@ namespace Framework
                     rect.y += EditorGUIUtility.singleLineHeight;
                 }
             }
+            /// <summary>显示不支持成员的 gui</summary>
             protected void OnShowNonsupportMemberGUI(GUIContent label) => OnShowNonsupportMemberGUI(label, $"不支持该类型");
+            /// <summary>显示不支持成员的 gui</summary>
             protected void OnShowNonsupportMemberGUI(GUIContent label, string text)
             {
                 if (showNonsupportMember)
@@ -2683,20 +2673,21 @@ namespace Framework
             }
 
             /// <summary>
-            /// 创建时需要特殊处理
+            /// 创建时需要特殊处理，在 <see cref="Init"/> 最后调用
             /// </summary>
             /// <param name="gui"></param>
             protected virtual void CreateSpecialHandling(GenericsTypeGUI gui)
             {
-                if (gui.type == typeof(Matrix4x4) || GetType(gui.info) == typeof(Matrix4x4))
-                {
-                    gui.showProperty = false;
-                    gui.showFieldFoldout = false;
-                    gui._memberEndGUIEvent -= MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
-                    gui._memberEndGUIEvent += MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
-                    gui._memberEndRectGUIEvent -= MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
-                    gui._memberEndRectGUIEvent += MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
-                }
+                // Matrix4x4 已解决有索引器引起的异常问题
+                //if (gui.type == typeof(Matrix4x4) || GetType(gui.info) == typeof(Matrix4x4))
+                //{
+                //    gui.showProperty = false;
+                //    gui.showFieldFoldout = false;
+                //    gui._memberEndGUIEvent -= MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
+                //    gui._memberEndGUIEvent += MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
+                //    gui._memberEndRectGUIEvent -= MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
+                //    gui._memberEndRectGUIEvent += MemberEndGUITypeEvent_Inline_NoShowPropertyGUI;
+                //}
             }
             // 内联
             protected void MemberEndGUITypeEvent_Inline_NoShowPropertyGUI()
@@ -2727,15 +2718,16 @@ namespace Framework
                 string dispalyName = $"{name}{dispalyTypeName}";
 
                 StringBuilder tooltip = new StringBuilder();
-                if (type != declareType) tooltip.Append($"声明类型：{declareType.FullName}").AppendLine();
-                tooltip.Append(type != null ? $"实例类型：{type.FullName}" : null);
+                if (type != declareType)
+                    tooltip.Append($"声明类型：{declareType.FullName}").AppendLine();
+                if (type != null)
+                    tooltip.Append($"实例类型：{type.FullName}");
                 if (info != null)
                     tooltip.AppendLine().Append($@"成员访问修饰符：{GetMemberDeclareVisit(info)}");
                 //if (IsGenericsType(target))
                 if (showDepth)
                 {
-                    tooltip.AppendLine();
-                    tooltip.Append($"gui 深度：当前：{currentDepth}，总深度：{depth}");
+                    tooltip.AppendLine().Append($"gui 深度：当前：{currentDepth}，总深度：{depth}");
                 }
                 var label = new GUIContent(dispalyName, tooltip.ToString());
                 return label;
@@ -2829,65 +2821,85 @@ namespace Framework
             public TypeGUIArgs GetTypeGUIArgs(FieldInfo info, object owner, bool showLabel = true)
             {
                 object value = owner != null ? info.GetValue(owner) : null;
-                //Type type = value?.GetType() ?? info.FieldType;
-                Type type = info.FieldType;
-                var r = new TypeGUIArgs(
-                    owner
-                    , info
-                    , info.Name
-                    , info.IsInitOnly
-                    , true
-                    , value
-                    , type
-                    , (newValue) =>
+                Type type = value?.GetType() ?? info.FieldType;
+                var r = new TypeGUIArgs();
+                r.owner = owner;
+                r.info = info;
+                r.name = info.Name;
+                r.readOnly = info.IsInitOnly;
+                r.showGUI = true;
+                r.isIndexer = false;
+                r.value = value;
+                r.type = type;
+                r.declareType = info.FieldType;
+                r.showLabel = showLabel;
+                r.setter = (newValue) =>
+                {
+                    setValueStartEvent?.Invoke(value, newValue, info);
+                    info.SetValue(owner, newValue);
+                    setValueStartEvent?.Invoke(value, newValue, info);
+                    return true;
+                };
+                r.label = GetLabel(r, IsGenericsType(value, type));
+                return r;
+            }
+            public TypeGUIArgs GetTypeGUIArgs(PropertyInfo info, object owner, bool showLabel = true)
+            {
+                var r = new TypeGUIArgs();
+                bool readOnly = IsReadOnly(info);
+                object value = null;
+                try
+                {
+                    // 处理索引器
+                    //var m = info.GetMethod ?? info.SetMethod;
+                    var ips = info.GetIndexParameters();
+                    if (ips.Length == 0)
+                    {
+                        //value = !IsWriteOnly(info) && owner != null ? info.GetValue(owner) : null;
+                        if (!IsWriteOnly(info) && owner != null)
+                        {
+                            // 收集 unity 的错误消息
+                            void _gather_error_func(string condition, string stackTrace, LogType type)
+                            {
+                                if (type == LogType.Error || type == LogType.Assert)
+                                {
+                                    Debug.LogError($"获取属性 \"{info.Name}\" 值时错误！！！");
+                                }
+                            }
+                            Application.logMessageReceived += _gather_error_func;
+
+                            value = info.GetValue(owner);
+
+                            Application.logMessageReceived -= _gather_error_func;
+                        }
+                    }
+                    r.isIndexer = ips.Length != 0;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"获取属性 \"{info.Name}\" 值时异常：{e}");
+                }
+                Type type = value?.GetType() ?? info.PropertyType;
+                r.owner = owner;
+                r.info = info;
+                r.name = info.Name;
+                r.readOnly = readOnly;
+                r.showGUI = !readOnly || (showReadonlyProperty && readOnly);
+                r.value = value;
+                r.type = type;
+                r.declareType = info.PropertyType;
+                r.showLabel = showLabel;
+                r.setter = (newValue) =>
+                {
+                    if (info.CanWrite)
                     {
                         setValueStartEvent?.Invoke(value, newValue, info);
                         info.SetValue(owner, newValue);
                         setValueStartEvent?.Invoke(value, newValue, info);
                         return true;
                     }
-                    );
-                r.declareType = info.FieldType;
-                r.showLabel = showLabel;
-                r.label = GetLabel(r, IsGenericsType(value, type));
-                return r;
-            }
-            public TypeGUIArgs GetTypeGUIArgs(PropertyInfo info, object owner, bool showLabel = true)
-            {
-                bool readOnly = IsReadOnly(info);
-                object value = null;
-                try
-                {
-                    value = !IsWriteOnly(info) && owner != null ? info.GetValue(owner) : null;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"获取属性 {info.Name} 值时异常：{e}");
-                }
-                //Type type = value?.GetType() ?? info.PropertyType;
-                Type type = info.PropertyType;
-                var r = new TypeGUIArgs(
-                    owner
-                    , info
-                    , info.Name
-                    , readOnly
-                    , !readOnly || (showReadonlyProperty && readOnly)
-                    , value
-                    , type
-                    , (newValue) =>
-                    {
-                        if (info.CanWrite)
-                        {
-                            setValueStartEvent?.Invoke(value, newValue, info);
-                            info.SetValue(owner, newValue);
-                            setValueStartEvent?.Invoke(value, newValue, info);
-                            return true;
-                        }
-                        return false;
-                    }
-                    );
-                r.declareType = info.PropertyType;
-                r.showLabel = showLabel;
+                    return false;
+                };
                 r.label = GetLabel(r, IsGenericsType(value, type));
                 return r;
             }

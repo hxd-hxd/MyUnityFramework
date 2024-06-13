@@ -8,16 +8,141 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using UnityEditor;
-using Object = UnityEngine.Object;
 using System.Linq;
+using System.Text;
 using System.Reflection;
+using UnityEditor;
 using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
 
 namespace Test
 {
+
+    class TestMethodInfo
+    {
+        public int this[string index]
+        {
+            get
+            {
+                return 0;
+            }
+            set
+            {
+
+            }
+        }
+
+        public string N { get; set; }
+
+        //[Return]
+        public /*[Def("")]*/int P()
+        {
+
+            return 0;
+        }
+
+        static void P1(int i = 666)
+        {
+
+        }
+
+        static void P2([Def("233")] int i, string n)
+        {
+
+        }
+
+        static void POutRef([Def("2548")] out int i, ref string n)
+        {
+            i = 0;
+        }
+
+        static void PParas([Def("577")] params object[] vs)
+        {
+
+        }
+
+        [System.AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue, Inherited = false, AllowMultiple = true)]
+        sealed class DefAttribute : Attribute
+        {
+            // See the attribute guidelines at 
+            //  http://go.microsoft.com/fwlink/?LinkId=85236
+            readonly string v;
+
+            // This is a positional argument
+            public DefAttribute(string v)
+            {
+                this.v = v;
+            }
+
+            public string Value
+            {
+                get { return v; }
+            }
+
+            // This is a named argument
+            public int NamedInt { get; set; }
+        }
+
+        [System.AttributeUsage(AttributeTargets.ReturnValue, Inherited = false, AllowMultiple = true)]
+        sealed class ReturnAttribute : Attribute
+        {
+
+        }
+    }
+
     public class TestDic
     {
+        [MenuItem("Test/反射 获取方法参数")]
+        public static void Test_MethodInfo_Parameters()
+        {
+            var ms = typeof(TestMethodInfo).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+            foreach (var m in ms)
+            {
+                StringBuilder sb = new StringBuilder();
+                var paras = m.GetParameters();
+                sb.Append($"参数个数：{paras.Length} ，{m.Name}\t（");
+                int i = 0;
+                foreach (var param in paras)
+                {
+                    ++i;
+                    // out、ref 标记，其中 ref 未直接提供 api
+                    if (param.IsOut) sb.Append("out ");
+                    else if (param.ParameterType.IsByRef) sb.Append("ref ");
+                    // 无法判断 params，可能需要用到 System.Reflection.Metadata 
+
+                    // 类型、名字
+                    sb.Append($"{param.ParameterType.Name} {param.Name}");
+                    // 默认值
+                    if (param.HasDefaultValue) sb.Append($" = {param.DefaultValue}");
+                    // 参数分隔符
+                    if (i < paras.Length) sb.Append(", ");
+                }
+                sb.Append("）");
+                Debug.Log(sb);
+            }
+        }
+
+        [MenuItem("Test/可变参方法")]
+        public static void Test_DuoCanShu()
+        {
+            object[] vs1 = { 1, "a" };
+            object[] vs2 = { 2 };
+            DuoCanShu(vs1);
+            DuoCanShu(vs1, vs2);
+
+        }
+        static void DuoCanShu(params object[] ps)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("参数个数：").Append(ps.Length);
+            sb.AppendLine().Append("参数：");
+            for (int i = 0; i < ps.Length; i++)
+            {
+                sb.AppendLine().Append(i).Append("：\t").Append(ps[i]);
+            }
+            Debug.Log(sb);
+        }
+
         [MenuItem("Test/获取当前渲染管线")]
         public static void Test_currentPipeline()
         {
