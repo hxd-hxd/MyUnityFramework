@@ -165,8 +165,8 @@ namespace Framework.Test
         /*循环依赖
         unity 最多处理 10 层循环，算上自身 11 层
         */
-        //[Header("单链 循环")]
-        //public A _A;
+        [Header("单链 循环")]
+        public A _A;
         //private A _A_private;// 测试 创建实例
         //private A_NonSerializable _A_NonSerializable_private;// 测试 创建实例
         //public B _B;
@@ -370,6 +370,7 @@ namespace Framework.Test
         public class A
         {
             public string name;
+            public List<int> list;
             public B b;
         }
         public class A_NonSerializable // 没有 序列化特性
@@ -391,6 +392,7 @@ namespace Framework.Test
         public class ALong
         {
             public string name;
+            public List<int> list;
             public BLong b;
         }
         [Serializable]
