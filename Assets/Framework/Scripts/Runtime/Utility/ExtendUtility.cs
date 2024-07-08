@@ -136,9 +136,21 @@ namespace Framework
             foreach (Transform item in obj)
             {
                 target = FindOfContainName(item, containName);
+                if (target) break;
             }
 
             return target;
+        }
+        /// <summary>
+        /// 在所有子节点中，找到名称中包含指定名字的第一个对应的组件，默认采用模糊搜索，不区分大小写
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="containName"></param>
+        /// <returns></returns>
+        public static T FindOfContainName<T>(this Transform obj, string containName, bool fuzzySearch = true) where T : Component
+        {
+            var t = FindOfContainName(obj, containName, fuzzySearch);
+            return t ? t.GetComponent<T>() : null;
         }
 
         /// <summary>

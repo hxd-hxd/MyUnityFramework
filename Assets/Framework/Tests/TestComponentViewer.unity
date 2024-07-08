@@ -154,7 +154,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 613539253}
-  _num: 0
+  cTargetSettingsFoldout: 1
+  showNonsupportMember: 1
+  showInheritRelation: 1
+  maxDepth: 10
+  minTextLine: 2
+  maxTextLine: 5
 --- !u!114 &613539253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,30 +172,145 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _A:
-    name: 
-    list: 00000000
-    b:
-      name: 
-      a:
-        name: 
-        list: 00000000
+  _AListLong:
+    name: "\u666E\u901A\u5B9E\u4F8B\n1444444444444444444444445\n4444444444444\n444444444444444\n55555555555555555555555555"
+    list:
+    - name: "\u5143\u7D20\u5B9E\u4F8B\n1444444444444444444444445\n4444444444444\n444444444444444\n55555555555555555555555555"
+      list:
+      - name: 
+        list:
+        - name: 
+          list:
+          - name: '1444444444444444444444445
+
+              4444444444444
+
+              444444444444444
+
+              55555555555555555555555555'
+            list:
+            - name: 
+              list:
+              - name: 
+                list:
+                - name: 
+                  list:
+                  - name: 
+                    list:
+                    - name: 
+                      list: []
+                      b:
+                        name: 
+                    b:
+                      name: 
+                      c:
+                        name: 
+                  b:
+                    name: 
+                    c:
+                      name: 
+                      d:
+                        name: 
+                b:
+                  name: 
+                  c:
+                    name: 
+                    d:
+                      name: 
+                      e:
+                        name: 
+              b:
+                name: 
+                c:
+                  name: 
+                  d:
+                    name: 
+                    e:
+                      name: 
+                      a:
+                        name: 
+            b:
+              name: 
+              c:
+                name: 
+                d:
+                  name: 
+                  e:
+                    name: 
+                    a:
+                      name: 
+                      list: 
+                      b:
+                        name: 
+          b:
+            name: 
+            c:
+              name: 
+              d:
+                name: 
+                e:
+                  name: 
+                  a:
+                    name: 
+                    list: 
+                    b:
+                      name: 
+                      c:
+                        name: 
         b:
           name: 
-          a:
+          c:
             name: 
-            list: 
-            b:
+            d:
+              name: 
+              e:
+                name: 
+                a:
+                  name: 
+                  list: 
+                  b:
+                    name: 
+                    c:
+                      name: 
+                      d:
+                        name: 
+      b:
+        name: 
+        c:
+          name: 
+          d:
+            name: 
+            e:
               name: 
               a:
                 name: 
                 list: 
                 b:
                   name: 
-                  a:
+                  c:
                     name: 
-                    list: 
-                    b:
+                    d:
+                      name: 
+                      e:
+                        name: 
+    b:
+      name: 
+      c:
+        name: 
+        d:
+          name: 
+          e:
+            name: 
+            a:
+              name: 
+              list: 
+              b:
+                name: 
+                c:
+                  name: 
+                  d:
+                    name: 
+                    e:
                       name: 
                       a:
                         name: 
@@ -238,30 +358,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6589ecf00f8e5d047a5ca4c483b213cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _A:
+  _AListLong:
     name: 
-    list: 
+    list: []
     b:
       name: 
-      a:
+      c:
         name: 
-        list: 
-        b:
+        d:
           name: 
-          a:
+          e:
             name: 
-            list: 
-            b:
+            a:
               name: 
-              a:
+              list: 
+              b:
                 name: 
-                list: 
-                b:
+                c:
                   name: 
-                  a:
+                  d:
                     name: 
-                    list: 
-                    b:
+                    e:
                       name: 
                       a:
                         name: 

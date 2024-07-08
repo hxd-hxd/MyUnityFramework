@@ -26,7 +26,7 @@ namespace Framework.Test
         //public float _float;
         //public double _double;
         //public bool _bool;
-        //public string _string = "你好吗？\r\n人类";
+        //[TextArea] public string _string = $"你好吗？\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n人类";
         //public char _char;
         //public TestType _testType;
         //public TestTypeFlags _testTypeFlags;
@@ -107,6 +107,7 @@ namespace Framework.Test
 
         /// 基础容器 List、一维数组 unity 支持直接序列化
         //public List<int> _ints;
+        //[TextArea] public List<string> _strings = new List<string>() { "你好，\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n世\r\n盖" };
         //public int[] _intArray;
         /// unity 不支持，但工具支持
         //int[] _intArray_private;
@@ -127,8 +128,8 @@ namespace Framework.Test
         //public Stack<int> _intStackInt1;// 在构造函数中初始化
         //public Dictionary<int, int> _dicIntInt;
 
-        public Hashtable _Hashtable;
-        public HashSet<int> _HashSetInt;
+        //public Hashtable _Hashtable;
+        //public HashSet<int> _HashSetInt;
 
         /// 自定义 结构体
         //public InfoStruct _InfoStruct;
@@ -165,13 +166,15 @@ namespace Framework.Test
         /*循环依赖
         unity 最多处理 10 层循环，算上自身 11 层
         */
-        [Header("单链 循环")]
-        public A _A;
+        //[Header("单链 循环")]
+        //public A _A;
         //private A _A_private;// 测试 创建实例
         //private A_NonSerializable _A_NonSerializable_private;// 测试 创建实例
         //public B _B;
         //[Header("长链 循环")]
         //public ALong _ALong;
+        [Header("长链 列表循环")]
+        public AListLong _AListLong;
         //[Header("自循环")]
         //public ANested _ANested;
         //[Header("继承式自循环")]
@@ -387,6 +390,14 @@ namespace Framework.Test
         #endregion
 
         #region 长链循环嵌套
+
+        [Serializable]
+        public class AListLong
+        {
+            public string name;
+            public List<AListLong> list = new List<AListLong>() { /*new AListLong() */};
+            public BLong b;
+        }
 
         [Serializable]
         public class ALong

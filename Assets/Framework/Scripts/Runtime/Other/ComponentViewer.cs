@@ -27,9 +27,12 @@ namespace Framework
         protected GenericsTypeGUI cTargetGUI;
         protected GenericsTypeGUI _numGUI;
 
-        protected static bool cTargetSettingsFoldout = true;
-        protected static bool showNonsupportMember = true;
-        protected static bool showInheritRelation = true;
+        bool cTargetSettingsFoldout { get => my.cTargetSettingsFoldout; set => my.cTargetSettingsFoldout = value; }
+        bool showNonsupportMember { get => my.showNonsupportMember; set => my.showNonsupportMember = value; }
+        bool showInheritRelation { get => my.showInheritRelation; set => my.showInheritRelation = value; }
+        int maxDepth { get => my.maxDepth; set => my.maxDepth = value; }
+        int minTextLine { get => my.minTextLine; set => my.minTextLine = value; }
+        int maxTextLine { get => my.maxTextLine; set => my.maxTextLine = value; }
 
         ComponentViewer my => (ComponentViewer)target;
 
@@ -193,14 +196,37 @@ namespace Framework
                 EditorGUI.indentLevel++;
 
                 showNonsupportMember = EditorGUILayout.Toggle("显示不支持类型的成员", showNonsupportMember);
-                cTargetGUI.showNonsupportMember = showNonsupportMember;
 
                 showInheritRelation = EditorGUILayout.Toggle("显示类型成员的继承关系", showInheritRelation);
-                cTargetGUI.showInheritRelation = showInheritRelation;
+
+                maxDepth = EditorGUILayout.IntSlider("GUI 最大深度", maxDepth, 2, 100);
+
+                //float minTextLine = cTargetGUI.minTextLine, maxTextLine = cTargetGUI.maxTextLine;
+                //EditorGUI.MinMaxSlider("文本显示行数", ref minTextLine, ref maxTextLine, 2, 100);
+                //cTargetGUI.minTextLine = (int)minTextLine;
+                //cTargetGUI.maxTextLine = (int)maxTextLine;
+                minTextLine = EditorGUILayout.IntSlider("最小文本显示行数", minTextLine, 2, 100);
+                maxTextLine = EditorGUILayout.IntSlider("最大文本显示行数", maxTextLine, 2, 100);
+
+                //if (GUILayout.Button("展开所有成员"))
+                //{
+
+                //}
 
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
+
+            cTargetGUI.showNonsupportMember = showNonsupportMember;
+            cTargetGUI.showInheritRelation = showInheritRelation;
+
+            cTargetGUI.maxDepth = maxDepth;
+            maxDepth = cTargetGUI.maxDepth;
+
+            cTargetGUI.minTextLine = minTextLine;
+            cTargetGUI.maxTextLine = maxTextLine;
+            minTextLine = cTargetGUI.minTextLine;
+            maxTextLine = cTargetGUI.maxTextLine;
         }
 
         /// <summary>
@@ -291,23 +317,25 @@ namespace Framework
             protected Dictionary<Type, ControlList<PropertyInfo>> _typePropertyInfos = new Dictionary<Type, ControlList<PropertyInfo>>(3);
 
             protected bool _showFiled = true, _showProperty = true;
-            protected bool _showNonsupportMember = true;
-            protected bool _showReadonlyProperty = true;
+            protected bool _showNonsupportMember = true;// root
+            protected bool _showReadonlyProperty = true;// root
             protected bool _showInheritRelation = true;
             protected bool _foldout = false, _fieldFoldout = true, _propertyFoldout = false;// 由于属性内部实现的不确定性，默认不展开，将不会对属性进行任何操作
             protected bool _showFieldFoldout = true, _showPropertyFoldout = true;
+            protected int _minTextLine = 1, _maxTextLine = 5;// root
+            protected Vector2 _scrollPosition;
 
-            private int _maxDepth = 10;
-            protected bool _allowSelfNested = false;// 允许自我嵌套的类型
+            private int _maxDepth = 10;// root
+            protected bool _allowSelfNested = false;// 允许自我嵌套的类型 // root
 
             protected GenericsTypeGUI _parent;
             protected List<GenericsTypeGUI> _childs = new List<GenericsTypeGUI>(1);
             protected List<ReorderableList> _rLists = new List<ReorderableList>(1);
             protected ReorderableList _rlist;
 
-            protected Action<object, object, MemberInfo> _setValueStartEvent;
-            protected Action<object, object, MemberInfo> _setValueEndEvent;
-            protected Func<GenericsTypeGUI> _createChildEvent;
+            protected Action<object, object, MemberInfo> _setValueStartEvent;// root
+            protected Action<object, object, MemberInfo> _setValueEndEvent;// root
+            protected Func<GenericsTypeGUI> _createChildEvent;// root
             // 自定义 gui 事件
             protected Action _fieldStartGUIEvent, _fieldEndGUIEvent;
             protected Action _propertyStartGUIEvent, _propertyEndGUIEvent;
@@ -317,6 +345,8 @@ namespace Framework
             protected ActionRef<Rect> _memberStartRectGUIEvent, _memberEndRectGUIEvent;
 
             #region 属性
+
+            #region root
             /// <summary>
             /// 开始为目标字段或属性设置值事件，包括为 <see cref="target"/> 赋值
             /// <para></para>arg1：旧值，arg2：新值，arg3：设置值的目标字段或属性
@@ -339,16 +369,89 @@ namespace Framework
                 get => root._setValueEndEvent;
                 set => root._setValueEndEvent = value;
             }
-            /// <summary>创建子 gui 对象事件</summary>
+            /// <summary>创建子 gui 对象事件<para>此属性始终是 <see cref="root"/> 的</para></summary>
             /// <remarks>
             /// <para></para>return 新实例
-            /// <para></para>此属性始终是 <see cref="root"/> 的
             /// </remarks>
             public Func<GenericsTypeGUI> createChildEvent
             {
                 get => root._createChildEvent;
                 set => root._createChildEvent = value;
             }
+
+            /// <summary>显示不支持的成员<para>此属性始终是 <see cref="root"/> 的</para></summary>
+            public virtual bool showNonsupportMember
+            {
+                get => root._showNonsupportMember;
+                set
+                {
+                    root._showNonsupportMember = value;
+                    //// 设置子
+                    //foreach (var item in _childs)
+                    //{
+                    //    item._showNonsupportMember = value;
+                    //}
+                }
+            }
+            /// <summary>显示只读属性<para>此属性始终是 <see cref="root"/> 的</para></summary>
+            public virtual bool showReadonlyProperty
+            {
+                get => root._showReadonlyProperty;
+                set
+                {
+                    root._showReadonlyProperty = value;
+                }
+            }
+
+            /// <summary>允许自我嵌套的类型
+            /// <para>自嵌：1、类中有自身类型作为成员；2、两个类有继承关系，且父类中有子类作为其成员</para>
+            /// <para>此属性始终是 <see cref="root"/> 的</para>
+            /// </summary>
+            public virtual bool allowSelfNested
+            {
+                get => root._allowSelfNested;
+                set
+                {
+                    root._allowSelfNested = value;
+                }
+            }
+
+            /// <summary>当 <see cref="target"/> 是 <see cref="string"/> 时，显示的最小文本行数，不能小于 1<para>此属性始终是 <see cref="root"/> 的</para></summary>
+            public int minTextLine
+            {
+                get => root._minTextLine;
+                set
+                {
+                    root._minTextLine = value > 1 ? value : 1;
+                    root._minTextLine = value > root._maxTextLine ? root._maxTextLine : value;
+                }
+            }
+            /// <summary>当 <see cref="target"/> 是 <see cref="string"/> 时，显示的最大文本行数，不能小于 <see cref="minTextLine"/><para>此属性始终是 <see cref="root"/> 的</para></summary>
+            public int maxTextLine
+            {
+                get => root._maxTextLine;
+                set => root._maxTextLine = value > root.minTextLine ? value : root.minTextLine;
+            }
+
+            /// <summary>
+            /// 允许的对象创建 gui 的最大深度，防止无限循环依赖，不小于 1
+            /// <para>此属性始终是 <see cref="root"/> 的</para>
+            /// </summary>
+            public int maxDepth
+            {
+                get
+                {
+                    return root?._maxDepth ?? 0;
+                }
+                set
+                {
+                    if (root != null)
+                    {
+                        root._maxDepth = value > 0 ? value : 1;
+                    }
+                }
+            }
+            #endregion
 
             /// <summary>显示字段</summary>
             public bool showFiled { get => _showFiled; set => _showFiled = value; }
@@ -363,31 +466,6 @@ namespace Framework
             /// <summary>显示 属性 折页，否则直接显示 属性 </summary>
             public bool showPropertyFoldout { get => _showPropertyFoldout; set => _showPropertyFoldout = value; }
 
-            /// <summary>显示不支持的成员</summary>
-            /// <remarks>此属性始终是 <see cref="root"/> 的</remarks>
-            public virtual bool showNonsupportMember
-            {
-                get => root._showNonsupportMember;
-                set
-                {
-                    root._showNonsupportMember = value;
-                    //// 设置子
-                    //foreach (var item in _childs)
-                    //{
-                    //    item._showNonsupportMember = value;
-                    //}
-                }
-            }
-            /// <summary>显示只读属性</summary>
-            /// <remarks>此属性始终是 <see cref="root"/> 的</remarks>
-            public virtual bool showReadonlyProperty
-            {
-                get => root._showReadonlyProperty;
-                set
-                {
-                    root._showReadonlyProperty = value;
-                }
-            }
             /// <summary>显示继承关系</summary>
             public virtual bool showInheritRelation
             {
@@ -398,18 +476,6 @@ namespace Framework
                 set
                 {
                     _showInheritRelation = value;
-                }
-            }
-            /// <summary>允许自我嵌套的类型
-            /// <para>自嵌：1、类中有自身类型作为成员；2、两个类有继承关系，且父类中有子类作为其成员</para>
-            /// <para>此属性始终是 <see cref="root"/> 的</para>
-            /// </summary>
-            public virtual bool allowSelfNested
-            {
-                get => root._allowSelfNested;
-                set
-                {
-                    root._allowSelfNested = value;
                 }
             }
 
@@ -442,22 +508,7 @@ namespace Framework
                 }
             }
             public bool IsRoot => root == this;
-            /// <summary>
-            /// 允许的对象创建 gui 的最大深度，防止循环依赖
-            /// <para>此属性始终是 <see cref="root"/> 的</para>
-            /// </summary>
-            public int maxDepth
-            {
-                get
-                {
-                    return root?._maxDepth ?? 0;
-                }
-                set
-                {
-                    if (root != null)
-                        root._maxDepth = value;
-                }
-            }
+
             /// <summary>当前对象的深度</summary>
             public int currentDepth
             {
@@ -544,7 +595,6 @@ namespace Framework
             }
             /// <summary>目标 <see cref="target"/> 的实例类型，当 <see cref="target"/> 为 <paramref name="null"/>，<see cref="type"/> 也是 <paramref name="null"/></summary>
             public Type type => _target?.GetType();
-            ///// <summary>当 <see cref="info"/> 为 null 时，且 <see cref="target"/> 作为 <see cref="Array"/>、 <see cref="List{T}"/> 等实现 <see cref="IList"/> 的容器时，可指定其元素类型</summary>
             /// <summary>当 <see cref="info"/> 和 <see cref="target"/> 为 <paramref name="null"/> 时，将以此作为参考类型</summary>
             public Type referenceType { get; set; }
 
@@ -591,6 +641,7 @@ namespace Framework
                 }
             }
 
+            public List<GenericsTypeGUI> childs { get => _childs; }
             public ControlList<FieldInfo> fieldInfos { get => _fieldInfos; }
             public ControlList<PropertyInfo> propertyInfos { get => _propertyInfos; }
             public Dictionary<Type, ControlList<FieldInfo>> typeFieldInfos { get => _typeFieldInfos; }
@@ -884,6 +935,11 @@ namespace Framework
                 this.target = newV;
                 return change;
             }
+
+            //public void UnfoldAll()
+            //{
+
+            //}
 
             // 带标签
             protected virtual void OnTargetLabelMemberGUI(ref Rect rect) => OnTargetLabelMemberGUI(ref rect, GetLabel(_info?.Name, type, standardType, _info));
@@ -1347,6 +1403,7 @@ namespace Framework
                     }
                 }
             }
+
             // 以下是 TypeGUI 的最终处理方法
             protected virtual bool TypeGUI(ref Rect rect, GUIContent label, object v, Type type, out object newV, MemberInfo info = null)
             {
@@ -1432,7 +1489,7 @@ namespace Framework
 
                 EditorGUI.BeginChangeCheck();
 
-                isGenericsType = !UnityTypeGUI(ref rect, label, v, type, out newV, null);
+                isGenericsType = !UnityTypeGUI(ref rect, label, v, type, out newV, index);
 
                 isChange = EditorGUI.EndChangeCheck();
 
@@ -1506,7 +1563,7 @@ namespace Framework
                     }
                     else
                     {
-                        newV = TextFieldGUI(label, vString);
+                        newV = TextFieldGUI(label, vString, info);
                     }
                 }
                 else if (TypeCast(v, out char vChar, type))// 不直接支持
@@ -1517,8 +1574,7 @@ namespace Framework
 
                 else if (TypeCast(v, out Hash128 vHash128, type))// 不直接支持
                 {
-                    //string n = EditorGUILayout.TextField(label, vHash128.ToString());
-                    string n = TextFieldGUI(label, vHash128.ToString());
+                    string n = TextFieldGUI(label, vHash128.ToString(), info);
                     newV = Hash128.Parse(n);
                 }
 
@@ -1666,7 +1722,7 @@ namespace Framework
                     }
                     else
                     {
-                        newV = TextFieldGUI(ref rect, label, vString);
+                        newV = TextFieldGUI(ref rect, label, vString, info);
                     }
                 }
                 else if (TypeCast(v, out char vChar, type))// 不直接支持
@@ -1677,7 +1733,160 @@ namespace Framework
 
                 else if (TypeCast(v, out Hash128 vHash128, type))// 不直接支持
                 {
-                    string n = TextFieldGUI(ref rect, label, vHash128.ToString());
+                    string n = TextFieldGUI(ref rect, label, vHash128.ToString(), info);
+                    newV = Hash128.Parse(n);
+                }
+
+                else if (TypeCast(v, out LayerMask vLayerMask, type))
+                {
+                    vLayerMask.value = EditorGUI.LayerField(rect, label, vLayerMask.value);
+                    newV = vLayerMask;
+                }
+
+                else if (TypeCast(v, out Vector2 vVector2, type))
+                {
+                    newV = EditorGUI.Vector2Field(rect, label, vVector2);
+                }
+                else if (TypeCast(v, out Vector2Int vVector2Int, type))
+                {
+                    newV = EditorGUI.Vector2IntField(rect, label, vVector2Int);
+                }
+                else if (TypeCast(v, out Vector3 vVector3, type))
+                {
+                    newV = EditorGUI.Vector3Field(rect, label, vVector3);
+                }
+                else if (TypeCast(v, out Vector3Int vVector3Int, type))
+                {
+                    newV = EditorGUI.Vector3IntField(rect, label, vVector3Int);
+                }
+                else if (TypeCast(v, out Vector4 vVector4, type))
+                {
+                    newV = EditorGUI.Vector4Field(rect, label, vVector4);
+                }
+                else if (TypeCast(v, out Quaternion vQuaternion, type))// 不直接支持
+                {
+                    var v4 = new Vector4(vQuaternion.x, vQuaternion.y, vQuaternion.z, vQuaternion.w);
+                    v4 = EditorGUI.Vector4Field(rect, label, v4);
+                    newV = new Quaternion(v4.x, v4.y, v4.z, v4.w);
+                }
+                else if (TypeCast(v, out Color vColor, type))
+                {
+                    newV = EditorGUI.ColorField(rect, label, vColor);
+                }
+                else if (TypeCast(v, out Color32 vColor32, type))
+                {
+                    newV = (Color32)EditorGUI.ColorField(rect, label, vColor32);
+                }
+                else if (TypeCast(v, out Rect vRect, type))
+                {
+                    newV = EditorGUI.RectField(rect, label, vRect);
+                }
+                else if (TypeCast(v, out RectInt vRectInt, type))
+                {
+                    newV = EditorGUI.RectIntField(rect, label, vRectInt);
+                }
+                else if (TypeCast(v, out Bounds vBounds, type))
+                {
+                    newV = EditorGUI.BoundsField(rect, label, vBounds);
+                }
+                else if (TypeCast(v, out BoundsInt vBoundsInt, type))
+                {
+                    newV = EditorGUI.BoundsIntField(rect, label, vBoundsInt);
+                }
+
+                else if (TypeCast(v, out Enum vEnum, type, true))// 允许继承转换
+                {
+                    // 有枚举标志位特性
+                    if (IsHasAttribute<FlagsAttribute>(type))
+                    {
+                        newV = EditorGUI.EnumFlagsField(rect, label, vEnum);
+                    }
+                    else
+                        newV = EditorGUI.EnumPopup(rect, label, vEnum);
+                }
+
+                else if (TypeCast(v, out AnimationCurve vAnimationCurve, type))
+                {
+                    newV = EditorGUI.CurveField(rect, label, vAnimationCurve ?? new AnimationCurve());
+                }
+                else if (TypeCast(v, out Gradient vGradient, type))
+                {
+                    newV = EditorGUI.GradientField(rect, label, vGradient ?? new Gradient());
+                }
+
+                else if (TypeCast(v, out Object vUnityObject, type, true))// 允许继承转换
+                {
+                    newV = EditorGUI.ObjectField(rect, label, vUnityObject, type, true);
+                }
+
+                else
+                {
+                    r = false;
+                }
+
+                return r;
+            }
+            protected virtual bool UnityTypeGUI(ref Rect rect, GUIContent label, object v, Type type, out object newV, int index)
+            {
+                rect.width -= EditorGUIUtility.singleLineHeight;
+                //rect.x += EditorGUIUtility.singleLineHeight;
+
+                newV = default;
+                bool r = true;
+                if (TypeCast(v, out int vInt, type))
+                {
+                    newV = EditorGUI.IntField(rect, label, vInt);
+                }
+                else if (TypeCast(v, out uint vUint, type))// 不直接支持
+                {
+                    int n = EditorGUI.IntField(rect, label, (int)vUint);
+                    newV = n < 0 ? 0u : (uint)n;
+                    //Debug.Log($"{dispalyName}：{newV}");
+                }
+                else if (TypeCast(v, out long vLong, type))
+                {
+                    newV = EditorGUI.LongField(rect, label, vLong);
+                }
+                else if (TypeCast(v, out ulong vUlong, type))// 不直接支持
+                {
+                    long n = EditorGUI.LongField(rect, label, (long)vUlong);
+                    newV = n < 0 ? 0ul : (ulong)n;
+                }
+                else if (TypeCast(v, out float vFloat, type))
+                {
+                    newV = EditorGUI.FloatField(rect, label, vFloat);
+                }
+                else if (TypeCast(v, out double vDouble, type))
+                {
+                    newV = EditorGUI.DoubleField(rect, label, vDouble);
+                }
+                else if (TypeCast(v, out bool vBool, type))
+                {
+                    newV = EditorGUI.Toggle(rect, label, vBool);
+                }
+                else if (TypeCast(v, out string vString, type))
+                {
+                    label.tooltip = $"{label.tooltip}\r\n字符串长度：{vString?.Length ?? 0}";
+
+                    // 是否属于 Component 的标签
+                    if (IsLineal(this.type, typeof(Component)) && info != null && info.Name == "tag" && info.DeclaringType == typeof(Component))
+                    {
+                        newV = EditorGUI.TagField(rect, label, vString);
+                    }
+                    else
+                    {
+                        newV = TextFieldGUI(ref rect, label, vString, index);
+                    }
+                }
+                else if (TypeCast(v, out char vChar, type))// 不直接支持
+                {
+                    string n = EditorGUI.TextField(rect, label, new String(vChar, 1));
+                    newV = n == null || n == "" ? default : n[0];
+                }
+
+                else if (TypeCast(v, out Hash128 vHash128, type))// 不直接支持
+                {
+                    string n = TextFieldGUI(ref rect, label, vHash128.ToString(), index);
                     newV = Hash128.Parse(n);
                 }
 
@@ -1837,7 +2046,7 @@ namespace Framework
                     gui = ExpectChild(v, index, out bool find);
                     if (!find)
                     {
-                        gui._foldout = true;
+                        gui._foldout = v != null && v.Count <= 100;
                         gui.referenceType = type;
                     }
                 }
@@ -1861,7 +2070,7 @@ namespace Framework
                     gui = ExpectChild(v, info, out bool find);
                     if (!find)
                     {
-                        gui._foldout = true;
+                        gui._foldout = v != null && v.Count <= 100;
                         gui.referenceType = type;
                     }
                 }
@@ -1888,7 +2097,7 @@ namespace Framework
                         );
                     if (!find)
                     {
-                        gui._foldout = true;
+                        gui._foldout = v != null && v.Count <= 100;
                         gui.referenceType = type;
                     }
                 }
@@ -1914,7 +2123,7 @@ namespace Framework
                         );
                     if (!find)
                     {
-                        gui._foldout = true;
+                        gui._foldout = v != null && v.Count <= 100;
                         gui.referenceType = type;
                     }
                 }
@@ -2037,7 +2246,7 @@ namespace Framework
                     eGui.referenceType = elementType;
 
                     //var eLabel = new GUIContent($"元素 {index}", $"类型：{etype.FullName}");
-                    var eLabel = GetLabel($"元素 {index}", etype, elementType, null);
+                    var eLabel = eGui.GetLabel($"元素 {index}", etype, elementType, null);
                     bool change = listGui.TypeGUI(ref rect, eLabel, eValue, etype, out var newV, index);
                     if (change)
                     {
@@ -2174,7 +2383,7 @@ namespace Framework
             }
 
             // 经过处理的文本字段 gui
-            protected virtual string TextFieldGUI(ref Rect rect, GUIContent label, string text)
+            protected virtual string TextFieldGUI(ref Rect rect, GUIContent label, string text, MemberInfo info = null)
             {
                 if (text != null
                     && (text.Length > 50
@@ -2184,13 +2393,42 @@ namespace Framework
                     ))
                 {
                     var r = rect;
-                    EditorGUI.LabelField(rect, label);
-                    rect.y += EditorGUIUtility.singleLineHeight;
-                    rect.height = EditorStyles.textArea.CalcHeight(GetTempGUIContent(text), rect.width);
-                    text = EditorGUI.TextArea(rect, text);
-                    //text = GUI.TextArea(rect, text);
-                    rect.y += rect.height - EditorGUIUtility.singleLineHeight;
-                    rect.height = r.height;
+
+                    float currW = rect.width;
+                    float s_h = EditorStyles.textArea.CalcHeight(GetTempGUIContent(text), currW);
+                    float minH = EditorGUIUtility.singleLineHeight * minTextLine;
+                    float maxH = EditorGUIUtility.singleLineHeight * maxTextLine;
+                    float r_h = Math.Max(Math.Min(s_h, maxH), minH);// 滑动高度最小、最大值
+
+                    bool f = true;
+                    GenericsTypeGUI gui = info == null ? this : ExpectChild(text, info, out f);
+                    if (!f)
+                    {
+                        gui.foldout = s_h <= maxH;
+                    }
+                    gui.foldout = EditorGUI.Foldout(rect, gui.foldout, label, true);
+
+                    if (gui.foldout)
+                    {
+                        rect.y += EditorGUIUtility.singleLineHeight;
+
+                        Rect viewRect = rect;
+
+                        rect.height = r_h;
+
+                        viewRect.height = Math.Max(s_h, minH);// 文本高度最小值
+                        gui._scrollPosition = GUI.BeginScrollView(rect, gui._scrollPosition
+                            , viewRect
+                            );
+
+                        text = EditorGUI.TextArea(viewRect, text);
+                        //text = GUI.TextArea(rect, text);
+
+                        GUI.EndScrollView();
+
+                        rect.y += rect.height - EditorGUIUtility.singleLineHeight;
+                        rect.height = r.height;
+                    }
                 }
                 else
                 {
@@ -2201,18 +2439,99 @@ namespace Framework
 
                 return text;
             }
-            protected virtual string TextFieldGUI(GUIContent label, string text)
+            protected virtual string TextFieldGUI(ref Rect rect, GUIContent label, string text, int index)
             {
                 if (text != null
                     && (text.Length > 50
-                    || text.Contains("\r\n") || text.Contains("\n")
+                    || text.Contains("\n")
                     || text.Contains("\t")
                     //|| text.Split('\t').Length > 10
                     ))
                 {
-                    EditorGUILayout.LabelField(label);
-                    //newV = EditorGUILayout.TextArea(text);
-                    text = GUILayout.TextArea(text);
+                    var r = rect;
+
+                    float currW = rect.width;
+                    float s_h = EditorStyles.textArea.CalcHeight(GetTempGUIContent(text), currW);
+                    float minH = EditorGUIUtility.singleLineHeight * minTextLine;
+                    float maxH = EditorGUIUtility.singleLineHeight * maxTextLine;
+                    float r_h = Math.Max(Math.Min(s_h, maxH), minH);
+
+                    bool f = true;
+                    GenericsTypeGUI gui = ExpectChild(text, index, out f);
+                    if (!f)
+                    {
+                        gui.foldout = s_h <= maxH;
+                    }
+                    gui.foldout = EditorGUI.Foldout(rect, gui.foldout, label, true);
+
+                    if (gui.foldout)
+                    {
+                        rect.y += EditorGUIUtility.singleLineHeight;
+
+                        Rect viewRect = rect;
+
+                        rect.height = r_h;
+
+                        viewRect.height = Math.Max(s_h, minH);
+                        gui._scrollPosition = GUI.BeginScrollView(rect, gui._scrollPosition
+                            , viewRect
+                            );
+
+                        text = EditorGUI.TextArea(viewRect, text);
+                        //text = GUI.TextArea(rect, text);
+
+                        GUI.EndScrollView();
+
+                        rect.y += rect.height - EditorGUIUtility.singleLineHeight;
+                        rect.height = r.height;
+
+                    }
+                }
+                else
+                {
+                    text = EditorGUI.TextField(rect, label, text);
+                }
+
+                //rect.y += EditorGUIUtility.singleLineHeight;
+
+                return text;
+            }
+            protected virtual string TextFieldGUI(GUIContent label, string text, MemberInfo info = null)
+            {
+                if (text != null
+                    && (text.Length > 50
+                    || text.Contains("\n")
+                    || text.Contains("\t")
+                    //|| text.Split('\t').Length > 10
+                    ))
+                {
+                    //Rect rect = GUILayoutUtility.GetLastRect();
+                    //float currW = rect.width;
+                    float currW = EditorGUIUtility.currentViewWidth;
+                    float s_h = EditorStyles.textArea.CalcHeight(GetTempGUIContent(text), currW);
+                    float minH = EditorGUIUtility.singleLineHeight * minTextLine;
+                    float maxH = EditorGUIUtility.singleLineHeight * maxTextLine;
+                    float r_h = Math.Max(Math.Min(s_h, maxH), minH);
+
+                    bool f = true;
+                    GenericsTypeGUI gui = info == null ? this : ExpectChild(text, info, out f);
+                    if (!f)
+                    {
+                        gui.foldout = s_h <= maxH;
+                    }
+                    gui.foldout = EditorGUILayout.Foldout(gui.foldout, label, true);
+
+                    if (gui.foldout)
+                    {
+                        gui._scrollPosition = EditorGUILayout.BeginScrollView(gui._scrollPosition
+                            , GUILayout.MaxHeight(r_h)
+                            );
+
+                        text = EditorGUILayout.TextArea(text, GUILayout.MinHeight(Math.Max(s_h, minH)));
+                        //text = GUILayout.TextArea(text);
+
+                        EditorGUILayout.EndScrollView();
+                    }
                 }
                 else
                 {
@@ -2987,7 +3306,17 @@ namespace Framework
     {
         [SerializeField]
         private Component _target;
+        [NonSerialized]
         public int _num;
+
+        [HideInInspector]
+        public bool cTargetSettingsFoldout = true;
+        [HideInInspector]
+        public bool showNonsupportMember = true;
+        [HideInInspector]
+        public bool showInheritRelation = true;
+        [HideInInspector]
+        public int maxDepth = 10, minTextLine = 1, maxTextLine = 5;
 
         public Component target { get => _target; set => _target = value; }
 

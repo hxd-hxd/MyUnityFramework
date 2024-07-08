@@ -288,7 +288,7 @@ namespace Framework
         [SerializeField] private Vector2 _detectRectOffsetMinRatio, _detectRectOffsetMaxRatio;
 
         [Header("拖拽限制区域设置")]
-        [Tooltip("将限制区颠倒，即 左、右互换，上、下互换，此功能仅用于一些特殊用途。例如：使用百分比偏移值时，将偏移全部设置成 -1，保持拖拽矩形比限制区大，这时可以使拖拽区始终包围限制区。")]
+        [Tooltip("将限制区颠倒，即 左、右互换，上、下互换。\r\n此功能仅用于一些特殊用途，例如：使用百分比偏移值时，将偏移全部设置成 -1，保持拖拽矩形比限制区大，这时可以使拖拽区始终包围限制区。")]
         [SerializeField] private bool _dragRestrictZoneReversal;// 将限制区颠倒
         [SerializeField] private DragRestrictZoneMode _dragRestrictZoneMode;
         [SerializeField] private MinMax<float> _dragRestrictZoneX, _dragRestrictZoneY;
