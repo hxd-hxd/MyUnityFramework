@@ -221,10 +221,13 @@ namespace Framework
             var target = template;
             bool has = pool.TryGetValue(target, out var tPool);
 
-            if (has && tPool.Count > 0)
+            if (has)
             {
-                //tPool.TryDequeue(out obj);
-                obj = tPool.Dequeue();
+                if (tPool.Count > 0)
+                {
+                    //tPool.TryDequeue(out obj);
+                    obj = tPool.Dequeue();
+                }
             }
             else
             {

@@ -95,12 +95,15 @@ namespace Framework
             var target = type;
             var has = _pool.TryGetValue(target, out var tPool);
 
-            if (has && tPool.Count > 0)
+            if (has)
             {
-                //tPool.TryDequeue(out obj);
-                //obj = tPool.Dequeue();
-                //obj = tPool.Last();
-                obj = Fetch(tPool);
+                if (tPool.Count > 0)
+                {
+                    //tPool.TryDequeue(out obj);
+                    //obj = tPool.Dequeue();
+                    //obj = tPool.Last();
+                    obj = Fetch(tPool);
+                }
             }
             else
             {
@@ -192,18 +195,21 @@ namespace Framework
             Type target = elementType.MakeArrayType();
             bool has = _pool.TryGetValue(target, out var tPool);
 
-            if (has && tPool.Count > 0)
+            if (has)
             {
-                int index = 0;
-                for (var i = 0; i < tPool.Count; i++)
+                if (tPool.Count > 0)
                 {
-                    if ((tPool[i] as Array).Length == length)
+                    int index = 0;
+                    for (var i = 0; i < tPool.Count; i++)
                     {
-                        index = i;
-                        break;
+                        if ((tPool[i] as Array).Length == length)
+                        {
+                            index = i;
+                            break;
+                        }
                     }
+                    obj = Fetch(tPool, index);
                 }
-                obj = Fetch(tPool, index);
             }
             else
             {
