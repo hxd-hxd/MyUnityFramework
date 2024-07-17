@@ -157,7 +157,25 @@ namespace Framework
                 //    }
                 //}
 
+#if UNITY_2020_1_OR_NEWER
                 ui = GameObject.FindObjectOfType(type, true) as T;// 尝试从已加载的 Unity 对象中找
+#else
+                //ui = GameObject.FindObjectOfType(type) as T;// 尝试从已加载的 Unity 对象中找
+                var uis = Resources.FindObjectsOfTypeAll(type);
+                //ui = (uis.Length > 0 ? uis[0] : null) as T;
+                foreach (var item in uis)
+                {
+                    if (item is MonoBehaviour cui)
+                    {
+                        if(cui.gameObject.scene.path != "")// 排除预制体
+                        {
+                            ui = item as T;
+                            break;
+                        }
+                    }
+                }
+                if(ui == null) ui = (uis.Length > 0 ? uis[0] : null) as T;
+#endif
                 if (ui != null)
                 {
                     Register(ui);
