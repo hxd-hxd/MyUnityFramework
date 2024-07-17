@@ -253,11 +253,15 @@ namespace Framework
                 tPool = GetNewPoolQueue();
                 _pool[target] = tPool;
             }
-            tPool.Enqueue(obj);
-            obj.transform.SetParent(GOManager.transform);
 
-            // 清理操作
-            CleanupObject(obj);
+            if (!tPool.Contains(obj))
+            {
+                tPool.Enqueue(obj);
+                obj.transform.SetParent(GOManager.transform);
+
+                // 清理操作
+                CleanupObject(obj);
+            }
         }
 
         /// <summary>

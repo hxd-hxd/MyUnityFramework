@@ -245,10 +245,14 @@ namespace Framework
                 tPool = CreatePool();
                 _pool[target] = tPool;
             }
-            //tPool.Enqueue(obj);
-            tPool.Add(obj);
 
-            CleanupObject(obj);
+            if (!tPool.Contains(obj))
+            {
+                //tPool.Enqueue(obj);
+                tPool.Add(obj);
+
+                CleanupObject(obj);
+            }
         }
 
         // 以下基本容器类型
