@@ -12,12 +12,18 @@ namespace Framework.LogSystem
 #if !LOG_SYSTEM_AUTO_LOADER_DISABLE
         [RuntimeInitializeOnLoadMethod]
 #endif
-        static void Load()
+        public static void Load()
         {
-            var logUI = GameObject.FindObjectOfType<LogSystemUI>(true);
-            if (logUI)
+#if UNITY_2020_1_OR_NEWER
+            var logUIs = GameObject.FindObjectsOfType<LogSystemUI>(true);
+#else
+            //var logUI = GameObject.FindObjectOfType<LogSystemUI>();
+            var logUIs = Resources.FindObjectsOfTypeAll<LogSystemUI>();
+#endif
+            if (logUIs != null && logUIs.Length > 0)
             {
-                GameObject.DontDestroyOnLoad(logUI);
+                foreach (var logUI in logUIs)
+                    GameObject.DontDestroyOnLoad(logUI);
             }
             else
             {

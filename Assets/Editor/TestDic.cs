@@ -92,6 +92,14 @@ namespace Test
 
     public class TestDic
     {
+        [MenuItem("Test/获取脚本预定义宏")]
+        public static void Test_GetScriptingDefineSymbolsForGroup()
+        {
+            var buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            string def = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            Debug.Log(def);
+        }
+
         [MenuItem("Test/反射 获取方法参数")]
         public static void Test_MethodInfo_Parameters()
         {

@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Framework
 {
@@ -227,6 +228,7 @@ namespace Framework
                 {
                     //tPool.TryDequeue(out obj);
                     obj = tPool.Dequeue();
+                    obj.transform.SetParent(null);
                 }
             }
             else
