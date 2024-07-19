@@ -698,7 +698,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
-    1: ENABLE_DEBUG_AND_ABOVE_LOG
+    1: ENABLE_DEBUG_AND_ABOVE_LOG;LOG_SYSTEM_AUTO_LOADER_DISABLE
     4: ENABLE_DEBUG_AND_ABOVE_LOG
     7: ENABLE_DEBUG_AND_ABOVE_LOG
     13: ENABLE_DEBUG_AND_ABOVE_LOG
