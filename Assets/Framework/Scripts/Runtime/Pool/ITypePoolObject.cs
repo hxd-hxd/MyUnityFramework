@@ -12,9 +12,13 @@ namespace Framework
 {
     /// <summary>
     /// 类型池对象接口
+    /// <para>一般用于，在返回对象池时，执行必要的清理操作等。推荐显式实现。</para>
     /// </summary>
     public interface ITypePoolObject
     {
+        // TODO：增加一个是否在池子里的标识
+        //bool inPool { get; set; }
+
         /// <summary>
         /// 清除
         /// </summary>

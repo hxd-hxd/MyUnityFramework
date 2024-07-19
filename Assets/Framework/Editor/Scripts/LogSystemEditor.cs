@@ -65,5 +65,19 @@ namespace Framework.Editor
                 }
             }
         }
+        [MenuItem(LogLoaderRootPath + "∆Ù”√", true)]
+        static bool LogSystemAutoLoader_Checked()
+        {
+            GetLogSystemAutoLoaderDefine(out _, out bool contains);
+            Menu.SetChecked(LogLoaderRootPath + "∆Ù”√", !contains);
+            Menu.SetChecked(LogLoaderRootPath + "Ω˚”√", contains);
+            return true;
+        }
+        public static void GetLogSystemAutoLoaderDefine(out string defFormat, out bool contains)
+        {
+            var buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            defFormat = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            contains = defFormat.Contains(LOG_SYSTEM_AUTO_LOADER_DISABLE);
+        }
     }
 }

@@ -224,11 +224,12 @@ namespace Framework
 
             if (has)
             {
-                if (tPool.Count > 0)
+                while (tPool.Count > 0 && obj == null)
                 {
                     //tPool.TryDequeue(out obj);
                     obj = tPool.Dequeue();
-                    obj.transform.SetParent(null);
+                    if (obj != null)
+                        obj.transform.SetParent(null);
                 }
             }
             else
@@ -317,6 +318,31 @@ namespace Framework
         protected static Queue<GameObject> GetNewPoolQueue()
         {
             return new Queue<GameObject>(1);
+        }
+    }
+
+    /// <summary>
+    /// 用于记录 <see cref="GameObjectPool"/> 信息
+    /// </summary>
+    public class GameObjectPoolRecord : ITypePoolObject
+    {
+        public GameObjectPool pool;
+        public GameObject template;
+
+        public GameObjectPoolRecord()
+        {
+            
+        }
+        public GameObjectPoolRecord(GameObjectPool pool, GameObject template)
+        {
+            this.pool = pool;
+            this.template = template;
+        }
+
+        void ITypePoolObject.Clear()
+        {
+            pool = null;
+            template = null;
         }
     }
 }
