@@ -324,19 +324,31 @@ namespace Framework
     /// <summary>
     /// 用于记录 <see cref="GameObjectPool"/> 信息
     /// </summary>
+    [Serializable]
     public class GameObjectPoolRecord : ITypePoolObject
     {
+        [NonSerialized]
         public GameObjectPool pool;
         public GameObject template;
 
         public GameObjectPoolRecord()
         {
-            
+
         }
         public GameObjectPoolRecord(GameObjectPool pool, GameObject template)
         {
             this.pool = pool;
             this.template = template;
+        }
+
+        /// <summary>
+        /// 是否有效记录
+        /// </summary>
+        /// <returns></returns>
+        public bool IsValid()
+        {
+            bool r = pool != null && template != null;
+            return r;
         }
 
         void ITypePoolObject.Clear()
