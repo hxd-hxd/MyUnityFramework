@@ -39,6 +39,8 @@ namespace Framework.Editor
         public static void EnableLogSystemAutoLoader()
         {
             var buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+
+#if UNITY_2020_1_OR_NEWER
             PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup, out var defines);
             if (defines != null)
             {
@@ -49,11 +51,38 @@ namespace Framework.Editor
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, list.ToArray());
                 }
             }
+#else
+            string defFormat = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            //Debug.Log(defFormat);
+            if (defFormat != "")
+            {
+                string[] defines = defFormat.Split(';');
+                if (defines.Contains(LOG_SYSTEM_AUTO_LOADER_DISABLE))
+                {
+                    List<string> disabled = new List<string>(defines);
+                    disabled.Remove(LOG_SYSTEM_AUTO_LOADER_DISABLE);
+                    StringBuilder r = new StringBuilder();
+                    for (int i = 0; i < disabled.Count; i++)
+                    {
+                        string define = disabled[i];
+                        r.Append(define);
+                        if (i < disabled.Count - 1)
+                        {
+                            r.Append(";");
+                        }
+                    }
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, r.ToString());
+                }
+            }
+#endif
+
         }
         [MenuItem(LogLoaderRootPath + "½ûÓÃ", false, 12)]
         public static void DisableLogSystemAutoLoader()
         {
             var buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+
+#if UNITY_2020_1_OR_NEWER
             PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup, out var defines);
             if (defines != null)
             {
@@ -64,6 +93,20 @@ namespace Framework.Editor
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, list.ToArray());
                 }
             }
+#else
+            string defFormat = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            if (defFormat != "")
+            {
+                if (!defFormat.Contains(LOG_SYSTEM_AUTO_LOADER_DISABLE))
+                {
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, $"{defFormat};{LOG_SYSTEM_AUTO_LOADER_DISABLE}");
+                }
+            }
+            else
+            {
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, LOG_SYSTEM_AUTO_LOADER_DISABLE);
+            }
+#endif
         }
         [MenuItem(LogLoaderRootPath + "ÆôÓÃ", true)]
         static bool LogSystemAutoLoader_Checked()
