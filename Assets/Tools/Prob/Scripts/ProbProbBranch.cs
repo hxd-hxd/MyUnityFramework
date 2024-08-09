@@ -9,7 +9,7 @@ namespace Prob
     [System.Serializable]
     public  class ProbBranch : BaseProbBranch<string, ProbBranch, ProbItem>
     {
-        public ProbBranch()
+        public ProbBranch() : base()
         {
         }
 
@@ -37,7 +37,7 @@ namespace Prob
     [System.Serializable]
     public  class ProbBranch<T> : BaseProbBranch<T, ProbBranch<T>, ProbItem<T>>
     {
-        public ProbBranch()
+        public ProbBranch() : base()
         {
         }
 

@@ -194,7 +194,7 @@ namespace Framework
             yield break;
         }
         /// <summary>
-        /// 取消所有预创建
+        /// 取消所有预创建，仅取消任务，已创建的实例将保留
         /// </summary>
         public virtual void CancelPreCreateInstance()
         {
@@ -330,6 +330,10 @@ namespace Framework
         [NonSerialized]
         public GameObjectPool pool;
         public GameObject template;
+        /// <summary>
+        /// 通过 <see cref="template"/> 实例化的实例，可选，视自己的使用方式而定
+        /// </summary>
+        public GameObject instance;
 
         public GameObjectPoolRecord()
         {
@@ -339,6 +343,12 @@ namespace Framework
         {
             this.pool = pool;
             this.template = template;
+        }
+        public GameObjectPoolRecord(GameObjectPool pool, GameObject template, GameObject instance)
+        {
+            this.pool = pool;
+            this.template = template;
+            this.instance = instance;
         }
 
         /// <summary>
@@ -351,10 +361,26 @@ namespace Framework
             return r;
         }
 
+        /// <summary>
+        /// 返回对象池
+        /// </summary>
+        /// <returns></returns>
+        public bool Return()
+        {
+            if (IsValid() && instance)
+            {
+                pool.Return(instance, template);
+                return true;
+            }
+            return false;
+        }
+
+
         void ITypePoolObject.Clear()
         {
             pool = null;
             template = null;
+            instance = null;
         }
     }
 }

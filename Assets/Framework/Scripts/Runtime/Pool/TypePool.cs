@@ -371,6 +371,14 @@ namespace Framework
             v.Clear();
             Return<Hashtable>(v);
         }
+        /// <summary>返回对象池</summary>
+        /// <remarks>会清空</remarks>
+        public void Return<T>(LinkedList<T> v)
+        {
+            if (v == null) return;
+            v.Clear();
+            Return<LinkedList<T>>(v);
+        }
 
         /// <summary>返回对象池</summary>
         /// <remarks>会清空</remarks>

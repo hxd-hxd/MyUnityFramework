@@ -460,6 +460,10 @@ namespace Framework
 
             /// <summary>折页</summary>
             public bool foldout { get => _foldout; set => _foldout = value; }
+            /// <summary>字段折页</summary>
+            public bool fieldFoldout { get => _fieldFoldout; set => _fieldFoldout = value; }
+            /// <summary>属性折页</summary>
+            public bool propertyFoldout { get => _propertyFoldout; set => _propertyFoldout = value; }
 
             /// <summary>显示 字段 折页，否则直接显示 字段 </summary>
             public bool showFieldFoldout { get => _showFieldFoldout; set => _showFieldFoldout = value; }

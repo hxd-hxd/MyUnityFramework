@@ -18,7 +18,8 @@ namespace Framework
     {
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.transform.root == transform)
+                DontDestroyOnLoad(gameObject);
         }
     }
 }
