@@ -1,14 +1,17 @@
 {
     "name": "Dreamteck.Splines",
+    "rootNamespace": "",
     "references": [
-        "Dreamteck.Utilities"
+        "Dreamteck.Utilities",
+        "Unity.TextMeshPro"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
-    "excludePlatforms": [],
+    "exludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [],
+    "precompiledReferences": "",
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

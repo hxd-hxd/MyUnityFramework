@@ -365,7 +365,12 @@ namespace Framework
         /// 返回对象池
         /// </summary>
         /// <returns></returns>
-        public bool Return()
+        public bool Return() => Return(instance);
+        /// <summary>
+        /// 返回对象池
+        /// </summary>
+        /// <returns></returns>
+        public bool Return(GameObject instance)
         {
             if (IsValid() && instance)
             {
@@ -376,11 +381,20 @@ namespace Framework
         }
 
 
-        void ITypePoolObject.Clear()
+        public void Clear()
         {
             pool = null;
             template = null;
             instance = null;
         }
     }
+
+    /// <summary>
+    /// 可用于记录 <see cref="GameObjectPoolRecord"/>
+    /// </summary>
+    public class PoolRecordComponent : MonoBehaviour
+    {
+        public GameObjectPoolRecord record = new GameObjectPoolRecord();
+    }
+
 }
