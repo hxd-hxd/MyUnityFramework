@@ -19,7 +19,7 @@ namespace Framework.Test
         // Start is called before the first frame update
         void Start()
         {
-        
+            pool.PreCreateInstanceAsync(objects[0], 10);
         }
 
         private void Update()
@@ -31,13 +31,13 @@ namespace Framework.Test
                 go.transform.position = transform.position;
                 go.transform.rotation = transform.rotation;
                 go.SetActive(true);
-                if (c)
-                {
-                    c.onVanishEvent = () =>
-                    {
-                        pool.Return(go, objects[0]);
-                    };
-                }
+                //if (c)
+                //{
+                //    c.onVanishEvent = () =>
+                //    {
+                //        pool.Return(go, objects[0]);
+                //    };
+                //}
             }
         }
     }

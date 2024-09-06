@@ -557,6 +557,55 @@ namespace Framework
             Coroutines.BeginCoroutine(UIVanish(canvasGroup, aTarget, vanishDuration, finish));
         }
 
+        /// <summary>
+        /// 获取渲染此图形的相机
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
+        public static Camera GetCamera(this Graphic g)
+        {
+            var cvs = g ? g.canvas : null;
+            return GetCamera(cvs);
+        }
+        /// <summary>
+        /// 获取渲染此画布的相机
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
+        public static Camera GetCamera(this Canvas cvs)
+        {
+            Camera uiRCam = null;
+            if (cvs)
+            {
+                switch (cvs.renderMode)
+                {
+                    case RenderMode.WorldSpace:
+                        break;
+                    // 
+                    case RenderMode.ScreenSpaceOverlay:
+                        uiRCam = Camera.main;
+                        if (uiRCam == null)
+                        {
+                            var cs = TypePool.root.GetArray<Camera>(Camera.allCamerasCount);
+                            Camera.GetAllCameras(cs);
+                            uiRCam = cs[0];
+                            TypePool.root.Return(cs);
+                        }
+                        break;
+                    case RenderMode.ScreenSpaceCamera:
+                        uiRCam = cvs.worldCamera;
+                        if (uiRCam == null)
+                        {
+                            // 如果 Canvas.worldCamera == null，则实际 Canvas.renderMode 会是 RenderMode.ScreenSpaceOverlay，所以这里不需要处理，因为代码不会运行到这里
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return uiRCam;
+        }
+
         static IEnumerator DelayCoroutine(float time, System.Action e)
         {
             yield return Yielder.WaitForSeconds(time);

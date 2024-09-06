@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using UnityEngine;
 
 namespace Framework
 {
@@ -119,6 +120,7 @@ namespace Framework
                     obj = CreateInstance(type, ctorArgs);
             }
 
+            InitializeObject(obj);
             //Debug.Log($"目标是 {target} ,\r\n有池子 {has}，\t从池子里取出的 <color=yellow>{_o}</color> ，\t最终得到的 {obj}");
 
             return obj;
@@ -432,6 +434,14 @@ namespace Framework
         protected virtual void CleanupObject(object obj)
         {
             if (obj is ITypePoolObject tpo) tpo.Clear();
+        }
+        /// <summary>
+        /// 初始 <see cref="ITypePoolObjectInit.Init()"/>
+        /// </summary>
+        /// <param name="obj"></param>
+        protected virtual void InitializeObject(object obj)
+        {
+            if (obj is ITypePoolObjectInit tpo) tpo.Init();
         }
 
         /// <summary>清除对象池</summary>

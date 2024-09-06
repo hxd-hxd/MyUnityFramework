@@ -70,7 +70,7 @@ namespace Framework
         /// <summary>
         /// 是否自动实例化
         /// </summary>
-        public static bool autoInstance = false;
+        public static bool autoInstance = true;
 
         static void InitAutoInstance()
         {
@@ -106,7 +106,10 @@ namespace Framework
                 return;
             }
 
-            instance = (T)(Component)this;
+            instance = this as T;
+
+            if (transform.root == transform)
+                DontDestroyOnLoad(gameObject);
         }
 
     }

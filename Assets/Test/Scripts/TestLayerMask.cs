@@ -23,6 +23,8 @@ using UnityEditor;
 
             EditorGUILayout.LabelField($"层的值：{my.mask.value}");
             my.mask.value = EditorGUILayout.IntField("设置层的值", my.mask.value);
+
+
         }
     }
 #endif
