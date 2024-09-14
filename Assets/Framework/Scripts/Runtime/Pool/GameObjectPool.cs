@@ -317,7 +317,8 @@ namespace Framework
         /// <param name="obj"></param>
         protected virtual void CleanupObject(GameObject obj)
         {
-            var tpos = obj.GetComponents<ITypePoolObject>();
+            var tpos = TypePool.root.GetList<ITypePoolObject>();
+            obj.GetComponents(tpos);
             if (tpos != null)
             {
                 foreach (var tpo in tpos)
@@ -325,6 +326,7 @@ namespace Framework
                     tpo.Clear();
                 }
             }
+            TypePool.root.Return(tpos);
         }
         /// <summary>
         /// 初始 <see cref="ITypePoolObjectInit.Init()"/>
@@ -332,7 +334,8 @@ namespace Framework
         /// <param name="obj"></param>
         protected virtual void InitializeObject(GameObject obj)
         {
-            var tpos = obj.GetComponents<ITypePoolObjectInit>();
+            var tpos = TypePool.root.GetList<ITypePoolObjectInit>();
+            obj.GetComponents(tpos);
             if (tpos != null)
             {
                 foreach (var tpo in tpos)
@@ -340,6 +343,7 @@ namespace Framework
                     tpo.Init();
                 }
             }
+            TypePool.root.Return(tpos);
         }
 
 

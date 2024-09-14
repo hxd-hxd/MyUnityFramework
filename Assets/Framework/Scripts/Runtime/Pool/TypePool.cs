@@ -8,7 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using UnityEngine;
 
 namespace Framework
 {
@@ -263,7 +262,7 @@ namespace Framework
             }
         }
 
-        // 以下基本容器类型
+        // 以下处理基本容器类型
         /// <summary>返回对象池</summary>
         /// <remarks>会清空</remarks>
         public void Return<T>(List<T> v)
