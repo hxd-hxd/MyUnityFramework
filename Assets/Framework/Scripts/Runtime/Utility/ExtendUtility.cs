@@ -435,7 +435,7 @@ namespace Framework
         /// <summary>
         /// 计算场景加载时刷新的进度条
         /// </summary>
-        /// <param name="pv">进度值(再次回调中返回真实进度值)</param>
+        /// <param name="pv">进度值(再此回调中返回真实进度值)</param>
         /// <param name="minProgressTime">最小的进度持续时间（不会小于真实进度）</param>
         /// <param name="progressAcion">更新进度时的回调</param>
         /// <param name="progressFinish">更新进度完成的回调</param>
