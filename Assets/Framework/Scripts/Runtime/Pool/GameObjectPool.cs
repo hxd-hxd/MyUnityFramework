@@ -7,7 +7,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Framework
 {
@@ -15,10 +14,22 @@ namespace Framework
     /// <see cref="GameObject"/> 池
     /// </summary>
     [Serializable]
-    public class GameObjectPool
+    public partial class GameObjectPool
     {
+        static GameObjectPoolMonitor _monitor;
         static GameObjectPool _root;
         static GameObject _GOManager;
+        /// <summary>
+        /// 监视器
+        /// </summary>
+        public static GameObjectPoolMonitor monitor
+        {
+            get
+            {
+                InitStatic();
+                return _monitor;
+            }
+        }
         /// <summary>
         /// 公共池，不管理自己的对象池时使用
         /// </summary>
@@ -41,8 +52,28 @@ namespace Framework
             set { _GOManager = value; }
         }
 
+        //static GameObjectPool()
+        //{
+        //    InitStatic();
+        //}
+
+        // 不可以放在静态构造函数里执行，因为 Application.isPlaying 属性在静态构造函数之后更新
         protected static void InitStatic()
         {
+            if (_monitor == null)
+            {
+                try
+                {
+                    if (Application.isPlaying)
+                    {
+                        _monitor = new GameObject($"<{nameof(GameObjectPoolMonitor)}>").AddComponent<GameObjectPoolMonitor>();
+                        GameObject.DontDestroyOnLoad(_monitor.gameObject);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
             if (_GOManager == null)
             {
                 try
@@ -51,6 +82,7 @@ namespace Framework
                     {
                         _GOManager = new GameObject("<GameObjectPool>");
                         _GOManager.SetActive(false);
+                        _GOManager.transform.SetParent(_monitor.transform);
                         GameObject.DontDestroyOnLoad(_GOManager);
                     }
                 }
@@ -59,6 +91,7 @@ namespace Framework
                 }
             }
 
+            //Debug.Log($"{nameof(GameObjectPool)} 静态初始化");
         }
 
         [SerializeField]
@@ -179,7 +212,7 @@ namespace Framework
         /// <param name="num"></param>
         public virtual Coroutine PreCreateInstanceAsync(GameObject template, int num)
         {
-            var c = Coroutines.BeginCoroutine(_PreCreateInstanceCoroutine(template, num));
+            var c = monitor.StartCoroutine(_PreCreateInstanceCoroutine(template, num));
             _preCreateInstanceCoroutines.Add(c);
             return c;
         }
@@ -201,7 +234,7 @@ namespace Framework
             foreach (var item in _preCreateInstanceCoroutines)
             {
                 if (item != null)
-                    Coroutines.StopCoroutines(item);
+                    monitor.StopCoroutine(item);
             }
             _preCreateInstanceCoroutines.Clear();
         }
@@ -238,6 +271,14 @@ namespace Framework
                 pool[target] = tPool;
             }
             if (!obj) obj = CreateInstance(target);
+
+            var prc = obj.GetComponent<PoolRecordComponent>();
+            if (!prc) prc = obj.AddComponent<PoolRecordComponent>();
+            prc.record.pool = this;
+            prc.record.template = template;
+            prc.record.instance = obj;
+
+            InitializeObject(obj);
 
             return obj;
         }
@@ -276,7 +317,8 @@ namespace Framework
         /// <param name="obj"></param>
         protected virtual void CleanupObject(GameObject obj)
         {
-            var tpos = obj.GetComponents<ITypePoolObject>();
+            var tpos = TypePool.root.GetList<ITypePoolObject>();
+            obj.GetComponents(tpos);
             if (tpos != null)
             {
                 foreach (var tpo in tpos)
@@ -284,6 +326,24 @@ namespace Framework
                     tpo.Clear();
                 }
             }
+            TypePool.root.Return(tpos);
+        }
+        /// <summary>
+        /// 初始 <see cref="ITypePoolObjectInit.Init()"/>
+        /// </summary>
+        /// <param name="obj"></param>
+        protected virtual void InitializeObject(GameObject obj)
+        {
+            var tpos = TypePool.root.GetList<ITypePoolObjectInit>();
+            obj.GetComponents(tpos);
+            if (tpos != null)
+            {
+                foreach (var tpo in tpos)
+                {
+                    tpo.Init();
+                }
+            }
+            TypePool.root.Return(tpos);
         }
 
 
@@ -319,6 +379,14 @@ namespace Framework
         {
             return new Queue<GameObject>(1);
         }
+    }
+
+    /// <summary>
+    /// <see cref="GameObjectPool"/> 监视器
+    /// </summary>
+    public class GameObjectPoolMonitor : MonoBehaviour
+    {
+
     }
 
     /// <summary>
@@ -365,7 +433,12 @@ namespace Framework
         /// 返回对象池
         /// </summary>
         /// <returns></returns>
-        public bool Return()
+        public bool Return() => Return(instance);
+        /// <summary>
+        /// 返回对象池
+        /// </summary>
+        /// <returns></returns>
+        public bool Return(GameObject instance)
         {
             if (IsValid() && instance)
             {
@@ -376,11 +449,30 @@ namespace Framework
         }
 
 
-        void ITypePoolObject.Clear()
+        public void Clear()
         {
             pool = null;
             template = null;
             instance = null;
         }
     }
+
+    /// <summary>
+    /// 可用于记录 <see cref="GameObjectPoolRecord"/>
+    /// </summary>
+    public class PoolRecordComponent : MonoBehaviour
+    {
+        public GameObjectPoolRecord record = new GameObjectPoolRecord();
+
+        /// <summary>
+        /// 通过 <see cref="record"/> 记录的对象池信息放入对象池
+        /// </summary>
+        /// <returns></returns>
+        public bool Return()
+        {
+            if (record == null) return false;
+            return record.Return();
+        }
+    }
+
 }

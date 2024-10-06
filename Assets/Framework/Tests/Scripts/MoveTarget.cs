@@ -65,6 +65,7 @@ namespace Framework.Test
             {
                 isVanish = true;
                 onVanishEvent?.Invoke();
+                GetComponent<PoolRecordComponent>().Return();
                 return;
             }
 

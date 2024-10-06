@@ -16,13 +16,18 @@ namespace Framework
         {
             if (ui == null)
             {
-                Debug.LogError("空 ui ");
+                //Debug.LogError("空 ui ");
                 return false;
             }
             Type type = ui.GetType();
             if (uis.TryGetValue(type, out var bui))
             {
                 // 判断实例
+                if (bui is UnityEngine.Object uui)
+                {
+                    return uui;
+                }
+                else
                 //if (bui != ui)
                 //if (!object.ReferenceEquals(bui, ui))
                 if (!object.Equals(bui, ui))
@@ -120,6 +125,18 @@ namespace Framework
             T ui = default;
             if (uis.TryGetValue(type, out var bui))
             {
+                if (bui is UnityEngine.Object uui)
+                {
+                    if (uui != null)
+                    {
+                        ui = (T)bui;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"要获取的 ui \"{type.Name}\" 为空，可能已经被销毁");
+                    }
+                }
+                else
                 if (bui != null)
                 {
                     ui = (T)bui;

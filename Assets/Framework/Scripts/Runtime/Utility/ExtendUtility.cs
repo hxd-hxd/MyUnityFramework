@@ -435,7 +435,7 @@ namespace Framework
         /// <summary>
         /// 计算场景加载时刷新的进度条
         /// </summary>
-        /// <param name="pv">进度值(再次回调中返回真实进度值)</param>
+        /// <param name="pv">进度值(再此回调中返回真实进度值)</param>
         /// <param name="minProgressTime">最小的进度持续时间（不会小于真实进度）</param>
         /// <param name="progressAcion">更新进度时的回调</param>
         /// <param name="progressFinish">更新进度完成的回调</param>
@@ -555,6 +555,55 @@ namespace Framework
         public static void CanvasGroupVanish(this CanvasGroup canvasGroup, float aTarget, float vanishDuration, Action finish)
         {
             Coroutines.BeginCoroutine(UIVanish(canvasGroup, aTarget, vanishDuration, finish));
+        }
+
+        /// <summary>
+        /// 获取渲染此图形的相机
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
+        public static Camera GetCamera(this Graphic g)
+        {
+            var cvs = g ? g.canvas : null;
+            return GetCamera(cvs);
+        }
+        /// <summary>
+        /// 获取渲染此画布的相机
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
+        public static Camera GetCamera(this Canvas cvs)
+        {
+            Camera uiRCam = null;
+            if (cvs)
+            {
+                switch (cvs.renderMode)
+                {
+                    case RenderMode.WorldSpace:
+                        break;
+                    // 
+                    case RenderMode.ScreenSpaceOverlay:
+                        uiRCam = Camera.main;
+                        if (uiRCam == null)
+                        {
+                            var cs = TypePool.root.GetArray<Camera>(Camera.allCamerasCount);
+                            Camera.GetAllCameras(cs);
+                            uiRCam = cs[0];
+                            TypePool.root.Return(cs);
+                        }
+                        break;
+                    case RenderMode.ScreenSpaceCamera:
+                        uiRCam = cvs.worldCamera;
+                        if (uiRCam == null)
+                        {
+                            // 如果 Canvas.worldCamera == null，则实际 Canvas.renderMode 会是 RenderMode.ScreenSpaceOverlay，所以这里不需要处理，因为代码不会运行到这里
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return uiRCam;
         }
 
         static IEnumerator DelayCoroutine(float time, System.Action e)

@@ -25,4 +25,16 @@ namespace Framework
         void Clear();
     }
 
+    /// <summary>
+    /// 类型池对象初始化接口
+    /// <para>一般用于，在对象池取出时，执行必要的初始操作等，像 构造函数 和 Start、Awake 等生命周期一样。推荐显式实现。</para>
+    /// </summary>
+    public interface ITypePoolObjectInit
+    {
+        /// <summary>
+        /// 初始
+        /// </summary>
+        void Init();
+    }
+
 }

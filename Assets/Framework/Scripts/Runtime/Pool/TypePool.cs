@@ -119,6 +119,7 @@ namespace Framework
                     obj = CreateInstance(type, ctorArgs);
             }
 
+            InitializeObject(obj);
             //Debug.Log($"目标是 {target} ,\r\n有池子 {has}，\t从池子里取出的 <color=yellow>{_o}</color> ，\t最终得到的 {obj}");
 
             return obj;
@@ -261,7 +262,7 @@ namespace Framework
             }
         }
 
-        // 以下基本容器类型
+        // 以下处理基本容器类型
         /// <summary>返回对象池</summary>
         /// <remarks>会清空</remarks>
         public void Return<T>(List<T> v)
@@ -432,6 +433,14 @@ namespace Framework
         protected virtual void CleanupObject(object obj)
         {
             if (obj is ITypePoolObject tpo) tpo.Clear();
+        }
+        /// <summary>
+        /// 初始 <see cref="ITypePoolObjectInit.Init()"/>
+        /// </summary>
+        /// <param name="obj"></param>
+        protected virtual void InitializeObject(object obj)
+        {
+            if (obj is ITypePoolObjectInit tpo) tpo.Init();
         }
 
         /// <summary>清除对象池</summary>

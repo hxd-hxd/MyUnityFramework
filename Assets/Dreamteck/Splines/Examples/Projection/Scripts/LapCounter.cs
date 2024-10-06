@@ -11,6 +11,7 @@
 
         public void CountLap()
         {
+            Debug.Log(1);
             currentLap++;
             text.text = "LAP " + currentLap;
         }
