@@ -138,9 +138,18 @@ namespace Test
             DuoCanShu(vs1);
             DuoCanShu(vs1, vs2);
 
+            DuoCanShu();
+            DuoCanShu(null);
+
         }
         static void DuoCanShu(params object[] ps)
         {
+            if(ps == null)
+            {
+                Debug.Log("可变参数组是空引用");
+                return;
+            }
+
             StringBuilder sb = new StringBuilder();
             sb.Append("参数个数：").Append(ps.Length);
             sb.AppendLine().Append("参数：");
