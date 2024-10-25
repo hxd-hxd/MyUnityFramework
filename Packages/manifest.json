@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.tuyoogame.yooasset": "1.4.6-preview",
+    "com.tuyoogame.yooasset": "2.2.4-preview",
     "com.unity.cinemachine": "2.6.17",
     "com.unity.collab-proxy": "1.15.15",
     "com.unity.ide.rider": "2.0.7",
@@ -46,8 +46,8 @@
   },
   "scopedRegistries": [
     {
-      "name": "package.openupm.cn",
-      "url": "https://package.openupm.cn",
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
       "scopes": [
         "com.tuyoogame.yooasset"
       ]
