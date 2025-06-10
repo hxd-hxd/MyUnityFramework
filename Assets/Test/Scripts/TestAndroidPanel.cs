@@ -19,13 +19,13 @@ namespace Test
 
         private void Awake()
         {
-            Log.Debuger("Awake");
+            Log.Info("Awake");
         }
 
         // Start is called before the first frame update
         void Start()
         {
-            Log.Debuger("Start");
+            Log.Info("Start");
 
             showMsg = transform.FindOf<Text>("showMsg");
             appMonitorMsg = transform.FindOf<Text>("appMonitorMsg");
