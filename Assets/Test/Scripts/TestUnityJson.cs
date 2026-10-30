@@ -7,6 +7,9 @@ namespace Test
 {
     public class TestUnityJson : MonoBehaviour
     {
+        public int _int = 6;
+        public int _int_json;
+
         public List<int> _list_int = new List<int>()
         {
             0, 1, 2, 3
@@ -37,6 +40,11 @@ namespace Test
 
         void Start()
         {
+            var intJson = JsonUtility.ToJson(_int);
+            Debug.Log("数字直接转换");
+            Debug.Log(intJson);
+            JsonUtility.FromJsonOverwrite(intJson, _int_json);
+
             var listIntJson = JsonUtility.ToJson(_list_int);
             Debug.Log("列表直接转换");
             Debug.Log(listIntJson);
