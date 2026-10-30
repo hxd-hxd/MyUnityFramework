@@ -166,12 +166,76 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4007d0f691aad0d428d1ce48eb020b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _int: 6
+  _int_json: 0
   _list_int: 00000000010000000200000003000000
   _list_int_json: 
+  _dictSl_intString:
+    _entries:
+    - _key: 0
+      _value: "\u4F60"
+    - _key: 1
+      _value: "\u6211"
+    - _key: 2
+      _value: "\u4ED6"
+    _comparerClassName: 
+  _dictSl_intString_json:
+    _entries: []
+    _comparerClassName: 
   _testJson:
     _list_int: 00000000010000000200000003000000
   _testJson_json:
     _list_int: 
+  _testJson_int:
+    value: 6
+  _testJson_int_json:
+    value: 0
+  _testJson_listInt:
+    value: 01000000020000000300000004000000
+  _testJson_listInt_json:
+    value: 
+  _testJson_enum:
+    value: 1
+  _testJson_enum_json:
+    value: 0
+  _testJson_listEnum:
+    value: 0300000003000000
+  _testJson_listEnum_json:
+    value: 
+  _testJson_GO:
+    value: {fileID: 650034590}
+  _testJson_GO_json:
+    value: {fileID: 0}
+--- !u!1 &650034590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 650034591}
+  m_Layer: 0
+  m_Name: jsonGO
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &650034591
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 650034590}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -81.50714, y: -37.62079, z: -18.347137}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1012900139
 GameObject:
   m_ObjectHideFlags: 0
