@@ -166,46 +166,113 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4007d0f691aad0d428d1ce48eb020b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _int: 6
-  _int_json: 0
-  _list_int: 00000000010000000200000003000000
-  _list_int_json: 
+  _int:
+    _obj: 6
+    _obj_json: 0
+    _obj_jsonOverwriteObj: 0
+    _tips: "\u6570\u5B57\u76F4\u63A5\u8F6C\u6362"
+  _v3:
+    _obj: {x: 1, y: 1, z: 1}
+    _obj_json: {x: 0, y: 0, z: 0}
+    _obj_jsonOverwriteObj: {x: 0, y: 0, z: 0}
+    _tips: "\u7ED3\u6784\u4F53\u76F4\u63A5"
+  _quaternion:
+    _obj: {x: 1, y: 1, z: 1, w: 1}
+    _obj_json: {x: 0, y: 0, z: 0, w: 0}
+    _obj_jsonOverwriteObj: {x: 0, y: 0, z: 0, w: 0}
+    _tips: "\u7ED3\u6784\u4F53 Vector3 \u76F4\u63A5"
+  _color:
+    _obj: {r: 1, g: 0, b: 0, a: 1}
+    _obj_json: {r: 0, g: 0, b: 0, a: 0}
+    _obj_jsonOverwriteObj: {r: 0, g: 0, b: 0, a: 0}
+    _tips: "\u7ED3\u6784\u4F53\u76F4\u63A5"
+  _uObj:
+    _obj: {fileID: 650034590}
+    _obj_json: {fileID: 0}
+    _obj_jsonOverwriteObj: {fileID: 0}
+    _tips: "\u7ED3\u6784\u4F53\u76F4\u63A5"
+  _list_int:
+    _obj: 00000000010000000200000003000000
+    _obj_json: 
+    _obj_jsonOverwriteObj: 
+    _tips: "\u5217\u8868\u76F4\u63A5"
+  _dict_int_string:
+    _tips: "\u666E\u901A\u5B57\u5178\u76F4\u63A5"
   _dictSl_intString:
-    _entries:
-    - _key: 0
-      _value: "\u4F60"
-    - _key: 1
-      _value: "\u6211"
-    - _key: 2
-      _value: "\u4ED6"
-    _comparerClassName: 
-  _dictSl_intString_json:
-    _entries: []
-    _comparerClassName: 
+    _obj:
+      _entries:
+      - _key: 0
+        _value: "\u4F60"
+      - _key: 1
+        _value: "\u6211"
+      - _key: 2
+        _value: "\u4ED6"
+      _comparerClassName: 
+    _obj_json:
+      _entries: []
+      _comparerClassName: 
+    _obj_jsonOverwriteObj:
+      _entries: []
+      _comparerClassName: 
+    _tips: "\u53EF\u5E8F\u5217\u5316\u5B57\u5178\u76F4\u63A5"
   _testJson:
-    _list_int: 00000000010000000200000003000000
-  _testJson_json:
-    _list_int: 
+    _obj:
+      _list_int: 00000000010000000200000003000000
+    _obj_json:
+      _list_int: 
+    _obj_jsonOverwriteObj:
+      _list_int: 
+    _tips: "\u666E\u901A\u81EA\u5B9A\u4E49\u7C7B\u578B"
   _testJson_int:
-    value: 6
-  _testJson_int_json:
-    value: 0
+    _obj:
+      value: 6
+    _obj_json:
+      value: 0
+    _obj_jsonOverwriteObj:
+      value: 0
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B int "
+  _testJson_dictIntInt:
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B \u5B57\u5178 "
   _testJson_listInt:
-    value: 01000000020000000300000004000000
-  _testJson_listInt_json:
-    value: 
+    _obj:
+      value: 01000000020000000300000004000000
+    _obj_json:
+      value: 
+    _obj_jsonOverwriteObj:
+      value: 
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B \u5217\u8868 "
   _testJson_enum:
-    value: 1
-  _testJson_enum_json:
-    value: 0
+    _obj:
+      value: 1
+    _obj_json:
+      value: 0
+    _obj_jsonOverwriteObj:
+      value: 0
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B \u679A\u4E3E "
   _testJson_listEnum:
-    value: 0300000003000000
-  _testJson_listEnum_json:
-    value: 
-  _testJson_GO:
-    value: {fileID: 650034590}
-  _testJson_GO_json:
-    value: {fileID: 0}
+    _obj:
+      value: 0300000003000000
+    _obj_json:
+      value: 
+    _obj_jsonOverwriteObj:
+      value: 
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B \u5217\u8868\u679A\u4E3E "
+  _testJson_uObj:
+    _obj:
+      value: {fileID: 650034590}
+    _obj_json:
+      value: {fileID: 0}
+    _obj_jsonOverwriteObj:
+      value: {fileID: 0}
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B Unity \u5BF9\u8C61 "
+  _testJson_uAsset:
+    _obj:
+      value: {fileID: 2100000, guid: 6747c1ecf5300e54da59b9cddcea9a4c, type: 2}
+    _obj_json:
+      value: {fileID: 0}
+    _obj_jsonOverwriteObj:
+      value: {fileID: 0}
+    _tips: "\u6CDB\u578B\u81EA\u5B9A\u4E49\u7C7B\u578B Unity \u8D44\u4EA7 "
 --- !u!1 &650034590
 GameObject:
   m_ObjectHideFlags: 0
